@@ -5,7 +5,7 @@ from PyQt6.uic import loadUi
 # from PyQt6.QtCore import QCoreApplication
 from PyQt6 import QtCore
 import psycopg2 as pg2
-import sys
+import sys, os
 
 # import PyQt6
 # print(PyQt6.__file__)
