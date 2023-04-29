@@ -2,36 +2,64 @@ from PyQt6.QtWidgets import QWidget, QMainWindow, QApplication, QTableWidgetItem
 from PyQt6.uic import loadUi
 import sys
 import os
-
 from functions import get_data, drop_tables, create_tables
+
+
+# # Temat projektu
+# System zarządzania lotami
+
+# # Ogólne wymagania względem aplikacji
+# -	Aplikacja musi spełniać wymagania funkcjonalne
+# -	Aplikacja musi posiadać intuicyjny intefejs graficzny
+# -	Aplikacja musi współpracować z bazą danych zaprojektowaną w modelu relacyjnym
+
+# # Wymagania funkcjonalne
+# - Dodaj/Edytuj/Usuń pasażera
+# - Dodaj/Edytuj/Usuń pracownika wraz z jego funkcją
+# - Rezerwacja biletu dla pasażera
+# - Zmiana klasy miejsca w samolocie
+# - W samolocie dostępne są dwie klasy: ekonomiczna oraz biznesowa.
+#     Od rodzaju klasy zależy ilość miejsc,
+#     cena oraz dostępność dodatkowych usług.
+# - Pracownicy są z góry przypisani do danego lotu.
+# - Do samolotu wsiadają pasażerowie. Pasażer może wybrać określony lot.
+#     Każdy pasażer musi zostać zarejestrowany do konkretnego lotu
+#     przy użyciu systemu automatycznej rejestracji pasażerów samolotu.
+# - System automatycznej rejestracji pasażerów samolotu umożliwia:
+#     - rejestrację pasażera do lotu,
+#     - weryfikację wprowadzonych danych,
+#     - zmianę miejsca w samolocie,
+#     - zmianę klasy lotu,
+#     - drukowanie karty pokładowej,
+#     - zamówienie pomocy asystenta,
+#     - sprawdzenie informacji o bramce odlotu,
+#     - sprawdzenie parametrów lotu.
+
+
+# DONE:
+# widok tworzenia bazy danych postgres - schemat(tools - EDB tool)
+# sekwenje - ticket_id, osoba_id
+# skasować niepotrzebne kolumny w lotniskach (ładowanie danych jest )
+# zatrudnienie - 2 kolumny jako klucz główny
+# zamienić nazwę tabeli konto na osoba
+# import os
+# na githuba
+# TODO:
+# klucze obce - indeksowanie - CREATE INDEX osoba_imie ON osoba(imie)
+# zakładki na tabele i sygnały klikania
+# 
+# SRP = single response principle - jedna klasa - jedna funkcja
+# Wczytywanie listy dostępnych miejsc
+# dialog zamawiania biletu - skąd, dokąd, samolot, lotnisko(combo boxy), data(kalendarz)
+# rozdzielić klasy do osobnych plików - (main_window, klasy, dialog_window, db_connection (otwoeranie bazy w klasie a nie na początku kodu))
+# db.close()
+# 
+# sprawdzenie błędu "QSqlDatabase: QPSQL driver not loaded" na ubuntu
+
 
 # drop_tables()
 # create_tables()
 osoba, lotnisko, samolot = get_data()
-
-
-# TODO:
-# - widok tworzenia bazy danych postgres - schemat(tools - EDB tool)
-# - sekwenje - ID - ticket_id
-# - skasować niepotrzebne kolumny w lotniskach
-# - zatrudnienie - 2 kolumny jako klucz główny
-# - zamienić nazwę tabeli konto na osoba
-# - import os
-###################################################################
-# - klucze obce - indeksy na kolumnę(drzewko postgresowe)
-# - zakładki na tabele i sygnały klikania
-# -
-# - gui - biblioteka do ścieżek - import os
-# - osobna klasa do ładowania danych(i otwoeranie bazy w klasie a nie na początku kodu)
-# - SRP = single response principle - jedna klasa - jedna funkcja
-# - osobne pliki dla wszystkich klas
-# - dialog zamawiania biletu - skąd, dokąd, samolot, lotnisko(combo boxyb), data(kalendarz)
-# - Wczytywanie listy dostępnych miejsc
-# db.close()
-# -
-# - sprawdzenie błędu "QSqlDatabase: QPSQL driver not loaded" na ubuntu
-# - na githuba
-
 
 class Window(QWidget):
     def __init__(self):
