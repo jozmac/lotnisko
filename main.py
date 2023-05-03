@@ -1,9 +1,30 @@
 from PyQt6.QtWidgets import QWidget, QMainWindow, QApplication, QTableWidgetItem
 from PyQt6.uic import loadUi
 import sys, os
-from functions import get_data, drop_tables, create_tables
+from functions import get_data, drop_tables, create_tables, select_samolot, select_bilet, select_bilet, select_lot, select_miejsce, select_zajete_miejsce, select_zatrudnienie
 from PyQt6 import QtGui
+from dialog import Booking_dialog
 import psycopg2 as pg2
+
+def select_osoba():
+    cur.execute("SELECT osoba_id, imie, nazwisko, stanowisko FROM osoba")
+    osoba = cur.fetchall()
+    return osoba
+
+
+def select_lotnisko():
+    cur.execute("""
+                SELECT lotnisko_id, icao_code, name, city, country
+                FROM lotnisko
+                -- WHERE name LIKE 'LAWICA'
+                -- WHERE name NOT LIKE 'N/A'
+                """)
+    lotnisko = cur.fetchall()
+    return lotnisko
+
+
+
+
 
 
 # # Temat projektu
@@ -61,26 +82,11 @@ import psycopg2 as pg2
 # - nazwy kolumn
 # - 
 
-
-# drop_tables()
-# create_tables()
-
-# osoba
-# bilet
-# zatrudnienie
-# lot
-# samolot
-# miejsce
-# zajete_miejsce
-# lotnisko
-
-
-
 class Window(QWidget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
-        loadUi("main_window.ui", self)
+        loadUi("main_window_v2.ui", self)
 
         self.tabWidget.setMovable(True)
         # self.tabWidget.setTabsClosable(True)
@@ -104,10 +110,17 @@ class Window(QWidget):
         # Default table
         self.load_data(self.tableWidget_0, osoba)
 
+        # if self.index == 1:
+        #     self.pushButton_add.clicked.connected(self.bilet)
+
+        self.pushButton_dodaj_0.clicked.connect(self.bilet)
+
         
 
 
     def load_data(self, tab, data):
+        if not len(data):
+            return False
         tab.setRowCount(len(data))
         tab.setColumnCount(len(data[0]))
         for row_number, row_data in enumerate(data):
@@ -120,9 +133,38 @@ class Window(QWidget):
     def get_clicked_cell(self, row, column):
         print(f"Clicked cell: [{row}, {column}]")
         
+    # def tabChanged(self):
+    #     index = self.tabWidget.currentIndex()
+    #     print(index)
 
     def tabChanged(self, index):
+        self.index = index
         print(f"Selected tab: {index}")
+
+        if index == 0:
+            osoba = select_osoba()
+            self.load_data(self.tableWidget_0, osoba)
+        elif index == 1:
+            bilet = select_bilet()
+            self.load_data(self.tableWidget_1, bilet)
+        elif index == 2:
+            zatrudnienie = select_zatrudnienie()
+            self.load_data(self.tableWidget_2, zatrudnienie)
+        elif index == 3:
+            lot = select_lot()
+            self.load_data(self.tableWidget_3, lot)
+        elif index == 4:
+            select_samolot()
+            self.load_data(self.tableWidget_4, samolot)
+        elif index == 5:
+            miejsce = select_miejsce()
+            self.load_data(self.tableWidget_5, miejsce)
+        elif index == 6:
+            zajete_miejsce = select_zajete_miejsce()
+            self.load_data(self.tableWidget_6, zajete_miejsce)
+        elif index == 7:
+            lotnisko = select_lotnisko()
+            self.load_data(self.tableWidget_7, lotnisko)
 
         # table_widget = [self.tableWidget_0,
         #                 self.tableWidget_1,
@@ -136,39 +178,10 @@ class Window(QWidget):
 
         # self.load_data(table_widget[index], index)
 
-        if index == 0:
-            self.load_data(self.tableWidget_0, osoba)
-        elif index == 1:
-            self.load_data(self.tableWidget_1, bilet)
-        elif index == 2:
-            self.load_data(self.tableWidget_2, zatrudnienie)
-        elif index == 3:
-            self.load_data(self.tableWidget_3, lot)
-        elif index == 4:
-            self.load_data(self.tableWidget_4, samolot)
-        elif index == 5:
-            self.load_data(self.tableWidget_5, miejsce)
-        elif index == 6:
-            self.load_data(self.tableWidget_6, zajete_miejsce)
-        elif index == 7:
-            self.load_data(self.tableWidget_7, lotnisko)
-            
 
-    # def tabChanged(self, index):
-    #     print(index)
-    #     # print(self.tabWidget.currentIndex())
-    #     # page = self.tabWidget.widget(1)
-    #     # table_widget = page.findChild(QTableWidget)
-    #     # table_widget = page.findChild(self.tabWidget)
-    #     # self.current_table = self.tabWidget.widget(index)
-    #     # print(self.current_table)
-    #     # self.current_table.setRowCount(3)
-    #     # self.current_table.setColumnCount(3)
-
-    # def tabChanged(self):
-    #     index = self.tabWidget.currentIndex()
-    #     print(index)
-
+    def bilet(self):
+        window = Booking_dialog()
+        window.exec()
 
 
 
@@ -193,11 +206,12 @@ if __name__ == "__main__":
         print(e)
         sys.exit(1)
 
-
+    # drop_tables()
+    # create_tables()
     osoba, lotnisko, samolot = get_data()
 
     window = Window()
     window.show()
-    db.close()
+    # db.close()
     sys.exit(app.exec())
 

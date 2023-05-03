@@ -1,4 +1,3 @@
-from functions import get_data, drop_tables, create_tables
 import psycopg2 as pg2
 import sys
 
@@ -65,8 +64,9 @@ class Samolot:
     
 
 class Lotnisko:
-    def __init__(self, lotnisko_id=-1, miasto="", nazwa=""):
+    def __init__(self, lotnisko_id=-1, icao="", miasto="", nazwa=""):
         self.id = lotnisko_id
+        self.icao = icao
         self.miasto = miasto
         self.nazwa = nazwa
 

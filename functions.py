@@ -96,7 +96,7 @@ def get_data():
     osoba = cur.fetchall()
 
     cur.execute("""
-                SELECT lotnisko_id, name, city, country
+                SELECT lotnisko_id, icao_code, name, city, country
                 FROM lotnisko
                 -- WHERE name LIKE 'LAWICA'
                 -- WHERE name NOT LIKE 'N/A'
@@ -107,6 +107,60 @@ def get_data():
     samolot = cur.fetchall()
 
     return osoba, lotnisko, samolot
+
+
+def select_osoba():
+    cur.execute("SELECT osoba_id, imie, nazwisko, stanowisko FROM osoba")
+    osoba = cur.fetchall()
+    return osoba
+
+
+def select_lotnisko():
+    cur.execute("""
+                SELECT lotnisko_id, icao_code, name, city, country
+                FROM lotnisko
+                -- WHERE name LIKE 'LAWICA'
+                -- WHERE name NOT LIKE 'N/A'
+                """)
+    lotnisko = cur.fetchall()
+    return lotnisko
+
+
+def select_samolot():
+    cur.execute("SELECT samolot_id, model, ilosc_miejsc FROM samolot")
+    samolot = cur.fetchall()
+    return samolot
+
+def select_bilet():
+    cur.execute("SELECT bilet_id, osoba_id, lot_id, miejsce_id, asystent FROM bilet")
+    bilet = cur.fetchall()
+    return bilet
+
+def select_bilet():
+    cur.execute("SELECT bilet_id, osoba_id, lot_id, miejsce_id, asystent FROM bilet")
+    bilet = cur.fetchall()
+    return bilet
+
+def select_lot():
+    cur.execute("SELECT lot_id, osoba_id, lot_id, miejsce_id, asystent FROM bilet")
+    lot = cur.fetchall()
+    return lot
+
+def select_miejsce():
+    cur.execute("SELECT lot_id, osoba_id, lot_id, miejsce_id, asystent FROM bilet")
+    miejsce = cur.fetchall()
+    return miejsce
+
+def select_zajete_miejsce():
+    cur.execute("SELECT lot_id, osoba_id, lot_id, miejsce_id, asystent FROM bilet")
+    zajete_miejsce = cur.fetchall()
+    return zajete_miejsce
+
+def select_zatrudnienie():
+    cur.execute("SELECT lot_id, osoba_id, lot_id, miejsce_id, asystent FROM bilet")
+    zatrudnienie = cur.fetchall()
+    return zatrudnienie
+
 
 
 # def get_data(table_name):
