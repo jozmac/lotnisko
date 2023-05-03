@@ -1,31 +1,10 @@
 from PyQt6.QtWidgets import QWidget, QMainWindow, QApplication, QTableWidgetItem
 from PyQt6.uic import loadUi
 import sys, os
-from functions import get_data, drop_tables, create_tables, select_samolot, select_bilet, select_bilet, select_lot, select_miejsce, select_zajete_miejsce, select_zatrudnienie
+from functions import get_data, drop_tables, create_tables, select_osoba, select_lotnisko, select_samolot, select_bilet, select_lot, select_miejsce, select_zajete_miejsce, select_zatrudnienie
 from PyQt6 import QtGui
 from dialog import Booking_dialog
 import psycopg2 as pg2
-
-def select_osoba():
-    cur.execute("SELECT osoba_id, imie, nazwisko, stanowisko FROM osoba")
-    osoba = cur.fetchall()
-    return osoba
-
-
-def select_lotnisko():
-    cur.execute("""
-                SELECT lotnisko_id, icao_code, name, city, country
-                FROM lotnisko
-                -- WHERE name LIKE 'LAWICA'
-                -- WHERE name NOT LIKE 'N/A'
-                """)
-    lotnisko = cur.fetchall()
-    return lotnisko
-
-
-
-
-
 
 # # Temat projektu
 # System zarządzania lotami
@@ -77,10 +56,12 @@ def select_lotnisko():
 # db.close()
 #
 # sprawdzenie błędu "QSqlDatabase: QPSQL driver not loaded" na ubuntu
+
 # Pytania:
 # - sposób ładowania danych - lista tabel?
 # - nazwy kolumn
 # - 
+
 
 class Window(QWidget):
     def __init__(self, *args, **kwargs):
@@ -90,7 +71,6 @@ class Window(QWidget):
 
         self.tabWidget.setMovable(True)
         # self.tabWidget.setTabsClosable(True)
-
 
         self.tabWidget.setTabText(0, "Osoba")
         self.tabWidget.setTabText(1, "Bilet")
@@ -103,7 +83,7 @@ class Window(QWidget):
         # self.tabWidget.setTabText(8, "")
 
         # self.tabWidget.addTab(QWidget(), "New Tab")
-        # self.tabWidget.removeTab(0)
+        self.tabWidget.removeTab(8)
         
         self.tabWidget.tabBarClicked.connect(self.tabChanged)
 
@@ -113,10 +93,9 @@ class Window(QWidget):
         # if self.index == 1:
         #     self.pushButton_add.clicked.connected(self.bilet)
 
-        self.pushButton_dodaj_0.clicked.connect(self.bilet)
+        self.pushButton_dodaj_1.clicked.connect(self.bilet)
 
         
-
 
     def load_data(self, tab, data):
         if not len(data):
@@ -181,7 +160,9 @@ class Window(QWidget):
 
     def bilet(self):
         window = Booking_dialog()
-        window.exec()
+        if window.exec():
+            osoba, z, do, klasa, seat, asystent = self.get_selected_options()
+            print("Selected options:", option1, option2)
 
 
 

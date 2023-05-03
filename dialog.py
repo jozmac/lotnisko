@@ -10,6 +10,10 @@ class Booking_dialog(QDialog):
         os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
         loadUi("booking_dialog.ui", self)
 
+    def get_selected_options(self):
+        return self.comboBox_person.currentText(), self.comboBox_from.currentText(), self.comboBox_to.currentText(), self.comboBox_class.currentText(), self.comboBox_seat.currentText(), self.comboBox_assistant.currentText()
+
+
 
 
 if __name__ == "__main__":

@@ -136,11 +136,6 @@ def select_bilet():
     bilet = cur.fetchall()
     return bilet
 
-def select_bilet():
-    cur.execute("SELECT bilet_id, osoba_id, lot_id, miejsce_id, asystent FROM bilet")
-    bilet = cur.fetchall()
-    return bilet
-
 def select_lot():
     cur.execute("SELECT lot_id, osoba_id, lot_id, miejsce_id, asystent FROM bilet")
     lot = cur.fetchall()
