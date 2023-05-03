@@ -161,8 +161,9 @@ class Window(QWidget):
     def bilet(self):
         window = Booking_dialog()
         if window.exec():
-            osoba, z, do, klasa, seat, asystent = self.get_selected_options()
-            print("Selected options:", option1, option2)
+            # osoba, z, do, klasa, seat, asystent = self.get_selected_options()
+            combo1, combo2, combo3, combo4, combo5 = self.get_selected_options()
+            print("Selected options:", combo1, combo2, combo3, combo4, combo5)
 
 
 
