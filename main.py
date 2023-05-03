@@ -3,6 +3,7 @@ from PyQt6.uic import loadUi
 import sys, os
 from functions import get_data, drop_tables, create_tables
 from PyQt6 import QtGui
+import psycopg2 as pg2
 
 
 # # Temat projektu
@@ -47,6 +48,7 @@ from PyQt6 import QtGui
 # TODO:
 # dialog zamawiania biletu - skąd, dokąd, samolot, lotnisko(combo boxy), data(kalendarz)
 # klucze obce - indeksowanie - CREATE INDEX osoba_imie ON osoba(imie)
+# pytest
 #
 # SRP = single response principle - jedna klasa - jedna funkcja
 # rozdzielić klasy do osobnych plików - (main_window, klasy, dialog_window, db_connection (otwoeranie bazy w klasie a nie na początku kodu))
@@ -63,6 +65,15 @@ from PyQt6 import QtGui
 # drop_tables()
 # create_tables()
 
+# osoba
+# bilet
+# zatrudnienie
+# lot
+# samolot
+# miejsce
+# zajete_miejsce
+# lotnisko
+
 
 
 class Window(QWidget):
@@ -74,9 +85,16 @@ class Window(QWidget):
         self.tabWidget.setMovable(True)
         # self.tabWidget.setTabsClosable(True)
 
+
         self.tabWidget.setTabText(0, "Osoba")
-        self.tabWidget.setTabText(1, "Lotnisko")
-        self.tabWidget.setTabText(2, "Samolot")
+        self.tabWidget.setTabText(1, "Bilet")
+        self.tabWidget.setTabText(2, "Zatrudnienie")
+        self.tabWidget.setTabText(3, "Lot")
+        self.tabWidget.setTabText(4, "Samolot")
+        self.tabWidget.setTabText(5, "Miejsce")
+        self.tabWidget.setTabText(6, "Zajęte miejsce")
+        self.tabWidget.setTabText(7, "Lotnisko")
+        # self.tabWidget.setTabText(8, "")
 
         # self.tabWidget.addTab(QWidget(), "New Tab")
         # self.tabWidget.removeTab(0)
@@ -104,7 +122,7 @@ class Window(QWidget):
         
 
     def tabChanged(self, index):
-        print(index)
+        print(f"Selected tab: {index}")
 
         # table_widget = [self.tableWidget_0,
         #                 self.tableWidget_1,
@@ -121,16 +139,20 @@ class Window(QWidget):
         if index == 0:
             self.load_data(self.tableWidget_0, osoba)
         elif index == 1:
-            self.load_data(self.tableWidget_1, lotnisko)
+            self.load_data(self.tableWidget_1, bilet)
         elif index == 2:
-            self.load_data(self.tableWidget_2, samolot)
+            self.load_data(self.tableWidget_2, zatrudnienie)
         elif index == 3:
-            self.load_data(self.tableWidget_3, osoba)
+            self.load_data(self.tableWidget_3, lot)
         elif index == 4:
-            self.load_data(self.tableWidget_4, osoba)
+            self.load_data(self.tableWidget_4, samolot)
         elif index == 5:
-            self.load_data(self.tableWidget_5, osoba)
-
+            self.load_data(self.tableWidget_5, miejsce)
+        elif index == 6:
+            self.load_data(self.tableWidget_6, zajete_miejsce)
+        elif index == 7:
+            self.load_data(self.tableWidget_7, lotnisko)
+            
 
     # def tabChanged(self, index):
     #     print(index)
@@ -155,10 +177,27 @@ if __name__ == "__main__":
 
     # if not createConnection("contacts.sqlite"):
     #     sys.exit(1)
-    osoba, lotnisko, samolot = get_data()
 
+    try:
+        db = pg2.connect(
+            database="lotnisko",
+            host="localhost",
+            user='postgres',
+            password='password',
+            port='5432'
+        )
+        print(db)
+        cur = db.cursor()
+    except pg2.Error as e:
+        # self.label_result.setText("Error")
+        print(e)
+        sys.exit(1)
+
+
+    osoba, lotnisko, samolot = get_data()
 
     window = Window()
     window.show()
+    db.close()
     sys.exit(app.exec())
-    # db.close()
+

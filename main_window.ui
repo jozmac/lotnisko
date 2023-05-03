@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>700</width>
-    <height>501</height>
+    <width>900</width>
+    <height>700</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -106,11 +106,21 @@
      <property name="currentIndex">
       <number>0</number>
      </property>
-     <widget class="QWidget" name="tab_1">
+     <widget class="QWidget" name="tab_0">
       <attribute name="title">
        <string>Tab 1</string>
       </attribute>
       <layout class="QHBoxLayout" name="horizontalLayout_4">
+       <item>
+        <widget class="QTableWidget" name="tableWidget_0"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_1">
+      <attribute name="title">
+       <string>Tab 2</string>
+      </attribute>
+      <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
         <widget class="QTableWidget" name="tableWidget_1"/>
        </item>
@@ -118,25 +128,15 @@
      </widget>
      <widget class="QWidget" name="tab_2">
       <attribute name="title">
-       <string>Tab 2</string>
+       <string>Tab 3</string>
       </attribute>
-      <layout class="QHBoxLayout" name="horizontalLayout">
+      <layout class="QHBoxLayout" name="horizontalLayout_5">
        <item>
         <widget class="QTableWidget" name="tableWidget_2"/>
        </item>
       </layout>
      </widget>
      <widget class="QWidget" name="tab_3">
-      <attribute name="title">
-       <string>Tab 3</string>
-      </attribute>
-      <layout class="QHBoxLayout" name="horizontalLayout_5">
-       <item>
-        <widget class="QTableWidget" name="tableWidget"/>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="tab_4">
       <attribute name="title">
        <string>Tab 4</string>
       </attribute>
@@ -146,7 +146,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab_5">
+     <widget class="QWidget" name="tab_4">
       <attribute name="title">
        <string>Tab 5</string>
       </attribute>
@@ -156,7 +156,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab_6">
+     <widget class="QWidget" name="tab_5">
       <attribute name="title">
        <string>Tab 6</string>
       </attribute>
@@ -166,7 +166,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab_7">
+     <widget class="QWidget" name="tab_6">
       <attribute name="title">
        <string>Tab 7</string>
       </attribute>
@@ -176,7 +176,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab_8">
+     <widget class="QWidget" name="tab_7">
       <attribute name="title">
        <string>Tab 8</string>
       </attribute>
@@ -186,7 +186,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab_9">
+     <widget class="QWidget" name="tab_8">
       <attribute name="title">
        <string>Tab 9</string>
       </attribute>

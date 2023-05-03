@@ -1,21 +1,8 @@
 from functions import get_data, drop_tables, create_tables
 import psycopg2 as pg2
+import sys
 
 # pyuic6 -x lotnisko1.ui -o lotnisko1.py
-
-try:
-    db = pg2.connect(
-        database="lotnisko",
-        host="localhost",
-        user='postgres',
-        password='password',
-        port='5432'
-    )
-    print(db)
-    cur = db.cursor()
-except pg2.Error as e:
-    # self.label_result.setText("Error")
-    print(e)
 
 
 class Osoba(object):
@@ -27,7 +14,7 @@ class Osoba(object):
 
     def load_osoba(self):
         cur.execute(
-            f"""SELECT imie, nazwisko, stanowisko FROM osoba WHERE "id" = '{self.osoba_id}'; """)
+            f"""SELECT imie, nazwisko, stanowisko FROM osoba WHERE "osoba_id" = '{self.osoba_id}'; """)
 
         result = cur.fetchone()
 
@@ -36,19 +23,20 @@ class Osoba(object):
         self.stanowisko = result[2]
 
     def insert_osoba(self):
-        cur.execute(f"""INSERT INTO osoba (id, imie, nazwisko, stanowisko) VALUES
-        ('{self.osoba_id}', '{self.imie}', '{self.nazwisko}', '{self.stanowisko}')""")
+        cur.execute(f"""INSERT INTO osoba (imie, nazwisko, stanowisko) VALUES
+        ('{self.imie}', '{self.nazwisko}', '{self.stanowisko}')""")
         db.commit()
+        print(f"Osoba {self.osoba_id} został dodany")
 
     def delete_osoba(self):
         cur.execute(f"""DELETE FROM osoba 
-                    WHERE id = {self.osoba_id}""")
+                    WHERE osoba_id = {self.osoba_id}""")
         db.commit()
 
     def edit_osoba(self):
         cur.execute(f"""UPDATE osoba 
         SET imie = '{self.imie}', nazwisko = '{self.nazwisko}', stanowisko = '{self.stanowisko}'
-        WHERE id = {self.osoba_id}""")
+        WHERE osoba_id = {self.osoba_id}""")
         db.commit()
 
     def __str__(self):
@@ -87,15 +75,32 @@ class Lot:
 
 
 if __name__ == "__main__":
+
+    try:
+        db = pg2.connect(
+            database="lotnisko",
+            host="localhost",
+            user='postgres',
+            password='password',
+            port='5432'
+        )
+        cur = db.cursor()
+        print(db)
+    except pg2.Error as e:
+        # self.label_result.setText("Error")
+        print(e)
+        sys.exit(1)
+
+
     jan = Osoba(1, "Jan", "Kowalski", "Pilot")
-    jozef = Osoba(33, "Jozef", "Mackowiak", "pilot")
+    jozef = Osoba(osoba_id=33, imie="Jozef", nazwisko="Mackowiak", stanowisko="pilot")
     person = Osoba(osoba_id=7)
     person.load_osoba()
     # jozef.insert_osoba()
     # jozef.delete_osoba()
-    jozef.edit_osoba()
-    print(person)
-    print(jan)
-    print(jozef)
+    jozef.insert_osoba()
+    # print(person)
+    # print(jan)
+    # print(jozef)
 
     db.close()
