@@ -109,6 +109,7 @@ def get_data():
     return osoba, lotnisko, samolot
 
 
+
 def select_osoba():
     cur.execute("SELECT osoba_id, imie, nazwisko, stanowisko FROM osoba")
     osoba = cur.fetchall()
@@ -137,31 +138,30 @@ def select_bilet():
     return bilet
 
 def select_lot():
-    cur.execute("SELECT lot_id, osoba_id, lot_id, miejsce_id, asystent FROM bilet")
+    cur.execute("SELECT lot_id, samolot_id, lotnisko_a_id, lotnisko_b_id, bramka, cena FROM lot")
     lot = cur.fetchall()
     return lot
 
 def select_miejsce():
-    cur.execute("SELECT lot_id, osoba_id, lot_id, miejsce_id, asystent FROM bilet")
+    cur.execute("SELECT miejsce_id, samolot_idt FROM miejsce")
     miejsce = cur.fetchall()
     return miejsce
 
 def select_zajete_miejsce():
-    cur.execute("SELECT lot_id, osoba_id, lot_id, miejsce_id, asystent FROM bilet")
+    cur.execute("SELECT lot_id, miejsce_id, bilet_id FROM zajete_miejsce")
     zajete_miejsce = cur.fetchall()
     return zajete_miejsce
 
 def select_zatrudnienie():
-    cur.execute("SELECT lot_id, osoba_id, lot_id, miejsce_id, asystent FROM bilet")
+    cur.execute("SELECT osoba_id, lot_id FROM zatrudnienie")
     zatrudnienie = cur.fetchall()
     return zatrudnienie
 
+def select_pracownik():
+    cur.execute("SELECT osoba_id, imie, nazwisko, stanowisko FROM osoba WHERE stanowisko IS NOT NULL")
+    zatrudnienie = cur.fetchall()
+    return zatrudnienie
 
-
-# def get_data(table_name):
-#
-#     cur.execute(f"SELECT osoba_id, imie, nazwisko, stanowisko FROM {table_name}")
-#     return cur.fetchall()
 
 
 

@@ -25,8 +25,22 @@ class Booking_dialog(QDialog):
         self.comboBox_to.addItems([''.join(str(x)) for x in select_lotnisko()])
         self.comboBox_seat.addItems([''.join(str(x)) for x in select_miejsce()])
 
+        self.comboBox_from.setCurrentIndex(1538)
+        self.comboBox_to.setCurrentIndex(1538)
+
     def get_selected_options(self):
-        return self.comboBox_person.currentText(), self.comboBox_from.currentText(), self.comboBox_to.currentText(), self.comboBox_class.currentText(), self.comboBox_seat.currentText(), self.comboBox_assistant.currentText()
+        return [self.comboBox_person.currentText(), 
+                self.comboBox_from.currentText(), 
+                self.comboBox_to.currentText(), 
+                self.comboBox_class.currentText(), 
+                self.comboBox_seat.currentText(), 
+                self.comboBox_assistant.currentText(),
+                self.calendarWidget.selectedDate().toPyDate(),
+                self.timeEdit.time().toPyTime()]
+    
+    # def calendar_date(self):
+    #     dateSelected = self.calendar.selectedDate()
+    #     date_string = str(dateSelected.toPyDate())
 
 
 

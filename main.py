@@ -3,7 +3,7 @@ from PyQt6.uic import loadUi
 import sys, os
 from functions import get_data, drop_tables, create_tables, select_osoba, select_lotnisko, select_samolot, select_bilet, select_lot, select_miejsce, select_zajete_miejsce, select_zatrudnienie
 from PyQt6 import QtGui
-from dialog import Booking_dialog
+from booking_dialog import Booking_dialog
 import psycopg2 as pg2
 
 # # Temat projektu
@@ -47,7 +47,7 @@ import psycopg2 as pg2
 # zakładki na tabele i sygnały klikania
 # TODO:
 # dialog zamawiania biletu - skąd, dokąd, samolot, lotnisko(combo boxy), data(kalendarz)
-# klucze obce - indeksowanie - CREATE INDEX osoba_imie ON osoba(imie)
+# indeksowanie - CREATE INDEX osoba_imie ON osoba(imie)
 # pytest
 #
 # SRP = single response principle - jedna klasa - jedna funkcja
@@ -63,6 +63,7 @@ import psycopg2 as pg2
 # - QSQL
 # - @dataclass
 # - testy 
+# - miejsce / siedzenia
 
 
 class Window(QWidget):
@@ -80,7 +81,7 @@ class Window(QWidget):
         self.tabWidget.setTabText(3, "Lot")
         self.tabWidget.setTabText(4, "Samolot")
         self.tabWidget.setTabText(5, "Miejsce")
-        self.tabWidget.setTabText(6, "Zajęte miejsce")
+        self.tabWidget.setTabText(6, "Zajete_miejsce")
         self.tabWidget.setTabText(7, "Lotnisko")
         # self.tabWidget.setTabText(8, "")
 
@@ -90,7 +91,7 @@ class Window(QWidget):
         self.tabWidget.tabBarClicked.connect(self.tabChanged)
 
         # Default table
-        self.load_data(self.tableWidget_0, osoba)
+        self.load_data(self.tableWidget_0, select_osoba())
 
         # if self.index == 1:
         #     self.pushButton_add.clicked.connected(self.bilet)
@@ -120,54 +121,34 @@ class Window(QWidget):
 
     def tabChanged(self, index):
         self.index = index
-        print(f"Selected tab: {index}")
+        print(f"Selected tab: {index} - {self.tabWidget.tabText(index).lower()}")
 
-        if index == 0:
-            osoba = select_osoba()
-            self.load_data(self.tableWidget_0, osoba)
-        elif index == 1:
-            bilet = select_bilet()
-            self.load_data(self.tableWidget_1, bilet)
-        elif index == 2:
-            zatrudnienie = select_zatrudnienie()
-            self.load_data(self.tableWidget_2, zatrudnienie)
-        elif index == 3:
-            lot = select_lot()
-            self.load_data(self.tableWidget_3, lot)
-        elif index == 4:
-            select_samolot()
-            self.load_data(self.tableWidget_4, samolot)
-        elif index == 5:
-            miejsce = select_miejsce()
-            self.load_data(self.tableWidget_5, miejsce)
-        elif index == 6:
-            zajete_miejsce = select_zajete_miejsce()
-            self.load_data(self.tableWidget_6, zajete_miejsce)
-        elif index == 7:
-            lotnisko = select_lotnisko()
-            self.load_data(self.tableWidget_7, lotnisko)
+        self.load_data(eval(f"self.tableWidget_{index}"), eval(f"select_{self.tabWidget.tabText(index).lower()}()"))
 
-        # table_widget = [self.tableWidget_0,
-        #                 self.tableWidget_1,
-        #                 self.tableWidget_2,
-        #                 self.tableWidget_3,
-        #                 self.tableWidget_4,
-        #                 self.tableWidget_5,
-        #                 self.tableWidget_6,
-        #                 self.tableWidget_7,
-        #                 self.tableWidget_8]
-
-        # self.load_data(table_widget[index], index)
-
-        # self.load_data(eval(f"self.tableWidget_{index}"), samolot)
+        # if index == 0:
+        #     self.load_data(self.tableWidget_0, select_osoba())
+        # elif index == 1:
+        #     self.load_data(self.tableWidget_1, select_bilet())
+        # elif index == 2:
+        #     self.load_data(self.tableWidget_2, select_zatrudnienie())
+        # elif index == 3:
+        #     self.load_data(self.tableWidget_3, select_lot())
+        # elif index == 4:
+        #     self.load_data(self.tableWidget_4, select_samolot())
+        # elif index == 5:
+        #     self.load_data(self.tableWidget_5, select_miejsce())
+        # elif index == 6:
+        #     self.load_data(self.tableWidget_6, select_zajete_miejsce())
+        # elif index == 7:
+        #     self.load_data(self.tableWidget_7, select_lotnisko())
 
 
     def bilet(self):
         window = Booking_dialog()
         if window.exec():
             # osoba, z, do, klasa, seat, asystent = self.get_selected_options()
-            combo1, combo2, combo3, combo4, combo5, combo6 = window.get_selected_options()
-            print("Selected options:", combo1, combo2, combo3, combo4, combo5, combo6)
+            combo1, combo2, combo3, combo4, combo5, combo6, date, time = window.get_selected_options()
+            print(f"Selected options:, {combo1}, {combo2}, {combo3}, {combo4}, {combo5}, {combo6}, {date}, {time}")
 
 
 
@@ -194,7 +175,7 @@ if __name__ == "__main__":
 
     # drop_tables()
     # create_tables()
-    osoba, lotnisko, samolot = get_data()
+    # osoba, lotnisko, samolot = get_data()
 
     window = Window()
     window.show()
