@@ -60,7 +60,9 @@ import psycopg2 as pg2
 # Pytania:
 # - sposób ładowania danych - lista tabel?
 # - nazwy kolumn
-# - 
+# - QSQL
+# - @dataclass
+# - testy 
 
 
 class Window(QWidget):
@@ -157,13 +159,15 @@ class Window(QWidget):
 
         # self.load_data(table_widget[index], index)
 
+        # self.load_data(eval(f"self.tableWidget_{index}"), samolot)
+
 
     def bilet(self):
         window = Booking_dialog()
         if window.exec():
             # osoba, z, do, klasa, seat, asystent = self.get_selected_options()
-            combo1, combo2, combo3, combo4, combo5 = self.get_selected_options()
-            print("Selected options:", combo1, combo2, combo3, combo4, combo5)
+            combo1, combo2, combo3, combo4, combo5, combo6 = window.get_selected_options()
+            print("Selected options:", combo1, combo2, combo3, combo4, combo5, combo6)
 
 
 
