@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import QWidget, QMainWindow, QApplication, QTableWidgetItem
 from PyQt6.uic import loadUi
 import sys, os
-from functions import get_data, drop_tables, create_tables, select_osoba, select_lotnisko, select_samolot, select_bilet, select_lot, select_miejsce, select_zajete_miejsce, select_zatrudnienie
+from functions import get_data, drop_tables, create_tables, select_osoba, select_lotnisko, select_samolot, select_bilet, select_lot, select_miejsce, select_zajete_miejsce, select_zatrudnienie, select_pracownik
 from PyQt6 import QtGui
 from booking_dialog import Booking_dialog
 import psycopg2 as pg2
@@ -45,24 +45,24 @@ import psycopg2 as pg2
 # zamienić nazwę tabeli konto na osoba
 # import os
 # zakładki na tabele i sygnały klikania
-# TODO:
 # dialog zamawiania biletu - skąd, dokąd, samolot, lotnisko(combo boxy), data(kalendarz)
+# TODO:
 # indeksowanie - CREATE INDEX osoba_imie ON osoba(imie)
 # pytest
 #
-# SRP = single response principle - jedna klasa - jedna funkcja
-# rozdzielić klasy do osobnych plików - (main_window, klasy, dialog_window, db_connection (otwoeranie bazy w klasie a nie na początku kodu))
+# rozdzielić klasy do osobnych plików - (main_window, klasy, dialog_window, db_connection (otwoeranie bazy w klasie a nie na początku kodu)) (SRP = single response principle - jedna klasa - jedna funkcja)
 # Wczytywanie listy dostępnych miejsc
 # db.close()
 #
 # sprawdzenie błędu "QSqlDatabase: QPSQL driver not loaded" na ubuntu
 
 # Pytania:
-# - sposób ładowania danych - lista tabel?
+# - sposób ładowania danych
+# - comboboxy
 # - nazwy kolumn
 # - QSQL
 # - @dataclass
-# - testy 
+# - testy
 # - miejsce / siedzenia
 
 
@@ -83,10 +83,10 @@ class Window(QWidget):
         self.tabWidget.setTabText(5, "Miejsce")
         self.tabWidget.setTabText(6, "Zajete_miejsce")
         self.tabWidget.setTabText(7, "Lotnisko")
-        # self.tabWidget.setTabText(8, "")
+        self.tabWidget.setTabText(8, "Pracownik")
 
         # self.tabWidget.addTab(QWidget(), "New Tab")
-        self.tabWidget.removeTab(8)
+        # self.tabWidget.removeTab(8)
         
         self.tabWidget.tabBarClicked.connect(self.tabChanged)
 
@@ -96,7 +96,7 @@ class Window(QWidget):
         # if self.index == 1:
         #     self.pushButton_add.clicked.connected(self.bilet)
 
-        self.pushButton_dodaj_1.clicked.connect(self.bilet)
+        self.pushButton_dodaj_1.clicked.connect(self.rezerwuj_bilet)
 
         
 
@@ -143,7 +143,7 @@ class Window(QWidget):
         #     self.load_data(self.tableWidget_7, select_lotnisko())
 
 
-    def bilet(self):
+    def rezerwuj_bilet(self):
         window = Booking_dialog()
         if window.exec():
             # osoba, z, do, klasa, seat, asystent = self.get_selected_options()

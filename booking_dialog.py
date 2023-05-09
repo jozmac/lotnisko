@@ -2,7 +2,7 @@ from PyQt6.QtWidgets import QDialog, QApplication, QComboBox
 from PyQt6.uic import loadUi
 import sys, os
 # from functions import get_data, drop_tables, create_tables
-from functions import select_osoba, select_lotnisko, select_samolot, select_bilet, select_lot, select_miejsce, select_zajete_miejsce, select_zatrudnienie
+from functions import select_osoba, select_lotnisko, select_samolot, select_bilet, select_lot, select_miejsce, select_zajete_miejsce, select_zatrudnienie, select_pracownik
 
 
 class Booking_dialog(QDialog):

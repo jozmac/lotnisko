@@ -143,7 +143,7 @@ def select_lot():
     return lot
 
 def select_miejsce():
-    cur.execute("SELECT miejsce_id, samolot_idt FROM miejsce")
+    cur.execute("SELECT miejsce_id, samolot_id FROM miejsce")
     miejsce = cur.fetchall()
     return miejsce
 

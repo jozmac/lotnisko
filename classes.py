@@ -55,6 +55,37 @@ class Bilet:
         self.miejsce_id = miejsce_id
         self.asystent = asystent
 
+    def load_bilet(self):
+        cur.execute(
+            f"""SELECT osoba_id, lot_id, miejsce_id, asystent FROM bilet WHERE "bilet_id" = '{self.bilet_id}'; """)
+
+        result = cur.fetchone()
+
+        self.osoba_id = result[0]
+        self.lot_id = result[1]
+        self.miejsce_id = result[2]
+        self.asystent = result[3]
+
+    def insert_bilet(self):
+        cur.execute(f"""INSERT INTO bilet (osoba_id, lot_id, miejsce_id, asystent) VALUES
+        ('{self.osoba_id}', '{self.lot_id}', '{self.miejsce_id}', '{self.asystent}')""")
+        db.commit()
+        print(f"Osoba {self.osoba_id} został dodany")
+
+    def delete_bilet(self):
+        cur.execute(f"""DELETE FROM bilet
+                    WHERE bilet_id = {self.bilet_id}""")
+        db.commit()
+
+    def edit_bilet(self):
+        cur.execute(f"""UPDATE osoba 
+        SET osoba_id = '{self.osoba_id}', lot_id = '{self.lot_id}', miejsce_id = '{self.miejsce_id}', asystent = '{self.asystent}'
+        WHERE bilet_id = {self.bilet_id}""")
+        db.commit()
+
+    def __str__(self):
+        return f"Id: {self.bilet_id}, osoba: {self.osoba_id}, lot: {self.lot_id}, miejsce: {self.miejsce_id}, asystent: {self.asystent}"
+
 
 class Samolot:
     def __init__(self, samolot_id=-1, model="", ilosc_miejsc=""):

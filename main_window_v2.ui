@@ -28,7 +28,7 @@
       </font>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="tab_0">
       <attribute name="title">
@@ -120,7 +120,7 @@
             </font>
            </property>
            <property name="text">
-            <string>Dodaj</string>
+            <string>Rezerwuj</string>
            </property>
           </widget>
          </item>
