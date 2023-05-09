@@ -39,7 +39,7 @@ import psycopg2 as pg2
 
 # DONE:
 # widok tworzenia bazy danych postgres - schemat(tools - EDB tool)
-# sekwenje - ticket_id, osoba_id
+# sekwenje - ticket_id, osoba_id - nextval('osoba_id_seq'::regclass)
 # skasować niepotrzebne kolumny w lotniskach (ładowanie danych jest )
 # zatrudnienie - 2 kolumny jako klucz główny
 # zamienić nazwę tabeli konto na osoba
@@ -48,22 +48,25 @@ import psycopg2 as pg2
 # dialog zamawiania biletu - skąd, dokąd, samolot, lotnisko(combo boxy), data(kalendarz)
 # TODO:
 # indeksowanie - CREATE INDEX osoba_imie ON osoba(imie)
-# pytest
 #
 # rozdzielić klasy do osobnych plików - (main_window, klasy, dialog_window, db_connection (otwoeranie bazy w klasie a nie na początku kodu)) (SRP = single response principle - jedna klasa - jedna funkcja)
 # Wczytywanie listy dostępnych miejsc
 # db.close()
+# pytest
 #
 # sprawdzenie błędu "QSqlDatabase: QPSQL driver not loaded" na ubuntu
 
+
 # Pytania:
-# - sposób ładowania danych
-# - comboboxy
+# - sposób ładowania danych, QSQL
+# - tabele- select id
+# - comboboxy - jak załadować dane, czytanie id wybranej opcji po kliknięciu ok
+# - tabela lotów
 # - nazwy kolumn
-# - QSQL
 # - @dataclass
 # - testy
 # - miejsce / siedzenia
+# - przykładowe projekty pyqt
 
 
 class Window(QWidget):
@@ -147,8 +150,14 @@ class Window(QWidget):
         window = Booking_dialog()
         if window.exec():
             # osoba, z, do, klasa, seat, asystent = self.get_selected_options()
-            combo1, combo2, combo3, combo4, combo5, combo6, date, time = window.get_selected_options()
-            print(f"Selected options:, {combo1}, {combo2}, {combo3}, {combo4}, {combo5}, {combo6}, {date}, {time}")
+            osoba, lotnisko_a, lotnisko_b, klasa, miejsce, asystent, data, godzina = window.get_selected_options()
+            print(f"Selected options:, {osoba}, {lotnisko_a}, {lotnisko_b}, {klasa}, {miejsce}, {asystent}, {data}, {godzina}")
+
+            miejsce = 1
+            
+            # cur.execute(f"""INSERT INTO bilet (osoba_id, lot_id, miejsce_id) VALUES
+            #     (5, 1, {miejsce})""")
+            # db.commit()
 
 
 

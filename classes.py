@@ -70,7 +70,7 @@ class Bilet:
         cur.execute(f"""INSERT INTO bilet (osoba_id, lot_id, miejsce_id, asystent) VALUES
         ('{self.osoba_id}', '{self.lot_id}', '{self.miejsce_id}', '{self.asystent}')""")
         db.commit()
-        print(f"Osoba {self.osoba_id} został dodany")
+        print(f"Bilet {self.bilet_id} został dodany")
 
     def delete_bilet(self):
         cur.execute(f"""DELETE FROM bilet
@@ -87,11 +87,40 @@ class Bilet:
         return f"Id: {self.bilet_id}, osoba: {self.osoba_id}, lot: {self.lot_id}, miejsce: {self.miejsce_id}, asystent: {self.asystent}"
 
 
-class Samolot:
-    def __init__(self, samolot_id=-1, model="", ilosc_miejsc=""):
-        self.samolot_id = samolot_id
-        self.model = model
-        self.ilosc_miejsc = ilosc_miejsc
+# class Samolot:
+#     def __init__(self, samolot_id=-1, model="", ilosc_miejsc=""):
+#         self.samolot_id = samolot_id
+#         self.model = model
+#         self.ilosc_miejsc = ilosc_miejsc
+
+#     def load_samolot(self):
+#         cur.execute(
+#             f"""SELECT model, ilosc_miejsc FROM samolot WHERE "bilet_id" = '{self.samolot_id}'; """)
+
+#         result = cur.fetchone()
+
+#         self.model = result[0]
+#         self.ilosc_miejsc = result[1]
+
+#     def insert_samolot(self):
+#         cur.execute(f"""INSERT INTO samolot (model, ilosc_miejsc) VALUES
+#         ('{self.model}', '{self.ilosc_miejsc}')""")
+#         db.commit()
+#         print(f"Samolot {self.samolot_id} - {self.model} został dodany")
+
+#     def delete_samolot(self):
+#         cur.execute(f"""DELETE FROM bilet
+#                     WHERE bilet_id = {self.samolot_id}""")
+#         db.commit()
+
+#     def edit_samolot(self):
+#         cur.execute(f"""UPDATE osoba 
+#         SET model = '{self.model}', ilosc_miejsc = '{self.ilosc_miejsc}'
+#         WHERE bilet_id = {self.samolot_id}""")
+#         db.commit()
+
+#     def __str__(self):
+#         return f"Id: {self.samolot_id}, model: {self.model}, ilosc miejsc: {self.ilosc_miejsc}"
     
 
 class Lotnisko:
