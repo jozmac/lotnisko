@@ -61,6 +61,7 @@ def create_tables():
         """
         CREATE TABLE IF NOT EXISTS miejsce (
             miejsce_id SERIAL PRIMARY KEY,
+            miejsce_samolot_id INTEGER NOT NULL,
             samolot_id INTEGER NOT NULL REFERENCES samolot(samolot_id),
             klasa_lotu VARCHAR(50)
         );
@@ -87,6 +88,27 @@ def create_tables():
         );
         """
     )
+    db.commit()
+
+
+def insert_miejsca():
+    # Select all planes from the planes table
+    cur.execute("SELECT samolot_id, ilosc_miejsc FROM samolot")
+    planes = cur.fetchall()
+    print(planes)
+
+    # Insert seat information into the seats table based on the capacities of the planes
+    for plane in planes:
+        plane_id = plane[0]
+        capacity = plane[1]
+        for j in range(1, capacity+1):
+            cur.execute("INSERT INTO miejsce (miejsce_samolot_id, samolot_id) VALUES (%s, %s)", (j, plane_id))
+            print(j)
+    db.commit()
+
+
+def delete_seats():
+    cur.execute("DELETE FROM miejsce")
     db.commit()
 
 
@@ -138,7 +160,7 @@ def select_bilet():
     return bilet
 
 def select_lot():
-    cur.execute("SELECT lot_id, samolot_id, lotnisko_a_id, lotnisko_b_id, bramka, cena FROM lot")
+    cur.execute("SELECT lot_id, samolot_id, lotnisko_a_id, lotnisko_b_id, datetime FROM lot")
     lot = cur.fetchall()
     return lot
 
@@ -164,8 +186,9 @@ def select_pracownik():
 
 
 
-
-
+# drop_tables()
+# create_tables()
+# insert_miejsca()
 
 
 

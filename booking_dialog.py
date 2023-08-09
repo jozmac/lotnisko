@@ -8,42 +8,27 @@ from functions import select_osoba, select_lotnisko, select_samolot, select_bile
 class Booking_dialog(QDialog):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
+        directory = os.path.dirname(os.path.realpath(sys.argv[0]))
+        gui_directory = os.path.join(directory, 'GUI')
+        os.chdir(gui_directory)
+        # os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
         loadUi("booking_dialog.ui", self)
-
-        # self.cb_platform = QComboBox(self)
-        # self.cb_platform.addItem('Android')
-        # self.cb_platform.addItem('iOS')
-        # self.cb_platform.addItem('Windows')
-        # self.string_list = (["apple", "banana", "cherry"])
-        # self.cb_platform.addItems(self.string_list)
 
         # osoba = select_osoba()
         # s = [''.join(str(x)) for x in osoba]
         self.comboBox_person.addItems([''.join(str(x)) for x in select_osoba()])
-        self.comboBox_from.addItems([''.join(str(x)) for x in select_lotnisko()])
-        self.comboBox_to.addItems([''.join(str(x)) for x in select_lotnisko()])
+        self.comboBox_flight.addItems([''.join(str(x)) for x in select_lot()])
         self.comboBox_seat.addItems([''.join(str(x)) for x in select_miejsce()])
 
-        self.comboBox_from.setCurrentIndex(1538)
-        self.comboBox_to.setCurrentIndex(1538)
+
 
     def get_selected_options(self):
         return [self.comboBox_person.currentText(), 
-                self.comboBox_from.currentText(), 
-                self.comboBox_to.currentText(), 
+                self.comboBox_flight.currentText(), 
                 self.comboBox_class.currentText(), 
                 self.comboBox_seat.currentText(), 
-                self.comboBox_assistant.currentText(),
-                self.calendarWidget.selectedDate().toPyDate(),
-                self.timeEdit.time().toPyTime()]
+                self.comboBox_assistant.currentText(),]
     
-    # def calendar_date(self):
-    #     dateSelected = self.calendar.selectedDate()
-    #     date_string = str(dateSelected.toPyDate())
-
-
-
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

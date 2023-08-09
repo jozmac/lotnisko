@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>900</width>
-    <height>500</height>
+    <width>654</width>
+    <height>439</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,7 +15,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_3">
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,2">
+    <layout class="QHBoxLayout" name="horizontalLayout" stretch="1">
      <item>
       <layout class="QVBoxLayout" name="verticalLayout_combo">
        <property name="spacing">
@@ -50,50 +50,19 @@
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="label_from">
+        <widget class="QLabel" name="label_flight">
          <property name="font">
           <font>
            <pointsize>12</pointsize>
           </font>
          </property>
          <property name="text">
-          <string>From:</string>
+          <string>Flight</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QComboBox" name="comboBox_from">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>250</width>
-           <height>0</height>
-          </size>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="label_to">
-         <property name="font">
-          <font>
-           <pointsize>12</pointsize>
-          </font>
-         </property>
-         <property name="text">
-          <string>To:</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QComboBox" name="comboBox_to">
+        <widget class="QComboBox" name="comboBox_flight">
          <property name="enabled">
           <bool>true</bool>
          </property>
@@ -236,16 +205,6 @@
           </size>
          </property>
         </spacer>
-       </item>
-      </layout>
-     </item>
-     <item>
-      <layout class="QVBoxLayout" name="verticalLayout_calendar">
-       <item>
-        <widget class="QCalendarWidget" name="calendarWidget"/>
-       </item>
-       <item>
-        <widget class="QTimeEdit" name="timeEdit"/>
        </item>
        <item>
         <widget class="QDialogButtonBox" name="buttonBox">
