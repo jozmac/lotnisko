@@ -66,16 +66,19 @@ SELECT_FUNCTIONS = {
 # zamienić nazwę tabeli konto na osoba
 # import os
 # zakładki na tabele i sygnały klikania
+
 # dialog zamawiania biletu - skąd, dokąd, samolot, lotnisko(combo boxy), data(kalendarz)
-# skrypt do stworzenia miejsc w samolotach
+# miejsca w samolotach
 # usunąć wybór daty z biletów, dialog dodawania lotów QDateEdit
 # getarrt() zamiast eval()
 # Flight_dialog()
 # db.close()
+
 # TODO:
 # comboboxy - jak załadować dane, czytanie id wybranej opcji po kliknięciu ok - słowniki (dict)
 # pytest - testy klas, sprawdzanie jednego wiersza lotów, sprawdzenie selektów - czy fstring jest taki sam jak query
 # usunąć tabele zatrudnienie, miejsca, lotnisko, miejsce, zajęte miejsce z głównego okna
+
 # indeksowanie - CREATE INDEX osoba_imie ON osoba(imie)
 # rozdzielić klasy do osobnych plików, osobne foldery dla dialogów, klas, skryptów - (main_window, klasy, dialog_window, db_connection (otwoeranie bazy w klasie a nie na początku kodu)) (SRP = single response principle - jedna klasa - jedna funkcja)
 # Wczytywanie listy dostępnych miejsc
@@ -119,6 +122,8 @@ class Window(QWidget):
         # # self.tabWidget.addTab(QWidget(), "New Tab")
         # # self.tabWidget.removeTab(8)
 
+        # get_widget_dict = 
+
 
     def init_gui(self):
         directory = os.path.dirname(os.path.realpath(sys.argv[0]))
@@ -145,6 +150,10 @@ class Window(QWidget):
         self.pushButton_usun_3.clicked.connect(self.usun_lot)
 
 
+    # load_data_lot()
+        # load_data()
+        # set_delegate()
+
     def load_data(self, tab, data):
         if not len(data):
             return False
@@ -163,13 +172,13 @@ class Window(QWidget):
         return row, column
 
 
-    def get_row_id(self):
-        # row, column = tab.cellClicked.connect(self.get_clicked_cell)
-        # selected_row = self.tableWidget_1.currentRow()
-        # print(f"Clicked cell: [{row}, {column}]")
-        item = self.tableWidget_1.item(row, 0)
-        print(row)
-        return item
+    # def get_row_id(self):
+    #     # row, column = tab.cellClicked.connect(self.get_clicked_cell)
+    #     # selected_row = self.tableWidget_1.currentRow()
+    #     # print(f"Clicked cell: [{row}, {column}]")
+    #     item = self.tableWidget_1.item(row, 0)
+    #     print(row)
+    #     return item
         
 
     def tab_changed(self, index):
@@ -178,6 +187,7 @@ class Window(QWidget):
         print(f"Selected tab: {index} - {tab_name}")
 
         table_widget_attr = getattr(self, f"tableWidget_{index}", None)
+        print(table_widget_attr)
         select_function = SELECT_FUNCTIONS.get(tab_name)
 
         if table_widget_attr and select_function:
@@ -199,8 +209,9 @@ class Window(QWidget):
             lotnisko_a_id = self.return_id(lotnisko_a)
             lotnisko_b_id = self.return_id(lotnisko_b)
             
-
+            
             try:
+                # execute_query(query)
                 with pg2.connect(**DB_CONFIG) as db:
                     cur = db.cursor()
                     cur.execute("INSERT INTO lot (samolot_id, lotnisko_a_id, lotnisko_b_id, datetime) VALUES (%s, %s, %s, %s)",
@@ -209,6 +220,8 @@ class Window(QWidget):
                     print("Flight added to the database.")
             except pg2.Error as e:
                 print("Error while adding flight: ", e)
+
+            # model.setheaderdata()
 
             self.tab_changed(self.index)
 
