@@ -75,9 +75,10 @@ class Flight_dialog(QDialog):
         # check_state = cbo.itemData(index, QtCore.Qt.CheckStateRole)
         # print(index, text, data, check_state)
 
-    # cbo.currentIndexChanged[int].connect(on_current_index_changed)
+        # cbo.currentIndexChanged[int].connect(on_current_index_changed)
 
-        self.buttonBox.accepted.connect(self.insert_selected_data)
+        # self.buttonBox.accepted.connect(self.insert_to_database)
+        # self.buttonBox.rejected.connect(Dialog.reject)
 
     def load_combo_boxes(self):
         # samolot_query = QSqlQuery("SELECT samolot_id, model, ilosc_miejsc FROM samolot", self.db)
@@ -111,7 +112,7 @@ class Flight_dialog(QDialog):
         # self.comboBox_plane.setModelColumn(1)
         # self.comboBox_plane.setItemDelegate(MultiColumnItemDelegate())
 
-    def insert_selected_data(self):
+    def insert_to_database(self):
         # TODO
         selected_date = self.calendarWidget.selectedDate().toPyDate()
         selected_time = self.timeEdit.time().toPyTime()
