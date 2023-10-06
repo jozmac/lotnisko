@@ -95,14 +95,14 @@ from person_dialog import Person_dialog
 # edytowanie komórki po kliknięciu edytuj
 # drukowanie karty pokładowej
 # black formatter
+# rollback -czy napewno chcesz zatwierdzić zmiany?
 
 # TODO:
-# rollback -czy napewno chcesz zatwierdzić zmiany?
 # pytest - testy klas, sprawdzanie jednego wiersza lotów, sprawdzenie selektów - czy fstring jest taki sam jak query
 # cena biletu
 
 # join zamiast tabledelegate / caschowanie
-# indeksowanie - CREATE INDEX osoba_imie ON osoba(imie)
+# indeksowanie - CREATE INDEX osoba_imie ON osoba(imie) -
 # rozdzielić klasy do osobnych plików, osobne foldery dla dialogów, klas, skryptów - (main_window, klasy, dialog_window, db_connection (otwieranie bazy w klasie a nie na początku kodu)) (SRP = single response principle - jedna klasa - jedna funkcja)
 # Wczytywanie listy dostępnych miejsc
 # cashowanie tabeli lotów
@@ -130,7 +130,9 @@ from person_dialog import Person_dialog
 
 
 # Pytania:
-# -
+# - TODOs
+# - okno dialpogowe po edycji komórki pojawia się dwa razy
+# - dialog zamawiania
 
 
 def create_connection():
@@ -196,22 +198,17 @@ class Window(QWidget):
         self.pushButton_info_1.clicked.connect(self.info_bilet)
         self.pushButton_info_2.clicked.connect(self.info_lot)
 
-        # self.tableView_0.model().dataChanged.connect(self.on_data_change)
-        # self.tableView_1.model().dataChanged.connect(self.on_data_change)
-        # self.tableView_2.model().dataChanged.connect(self.on_data_change)
-        # self.model.model().dataChanged.connect(self.on_data_change)
-
         # set default tab
-        self.tabWidget.setCurrentIndex(0)
-        self.load_osoba()
-        # self.tabChanged
+        # self.tabWidget.setCurrentIndex(0)
+        # self.load_osoba()
+        self.tabWidget.setCurrentIndex(1)
+        self.load_bilet()
 
         # # self.tabWidget.setMovable(True)
         # # self.tabWidget.setTabsClosable(True)
 
-    # TODO - rollback
-    def on_data_change(self, topLeft, bottomRight):
-        # Slot function to show a confirmation dialog when data is edited
+    # def on_data_change(self, topLeft, bottomRight):
+    def on_data_change(self):
         response = QMessageBox.question(
             self,
             "Confirm Edit",
@@ -221,39 +218,39 @@ class Window(QWidget):
         )
 
         if response == QMessageBox.StandardButton.Yes:
-            # Submit the changes to the database manually
             if self.model.submitAll():
                 print("Change submitted successfully.")
             else:
                 print("Error submitting change:", self.model.lastError().text())
         else:
-            # Revert the change if the user clicks No
-            self.model.revertAll()
+            # self.model.dataChanged.disconnect(self.on_data_change)
+            self.model.revertAll()  # rozbić na 2 metody
 
-    def closeEvent(self, event):
-        if self.model.isDirty():
-            reply = QMessageBox.question(
-                self,
-                "Unsaved Changes",
-                "There are unsaved changes. Do you want to save them?",
-                QMessageBox.StandardButton.Save
-                | QMessageBox.StandardButton.Discard
-                | QMessageBox.StandardButton.Cancel,
-                QMessageBox.StandardButton.Save,
-            )
+    # def closeEvent(self, event):
+    #     if self.model.isDirty():
+    #         reply = QMessageBox.question(
+    #             self,
+    #             "Unsaved Changes",
+    #             "There are unsaved changes. Do you want to save them?",
+    #             QMessageBox.StandardButton.Save
+    #             | QMessageBox.StandardButton.Discard
+    #             | QMessageBox.StandardButton.Cancel,
+    #             QMessageBox.StandardButton.Save,
+    #         )
 
-            if reply == QMessageBox.StandardButton.Save:
-                self.saveChanges()
-            elif reply == QMessageBox.StandardButton.Discard:
-                pass  # Do nothing and discard changes
-            else:
-                event.ignore()
+    #         if reply == QMessageBox.StandardButton.Save:
+    #             self.saveChanges()
+    #         elif reply == QMessageBox.StandardButton.Discard:
+    #             pass  # Do nothing and discard changes
+    #         else:
+    #             event.ignore()
 
+    # TODO
     def load_osoba(self):
         # self.model = QSqlTableModel()
         self.model = QSqlTableModel(None, self.db)
         # self.model.setEditStrategy(QSqlTableModel.EditStrategy.OnFieldChange)
-        # self.model.setEditStrategy(QSqlTableModel.EditStrategy.OnManualSubmit) #TODO - rollback
+        # self.model.setEditStrategy(QSqlTableModel.EditStrategy.OnManualSubmit)
         # self.model = QSqlRelationalTableModel()
         # self.model.setEditStrategy(QSqlRelationalTableModel.EditStrategy.OnFieldChange)
 
@@ -263,8 +260,9 @@ class Window(QWidget):
 
         # query = "SELECT osoba_id, imie, nazwisko, stanowisko FROM osoba"
         # self.model.setQuery(query, self.db)
-        self.model.select()
         self.tableView_0.setModel(self.model)
+        self.model.select()
+        self.model.dataChanged.connect(self.on_data_change)
 
         # self.tableView_0.setItemDelegate(QSqlRelationalDelegate(self.tableView_0)) # combobox
 
@@ -286,8 +284,8 @@ class Window(QWidget):
 
     def load_bilet(self):
         self.model = QSqlRelationalTableModel(None, self.db)
-        # self.model.setEditStrategy(QSqlRelationalTableModel.EditStrategy.OnManualSubmit)
-        self.model.setEditStrategy(QSqlRelationalTableModel.EditStrategy.OnFieldChange)
+        self.model.setEditStrategy(QSqlRelationalTableModel.EditStrategy.OnManualSubmit)
+        # self.model.setEditStrategy(QSqlRelationalTableModel.EditStrategy.OnFieldChange)
 
         self.model.setTable("bilet")
         self.model.setRelation(1, QSqlRelation("osoba", "osoba_id", "nazwisko"))
@@ -299,11 +297,12 @@ class Window(QWidget):
             QSqlRelationalDelegate(self.tableView_1)
         )  # combobox
         self.model.select()
+        self.model.dataChanged.connect(self.on_data_change)  # TODO - jest wyzwalane 2x
 
     def load_lot(self):
         self.model = QSqlRelationalTableModel(None, self.db)
-        # self.model.setEditStrategy(QSqlRelationalTableModel.EditStrategy.OnManualSubmit)
-        self.model.setEditStrategy(QSqlRelationalTableModel.EditStrategy.OnFieldChange)
+        self.model.setEditStrategy(QSqlRelationalTableModel.EditStrategy.OnManualSubmit)
+        # self.model.setEditStrategy(QSqlRelationalTableModel.EditStrategy.OnFieldChange)
 
         self.model.setTable("lot")
         self.model.setRelation(1, QSqlRelation("samolot", "samolot_id", "model"))
@@ -313,9 +312,11 @@ class Window(QWidget):
             QSqlRelationalDelegate(self.tableView_2)
         )  # combobox
         self.model.select()
+        self.model.dataChanged.connect(self.on_data_change)
 
     def tabChanged(self, index):
         self.index = index
+        self.model.dataChanged.disconnect(self.on_data_change)
         if index == 0:
             self.load_osoba()
             self.tableView_0.resizeColumnsToContents()
@@ -324,7 +325,6 @@ class Window(QWidget):
             self.tableView_1.resizeColumnsToContents()
         elif index == 2:
             self.load_lot()
-            self.tableView_2.resizeColumnsToContents()
 
     def dodaj_osoba(self):
         window = Person_dialog()
@@ -536,7 +536,12 @@ class Window(QWidget):
 
 def run_app():
     app = QApplication(sys.argv)
-    # app.setStyle("Fusion")
+    # app.setStyle("Basic")
+    # app.setStyle("Material") # Android
+    # app.setStyle("iOS")
+    # app.setStyle("Fusion") # Linux
+    # app.setStyle("macOS")
+    # app.setStyle("Windows")
 
     # drop_tables()
     # create_tables()
