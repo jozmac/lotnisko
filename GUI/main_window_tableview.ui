@@ -28,7 +28,7 @@
       </font>
      </property>
      <property name="currentIndex">
-      <number>8</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="tab_0">
       <attribute name="title">
@@ -38,7 +38,7 @@
        <item>
         <layout class="QVBoxLayout" name="verticalLayout_0">
          <item>
-          <widget class="QPushButton" name="pushButton_dodaj_0">
+          <widget class="QPushButton" name="pushButton_dodaj_osoba">
            <property name="font">
             <font>
              <pointsize>12</pointsize>
@@ -50,7 +50,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButton_usun_0">
+          <widget class="QPushButton" name="pushButton_usun_osoba">
            <property name="font">
             <font>
              <pointsize>12</pointsize>
@@ -62,7 +62,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButton_edytuj_0">
+          <widget class="QPushButton" name="pushButton_edytuj_osoba">
            <property name="font">
             <font>
              <pointsize>12</pointsize>
@@ -74,7 +74,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButton_info_0">
+          <widget class="QPushButton" name="pushButton_info_osoba">
            <property name="font">
             <font>
              <pointsize>12</pointsize>
@@ -101,7 +101,7 @@
         </layout>
        </item>
        <item>
-        <widget class="QTableView" name="tableView_0"/>
+        <widget class="QTableView" name="tableView_osoba"/>
        </item>
       </layout>
      </widget>
@@ -113,7 +113,7 @@
        <item>
         <layout class="QVBoxLayout" name="verticalLayout_1">
          <item>
-          <widget class="QPushButton" name="pushButton_dodaj_1">
+          <widget class="QPushButton" name="pushButton_dodaj_bilet">
            <property name="font">
             <font>
              <pointsize>12</pointsize>
@@ -125,7 +125,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButton_usun_1">
+          <widget class="QPushButton" name="pushButton_usun_bilet">
            <property name="font">
             <font>
              <pointsize>12</pointsize>
@@ -137,7 +137,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButton_edytuj_1">
+          <widget class="QPushButton" name="pushButton_edytuj_bilet">
            <property name="font">
             <font>
              <pointsize>12</pointsize>
@@ -149,7 +149,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButton_info_1">
+          <widget class="QPushButton" name="pushButton_info_bilet">
            <property name="font">
             <font>
              <pointsize>12</pointsize>
@@ -176,7 +176,7 @@
         </layout>
        </item>
        <item>
-        <widget class="QTableView" name="tableView_1"/>
+        <widget class="QTableView" name="tableView_bilet"/>
        </item>
       </layout>
      </widget>
@@ -188,7 +188,7 @@
        <item>
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
-          <widget class="QPushButton" name="pushButton_dodaj_2">
+          <widget class="QPushButton" name="pushButton_dodaj_lot">
            <property name="font">
             <font>
              <pointsize>12</pointsize>
@@ -200,7 +200,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButton_usun_2">
+          <widget class="QPushButton" name="pushButton_usun_lot">
            <property name="font">
             <font>
              <pointsize>12</pointsize>
@@ -212,7 +212,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButton_edytuj_2">
+          <widget class="QPushButton" name="pushButton_edytuj_lot">
            <property name="font">
             <font>
              <pointsize>12</pointsize>
@@ -224,7 +224,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButton_info_2">
+          <widget class="QPushButton" name="pushButton_info_lot">
            <property name="font">
             <font>
              <pointsize>12</pointsize>
@@ -251,457 +251,7 @@
         </layout>
        </item>
        <item>
-        <widget class="QTableView" name="tableView_2"/>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="tab_3">
-      <attribute name="title">
-       <string>Tab 3</string>
-      </attribute>
-      <layout class="QHBoxLayout" name="horizontalLayout_5">
-       <item>
-        <layout class="QVBoxLayout" name="verticalLayout_3">
-         <item>
-          <widget class="QPushButton" name="pushButton_dodaj_3">
-           <property name="font">
-            <font>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Dodaj</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButton_usun_3">
-           <property name="font">
-            <font>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Usuń</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButton_edytuj_3">
-           <property name="font">
-            <font>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Edytuj</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButton_info_3">
-           <property name="font">
-            <font>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Info</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="verticalSpacer_3">
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>40</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <widget class="QTableView" name="tableView_3"/>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="tab_4">
-      <attribute name="title">
-       <string>Tab 4</string>
-      </attribute>
-      <layout class="QHBoxLayout" name="horizontalLayout_6">
-       <item>
-        <layout class="QVBoxLayout" name="verticalLayout_4">
-         <item>
-          <widget class="QPushButton" name="pushButton_dodaj_4">
-           <property name="font">
-            <font>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Dodaj</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButton_usun_4">
-           <property name="font">
-            <font>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Usuń</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButton_edytuj_4">
-           <property name="font">
-            <font>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Edytuj</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButton_info_4">
-           <property name="font">
-            <font>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Info</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="verticalSpacer_4">
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>40</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <widget class="QTableView" name="tableView_4"/>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="tab_5">
-      <attribute name="title">
-       <string>Tab 5</string>
-      </attribute>
-      <layout class="QHBoxLayout" name="horizontalLayout_7">
-       <item>
-        <layout class="QVBoxLayout" name="verticalLayout_5">
-         <item>
-          <widget class="QPushButton" name="pushButton_dodaj_5">
-           <property name="font">
-            <font>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Dodaj</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButton_usun_5">
-           <property name="font">
-            <font>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Usuń</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButton_edytuj_5">
-           <property name="font">
-            <font>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Edytuj</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButton_info_5">
-           <property name="font">
-            <font>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Info</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="verticalSpacer_5">
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>40</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <widget class="QTableView" name="tableView_5"/>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="tab_6">
-      <attribute name="title">
-       <string>Tab 6</string>
-      </attribute>
-      <layout class="QHBoxLayout" name="horizontalLayout_6">
-       <item>
-        <layout class="QVBoxLayout" name="verticalLayout_6">
-         <item>
-          <widget class="QPushButton" name="pushButton_dodaj_6">
-           <property name="font">
-            <font>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Dodaj</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButton_usun_6">
-           <property name="font">
-            <font>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Usuń</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButton_edytuj_6">
-           <property name="font">
-            <font>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Edytuj</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButton_info_6">
-           <property name="font">
-            <font>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Info</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="verticalSpacer_6">
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>40</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <widget class="QTableView" name="tableView_6"/>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="tab_7">
-      <attribute name="title">
-       <string>Tab 7</string>
-      </attribute>
-      <layout class="QHBoxLayout" name="horizontalLayout_7">
-       <item>
-        <layout class="QVBoxLayout" name="verticalLayout_7">
-         <item>
-          <widget class="QPushButton" name="pushButton_dodaj_7">
-           <property name="font">
-            <font>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Dodaj</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButton_usun_7">
-           <property name="font">
-            <font>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Usuń</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButton_edytuj_7">
-           <property name="font">
-            <font>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Edytuj</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButton_info_7">
-           <property name="font">
-            <font>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Info</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="verticalSpacer_7">
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>40</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <widget class="QTableView" name="tableView_7"/>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="tab_8">
-      <attribute name="title">
-       <string>Tab 8</string>
-      </attribute>
-      <layout class="QHBoxLayout" name="horizontalLayout_8">
-       <item>
-        <layout class="QVBoxLayout" name="verticalLayout_8">
-         <item>
-          <widget class="QPushButton" name="pushButton_dodaj_8">
-           <property name="font">
-            <font>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Dodaj</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButton_usun_8">
-           <property name="font">
-            <font>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Usuń</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButton_edytuj_8">
-           <property name="font">
-            <font>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Edytuj</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButton_info_8">
-           <property name="font">
-            <font>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Info</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="verticalSpacer_8">
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>40</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <widget class="QTableView" name="tableView_8"/>
+        <widget class="QTableView" name="tableView_lot"/>
        </item>
       </layout>
      </widget>

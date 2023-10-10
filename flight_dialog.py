@@ -1,29 +1,52 @@
-from PyQt6.QtWidgets import QDialog, QApplication, QComboBox, QTableView, QStyledItemDelegate, QAbstractItemDelegate, QStyle
+from PyQt6.QtWidgets import (
+    QDialog,
+    QApplication,
+    QComboBox,
+    QTableView,
+    QStyledItemDelegate,
+    QAbstractItemDelegate,
+    QStyle,
+)
 from PyQt6.uic import loadUi
-from PyQt6.QtSql import QSqlQuery, QSqlDatabase, QSqlQueryModel, QSqlTableModel, QSqlRelationalTableModel, QSqlRelation, QSqlRelationalDelegate
-from PyQt6.QtCore import Qt, QModelIndex, QStringListModel, QAbstractTableModel, QAbstractItemModel, QSize, QDateTime
+from PyQt6.QtSql import (
+    QSqlQuery,
+    QSqlDatabase,
+    QSqlQueryModel,
+    QSqlTableModel,
+    QSqlRelationalTableModel,
+    QSqlRelation,
+    QSqlRelationalDelegate,
+)
+from PyQt6.QtCore import (
+    Qt,
+    QModelIndex,
+    QStringListModel,
+    QAbstractTableModel,
+    QAbstractItemModel,
+    QSize,
+    QDateTime,
+)
+
+from PyQt6.QtGui import QIcon
 
 import sys, os
+
+from Classes.DatabaseHandler import DatabaseHandler
+
 # from functions import get_data, drop_tables, create_tables
-from functions import select_osoba, select_lotnisko, select_samolot, select_bilet, select_lot, select_miejsce, select_zajete_miejsce, select_zatrudnienie, select_pracownik
+from functions import (
+    select_osoba,
+    select_lotnisko,
+    select_samolot,
+    select_bilet,
+    select_lot,
+    select_miejsce,
+    select_zajete_miejsce,
+    select_zatrudnienie,
+    select_pracownik,
+)
 from datetime import datetime
 
-
-def create_connection():
-    try:
-        db = QSqlDatabase.addDatabase("QPSQL")
-        db.setHostName("localhost")
-        db.setDatabaseName("lotnisko")
-        db.setUserName("postgres")
-        db.setPassword("password")
-        db.setPort(5432)
-
-        if not db.open():
-            raise ConnectionError(f"Could not open database. Error: {db.lastError().text()}")
-        return db
-    except Exception as e:
-        raise ConnectionError(f"Connection error: {e}")
-    
 
 class CustomSqlRelationalTableModel(QSqlRelationalTableModel):
     def data(self, index: QModelIndex, role: int = Qt.ItemDataRole.DisplayRole):
@@ -31,10 +54,13 @@ class CustomSqlRelationalTableModel(QSqlRelationalTableModel):
             row_index = index.row()
             data = ""
             for column_index in range(self.columnCount()):
-                value = super().data(self.index(row_index, column_index), Qt.ItemDataRole.EditRole)
+                value = super().data(
+                    self.index(row_index, column_index), Qt.ItemDataRole.EditRole
+                )
                 data += f" - {value}" if data else f"{value}"
             return f"{data}"
         return super().data(index, role)
+
 
 # class CustomSqlRelationalTableModel(QSqlRelationalTableModel):
 #     def data(self, index: QModelIndex, role: int = Qt.ItemDataRole.DisplayRole):
@@ -47,13 +73,18 @@ class CustomSqlRelationalTableModel(QSqlRelationalTableModel):
 
 #         return super().data(index, role)
 
-class Flight_dialog(QDialog):
+
+class FlightDialog(QDialog):
     def __init__(self, db, *args, **kwargs):
         super().__init__(*args, **kwargs)
         directory = os.path.dirname(os.path.realpath(sys.argv[0]))
-        gui_directory = os.path.join(directory, 'GUI')
+        gui_directory = os.path.join(directory, "GUI")
         os.chdir(gui_directory)
         loadUi("flight_dialog.ui", self)
+        os.chdir(directory)
+
+        self.setWindowTitle("Airport Management System")
+        self.setWindowIcon(QIcon("images/airport.png"))
 
         self.db = db
         # self.db = create_connection()
@@ -112,22 +143,36 @@ class Flight_dialog(QDialog):
         # self.comboBox_plane.setModelColumn(1)
         # self.comboBox_plane.setItemDelegate(MultiColumnItemDelegate())
 
-    def insert_to_database(self):
-        # TODO
+    def get_data(self):
         selected_date = self.calendarWidget.selectedDate().toPyDate()
         selected_time = self.timeEdit.time().toPyTime()
         py_datetime = datetime.combine(selected_date, selected_time)
-        datetime_str = py_datetime.strftime('%Y-%m-%d %H:%M:%S')
-        qt_datetime = QDateTime.fromString(datetime_str, 'yyyy-MM-dd HH:mm:ss')
+        datetime_str = py_datetime.strftime("%Y-%m-%d %H:%M:%S")
+        self.qt_datetime = QDateTime.fromString(datetime_str, "yyyy-MM-dd HH:mm:ss")
+
+        self.plane = self.comboBox_plane.itemData(
+            self.comboBox_plane.currentIndex(), Qt.ItemDataRole.EditRole
+        )
+        self.airport_a = self.comboBox_from.itemData(
+            self.comboBox_from.currentIndex(), Qt.ItemDataRole.EditRole
+        )
+        self.airport_b = self.comboBox_to.itemData(
+            self.comboBox_to.currentIndex(), Qt.ItemDataRole.EditRole
+        )
+
+    def insert_to_database(self):
+        # TODO
 
         # selected_data = self.samolot.data(self.samolot.currentIndex(), Qt.ItemDataRole.EditRole)
 
         # self.comboBox_plane.setModelColumn(0)
         # self.comboBox_from.setModelColumn(0)
         # self.comboBox_to.setModelColumn(0)
-
+        self.get_data()
         query = QSqlQuery()
-        query.prepare("INSERT INTO lot (samolot_id, lotnisko_a_id, lotnisko_b_id, datetime) VALUES (?, ?, ?, ?)")
+        query.prepare(
+            "INSERT INTO lot (samolot_id, lotnisko_a_id, lotnisko_b_id, datetime) VALUES (?, ?, ?, ?)"
+        )
         # query.addBindValue(self.comboBox_plane.currentText())
         # query.addBindValue(self.comboBox_from.currentText())
         # query.addBindValue(self.comboBox_to.currentText())
@@ -135,15 +180,15 @@ class Flight_dialog(QDialog):
         # query.addBindValue(self.comboBox_from.currentData(0))
         # query.addBindValue(self.comboBox_to.currentData(0))
         # query.addBindValue(self.comboBox_plane.itemData(self.comboBox_plane.currentIndex(),Qt.ItemDataRole.DisplayRole))
-        query.addBindValue(self.comboBox_plane.itemData(self.comboBox_plane.currentIndex(),Qt.ItemDataRole.EditRole))
-        query.addBindValue(self.comboBox_from.itemData(self.comboBox_from.currentIndex(),Qt.ItemDataRole.EditRole))
-        query.addBindValue(self.comboBox_to.itemData(self.comboBox_to.currentIndex(),Qt.ItemDataRole.EditRole))
-        query.addBindValue(qt_datetime)
+        query.addBindValue(self.plane)
+        query.addBindValue(self.airport_a)
+        query.addBindValue(self.airport_b)
+        query.addBindValue(self.qt_datetime)
+
         if query.exec():
             print(f"Data inserted successfully.")
         else:
             print(f"Error inserting data: {query.lastError().text()}")
-
 
 
 # class MultiColumnItemDelegate(QStyledItemDelegate):
@@ -172,17 +217,15 @@ class Flight_dialog(QDialog):
 #             return self.query.value(index.column())  # Use the index column
 
 #         return None
-    
+
 #     def index(self, row, column, parent=QModelIndex()):
 #         if not self.hasIndex(row, column, parent):
 #             return QModelIndex()
 
 #         return self.createIndex(row, column)
-    
+
 #     def parent(self, index):
 #         return QModelIndex()
-
-
 
 
 # class Flight_dialog(QDialog):
@@ -221,13 +264,9 @@ class Flight_dialog(QDialog):
 #         self.selected_time = self.timeEdit.time().toPyTime()
 
 #         return [self.comboBox_plane.currentText(),
-#                 self.comboBox_from.currentText(), 
-#                 self.comboBox_to.currentText(), 
+#                 self.comboBox_from.currentText(),
+#                 self.comboBox_to.currentText(),
 #                 datetime.combine(self.selected_date, self.selected_time)]
-
-
-
-
 
 
 #     # self.insertButton.clicked.connect(self.insert_data_to_database)
@@ -251,7 +290,8 @@ class Flight_dialog(QDialog):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = Flight_dialog(create_connection())
+    db_handler = DatabaseHandler()
+    window = FlightDialog(db_handler.db)
     window.show()
 
     # model = QSqlTableModel()
@@ -259,7 +299,6 @@ if __name__ == "__main__":
     # tableView = QTableView()
     # tableView.show()
     # tableView.setModel(model)
-
 
     sys.exit(app.exec())
     # db.close()

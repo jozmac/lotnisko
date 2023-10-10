@@ -18,6 +18,9 @@ from PyQt6.QtCore import (
     QSize,
     QDateTime,
 )
+
+from PyQt6.QtGui import QIcon
+
 import sys, os
 
 # from functions import get_data, drop_tables, create_tables
@@ -33,23 +36,7 @@ from functions import (
     select_pracownik,
 )
 
-
-def create_connection():
-    try:
-        db = QSqlDatabase.addDatabase("QPSQL")
-        db.setHostName("localhost")
-        db.setDatabaseName("lotnisko")
-        db.setUserName("postgres")
-        db.setPassword("password")
-        db.setPort(5432)
-
-        if not db.open():
-            raise ConnectionError(
-                f"Could not open database. Error: {db.lastError().text()}"
-            )
-        return db
-    except Exception as e:
-        raise ConnectionError(f"Connection error: {e}")
+from Classes.DatabaseHandler import DatabaseHandler
 
 
 # class CustomSqlRelationalTableModel(QSqlRelationalTableModel):
@@ -78,7 +65,7 @@ class CustomSqlRelationalTableModel(QSqlRelationalTableModel):
         return super().data(index, role)
 
 
-class Booking_dialog(QDialog):
+class BookingDialog(QDialog):
     def __init__(self, db, *args, **kwargs):
         super().__init__(*args, **kwargs)
         directory = os.path.dirname(os.path.realpath(sys.argv[0]))
@@ -86,6 +73,10 @@ class Booking_dialog(QDialog):
         os.chdir(gui_directory)
         # os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
         loadUi("booking_dialog.ui", self)
+        os.chdir(directory)
+
+        self.setWindowTitle("Airport Management System")
+        self.setWindowIcon(QIcon("images/airport.png"))
 
         self.db = db
 
@@ -136,7 +127,7 @@ class Booking_dialog(QDialog):
         # # self.comboBox_class.setModelColumn(0)
         # self.comboBox_seat.setModelColumn(0)
         # # self.comboBox_assistant.setModelColumn(0)
-
+        self.get_data()
         query = QSqlQuery()
         query.prepare(
             "INSERT INTO bilet (osoba_id, lot_id, klasa, miejsce_id, asystent) VALUES (?, ?, ?, ?, ?)"
@@ -146,54 +137,52 @@ class Booking_dialog(QDialog):
         # query.addBindValue(self.comboBox_class.currentText())
         # query.addBindValue(self.comboBox_seat.currentText())
         # query.addBindValue(self.comboBox_assistant.currentText())
-        query.addBindValue(
-            self.comboBox_person.itemData(
-                self.comboBox_person.currentIndex(), Qt.ItemDataRole.EditRole
-            )
-        )
-        query.addBindValue(
-            self.comboBox_flight.itemData(
-                self.comboBox_flight.currentIndex(), Qt.ItemDataRole.EditRole
-            )
-        )
-        query.addBindValue(
-            self.comboBox_class.itemData(
-                self.comboBox_class.currentIndex(), Qt.ItemDataRole.EditRole
-            )
-        )
-        query.addBindValue(
-            self.comboBox_seat.itemData(
-                self.comboBox_seat.currentIndex(), Qt.ItemDataRole.EditRole
-            )
-        )
-        query.addBindValue(
-            self.comboBox_assistant.itemData(
-                self.comboBox_assistant.currentIndex(), Qt.ItemDataRole.EditRole
-            )
-        )
+        query.addBindValue(self.person)
+        query.addBindValue(self.flight)
+        query.addBindValue(self.flightclass)
+        query.addBindValue(self.seat)
+        query.addBindValue(self.assistant)
+
         if query.exec():
             print(f"Data inserted successfully.")
         else:
             print(f"Error inserting data: {query.lastError().text()}")
 
-    def get_selected_options(self):
-        return [
-            self.comboBox_person.itemData(
-                self.comboBox_person.currentIndex(), Qt.ItemDataRole.EditRole
-            ),
-            self.comboBox_flight.itemData(
-                self.comboBox_flight.currentIndex(), Qt.ItemDataRole.EditRole
-            ),
-            self.comboBox_class.itemData(
-                self.comboBox_class.currentIndex(), Qt.ItemDataRole.EditRole
-            ),
-            self.comboBox_seat.itemData(
-                self.comboBox_seat.currentIndex(), Qt.ItemDataRole.EditRole
-            ),
-            self.comboBox_assistant.itemData(
-                self.comboBox_assistant.currentIndex(), Qt.ItemDataRole.EditRole
-            ),
-        ]
+    # def get_selected_options(self):
+    #     return [
+    #         self.comboBox_person.itemData(
+    #             self.comboBox_person.currentIndex(), Qt.ItemDataRole.EditRole
+    #         ),
+    #         self.comboBox_flight.itemData(
+    #             self.comboBox_flight.currentIndex(), Qt.ItemDataRole.EditRole
+    #         ),
+    #         self.comboBox_class.itemData(
+    #             self.comboBox_class.currentIndex(), Qt.ItemDataRole.EditRole
+    #         ),
+    #         self.comboBox_seat.itemData(
+    #             self.comboBox_seat.currentIndex(), Qt.ItemDataRole.EditRole
+    #         ),
+    #         self.comboBox_assistant.itemData(
+    #             self.comboBox_assistant.currentIndex(), Qt.ItemDataRole.EditRole
+    #         ),
+    #     ]
+
+    def get_data(self):
+        self.person = self.comboBox_person.itemData(
+            self.comboBox_person.currentIndex(), Qt.ItemDataRole.EditRole
+        )
+        self.flight = self.comboBox_flight.itemData(
+            self.comboBox_flight.currentIndex(), Qt.ItemDataRole.EditRole
+        )
+        self.flightclass = self.comboBox_class.itemData(
+            self.comboBox_class.currentIndex(), Qt.ItemDataRole.EditRole
+        )
+        self.seat = self.comboBox_seat.itemData(
+            self.comboBox_seat.currentIndex(), Qt.ItemDataRole.EditRole
+        )
+        self.assistant = self.comboBox_assistant.itemData(
+            self.comboBox_assistant.currentIndex(), Qt.ItemDataRole.EditRole
+        )
 
     # def load_combo_boxes(self):
     #     # samolot_query = QSqlQuery("SELECT samolot_id, model, ilosc_miejsc FROM samolot", self.db)
@@ -257,6 +246,7 @@ class Booking_dialog(QDialog):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = Booking_dialog(create_connection())
+    db_handler = DatabaseHandler()
+    window = BookingDialog(db_handler.db)
     window.show()
     sys.exit(app.exec())
