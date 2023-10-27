@@ -1,44 +1,3 @@
-# import psycopg2 as pg2
-
-
-# class DatabaseHandler:
-#     def __init__(self, database_name="lotnisko"):
-#         self.database_name = database_name
-#         # self.con = None
-
-#     def create_connection(self):
-#         try:
-#             self.con = pg2.connect(
-#                 host="localhost",
-#                 database=self.database_name,
-#                 user="postgres",
-#                 password="password",
-#                 port="5432",
-#             )
-#             return self.con
-#         except Exception as e:
-#             raise ConnectionError(f"Connection error: {e}")
-
-#     def close_connection(self):
-#         if self.con:
-#             self.con.close()
-#             self.con = None
-#             print("Database closed.")
-#         else:
-#             print("No open database connection to close.")
-
-#     def execute_query(self, query):
-#         if not self.con:
-#             raise ConnectionError("No open database connection.")
-#         try:
-#             with self.con.cursor() as cursor:
-#                 cursor.execute(query)
-#                 self.con.commit()
-#             print("Query executed successfully.")
-#         except Exception as e:
-#             print(f"Error executing query: {e}")
-
-
 from PyQt6.QtSql import QSqlDatabase, QSqlQuery
 
 
@@ -78,6 +37,47 @@ class DatabaseHandler:
         # else:
         #     # print(f"Error inserting data: {query.lastError().text()}")
         #     print("Error inserting data.")
+
+
+# import psycopg2 as pg2
+
+
+# class DatabaseHandler:
+#     def __init__(self, database_name="lotnisko"):
+#         self.database_name = database_name
+#         # self.con = None
+
+#     def create_connection(self):
+#         try:
+#             self.con = pg2.connect(
+#                 host="localhost",
+#                 database=self.database_name,
+#                 user="postgres",
+#                 password="password",
+#                 port="5432",
+#             )
+#             return self.con
+#         except Exception as e:
+#             raise ConnectionError(f"Connection error: {e}")
+
+#     def close_connection(self):
+#         if self.con:
+#             self.con.close()
+#             self.con = None
+#             print("Database closed.")
+#         else:
+#             print("No open database connection to close.")
+
+#     def execute_query(self, query):
+#         if not self.con:
+#             raise ConnectionError("No open database connection.")
+#         try:
+#             with self.con.cursor() as cursor:
+#                 cursor.execute(query)
+#                 self.con.commit()
+#             print("Query executed successfully.")
+#         except Exception as e:
+#             print(f"Error executing query: {e}")
 
 
 # TODO

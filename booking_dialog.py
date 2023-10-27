@@ -115,67 +115,9 @@ class BookingDialog(QDialog):
 
     def select_miejsce(self):
         self.get_data()
-        # print(self.flight)
-        # query = QSqlQuery()
-        # query.prepare("SELECT samolot_id FROM lot WHERE lot_id = ?")
-        # query.addBindValue(self.flight)
-        # query.exec()
-        # query.next()
-        # lot_samolot_id = query.value(0)
-        # print(lot_samolot_id)
 
-        # self.model = CustomSqlRelationalTableModel()
-        # query = "SELECT miejsce_id, samolot_id FROM miejsce"
-        # self.model.setQuery(query, self.db)
-        # self.model.select()
-
-        # self.model = CustomSqlQueryModel()
-
-        # query = QSqlQuery()
-        # query.prepare(
-        #     """
-        #     SELECT miejsce_id FROM miejsce m
-        #     INNER JOIN samolot s ON m.samolot_id = s.samolot_id
-        #     WHERE samolot_id = ?
-        #     """
-        # )
-        # query.addBindValue(lot_samolot_id)
-
-        # SELECT s.seat_id
-        # FROM seat_table s
-        # LEFT JOIN ticket_table t ON s.seat_id = t.seat_id AND t.flight_id = 'your_flight_id'
-        # WHERE t.seat_id IS NULL;
         self.model = QSqlQueryModel(None)
-        # self.model = QSqlTableModel()
-        # query = f"""
-        #         SELECT miejsce_id FROM miejsce m
-        #         INNER JOIN samolot s ON m.samolot_id = s.samolot_id
-        #         LEFT JOIN bilet b ON m.miejsce_id = b.miejsce_id
-        #         WHERE s.samolot_id = (SELECT samolot_id FROM lot WHERE lot_id = {self.flight})
-        #         AND b.miejsce_id IS NULL;
-        #         """
-        # query = f"""
-        #         SELECT m.miejsce_id
-        #         FROM miejsce m
-        #         LEFT JOIN bilet b ON m.miejsce_id = b.miejsce_id
-        #         AND b.lot_id = {self.flight}
-        #         WHERE b.miejsce_id IS NULL;
-        #         """
-        # query = f"""
-        #         SELECT m.miejsce_id
-        #         FROM miejsce m
-        #         INNER JOIN samolot s ON m.samolot_id = s.samolot_id
-        #         LEFT JOIN bilet b ON m.miejsce_id = b.miejsce_id
-        #         WHERE s.samolot_id = (SELECT l.samolot_id FROM lot l WHERE lot_id = {self.flight})
-        #         AND b.miejsce_id IS NULL
-        #         """
-        # query = f"""
-        #         SELECT m.miejsce_id
-        #         FROM miejsce m
-        #         LEFT JOIN bilet b ON m.miejsce_id = b.miejsce_id
-        #         WHERE m.samolot_id = (SELECT l.samolot_id FROM lot l WHERE lot_id = {self.flight})
-        #         AND b.miejsce_id IS NULL
-        #         """
+
         query = (
             f"SELECT m.miejsce_id "
             f"FROM miejsce m "
@@ -185,22 +127,6 @@ class BookingDialog(QDialog):
         )
         self.model.setQuery(query, self.db_handler.con)
 
-        # query = QSqlQuery()
-        # query.prepare(
-        #     """
-        #     SELECT m.miejsce_id
-        #     FROM miejsce m
-        #     LEFT JOIN bilet b ON m.miejsce_id = b.miejsce_id
-        #     AND b.lot_id = ?
-        #     WHERE b.miejsce_id IS NULL;
-        #     """
-        # )
-        # query.addBindValue(self.flight)
-
-        # query = QSqlQuery()
-        # query.prepare("SELECT miejsce_id FROM miejsce")
-        # query.exec()
-        # self.model.select()
         self.comboBox_seat.setModel(self.model)
         return self.model
 
@@ -220,9 +146,6 @@ class BookingDialog(QDialog):
         self.assistant = self.comboBox_assistant.itemData(
             self.comboBox_assistant.currentIndex(), Qt.ItemDataRole.EditRole
         )
-        # print(
-        #     f"{self.person} - {self.flight} - {self.flightclass} - {self.seat} - {self.assistant}"
-        # )
         # print(
         #     f"{type(self.person)} - {type(self.flight)} - {type(self.flightclass)} - {type(self.seat)} - {type(self.assistant)}"
         # )
@@ -247,33 +170,6 @@ class BookingDialog(QDialog):
             f"WHERE bilet_id = {id}"
         )
         self.db_handler.execute_query(self.query)
-
-    # def insert_into_database(self):
-    #     self.get_data()
-    #     query = QSqlQuery()
-    #     query.prepare(
-    #         "INSERT INTO bilet (osoba_id, lot_id, klasa, miejsce_id, asystent) VALUES (?, ?, ?, ?, ?)"
-    #     )
-    #     query.addBindValue(self.person)
-    #     query.addBindValue(self.flight)
-    #     query.addBindValue(self.flightclass)
-    #     query.addBindValue(self.seat)
-    #     query.addBindValue(self.assistant)
-    #     self.db_handler.execute_query(query)
-
-    # def update_database(self, id: int):
-    #     self.get_data()
-    #     query = QSqlQuery()
-    #     query.prepare(
-    #         "UPDATE bilet SET osoba_id = ?, lot_id = ?, miejsce_id = ?, asystent = ?, klasa = ? WHERE bilet_id = ?"
-    #     )
-    #     query.addBindValue(self.person)
-    #     query.addBindValue(self.flight)
-    #     query.addBindValue(self.seat)
-    #     query.addBindValue(self.assistant)
-    #     query.addBindValue(self.flightclass)
-    #     query.addBindValue(id)
-    #     self.db_handler.execute_query(query)
 
 
 if __name__ == "__main__":
