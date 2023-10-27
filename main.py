@@ -98,6 +98,7 @@ from Classes.DatabaseHandler import DatabaseHandler
 # indeksowanie - CREATE INDEX osoba_imie ON osoba(imie) - które tabele powinny być indeksowane - tylko lotnisko?
 # initializeDatabase
 
+# poprawne formatowanie zapytań SQL
 # ładuj jedynie dostępne miejsca z danego samolotu do comboboxa
 # indexy osobno ma kolumnę
 # wydzenenie funkcji execute_query
@@ -106,10 +107,24 @@ from Classes.DatabaseHandler import DatabaseHandler
 # pytest - testy klas, sprawdzanie jednego wiersza lotów, sprawdzenie selektów,
 # dev containers, pipfile, setup.py
 # .addBindValue -> f-string
-#
+
+# fields = "field1, field2, field3, field4"
+# table = "table"
+# conditions = "condition1=1 AND condition2=2"
+# sql = (f"SELECT {fields} "
+#        f"FROM {table} "
+#        f"WHERE {conditions};")
+
 
 # Pytania:
 # - czasami testy uruchamiają wcześnieją wersję klasy
+# - query.exec() zwraca False mimo poprawnego wykonania zapytania (person_dialog)
+# - zapytania w booking_dialog i flight_dialog nie działają (poza usuwaniem)
+# Error inserting data: ERROR:  syntax error at end of input
+# LINE 1: EXECUTE
+#                 ^
+# (42601) QPSQL: Unable to create query
+
 
 # QItemDelegate - tabele, comboboxy - select id
 # py

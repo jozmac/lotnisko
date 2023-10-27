@@ -81,9 +81,6 @@ class BookingDialog(QDialog):
         self.setWindowIcon(QIcon("images/airport.png"))
         self.load_combo_boxes()
         self.comboBox_flight.currentIndexChanged.connect(self.select_miejsce)
-        # self.comboBox_flight.currentIndexChanged.connect(self.load_combo_boxes)
-        # self.comboBox_flight.currentIndexChanged.connect(self.print_smile)
-        # self.comboBox_flight.clicked.connect(self.select_miejsce)
 
         # self.buttonBox.accepted.connect(self.insert_to_database)
         # self.buttonBox.rejected.connect(Dialog.reject)
@@ -179,13 +176,13 @@ class BookingDialog(QDialog):
         #         WHERE m.samolot_id = (SELECT l.samolot_id FROM lot l WHERE lot_id = {self.flight})
         #         AND b.miejsce_id IS NULL
         #         """
-        query = f"""
-                SELECT m.miejsce_id
-                FROM miejsce m
-                LEFT JOIN bilet b ON m.miejsce_id = b.miejsce_id
-                WHERE m.samolot_id = (SELECT l.samolot_id FROM lot l WHERE lot_id = {self.flight})
-                AND b.miejsce_id IS NULL
-                """
+        query = (
+            f"SELECT m.miejsce_id "
+            f"FROM miejsce m "
+            f"LEFT JOIN bilet b ON m.miejsce_id = b.miejsce_id "
+            f"WHERE m.samolot_id = (SELECT l.samolot_id FROM lot l WHERE lot_id = {self.flight}) "
+            f"AND b.miejsce_id IS NULL "
+        )
         self.model.setQuery(query, self.db_handler.con)
 
         # query = QSqlQuery()
@@ -223,6 +220,33 @@ class BookingDialog(QDialog):
         self.assistant = self.comboBox_assistant.itemData(
             self.comboBox_assistant.currentIndex(), Qt.ItemDataRole.EditRole
         )
+        # print(
+        #     f"{self.person} - {self.flight} - {self.flightclass} - {self.seat} - {self.assistant}"
+        # )
+        # print(
+        #     f"{type(self.person)} - {type(self.flight)} - {type(self.flightclass)} - {type(self.seat)} - {type(self.assistant)}"
+        # )
+
+    def insert_into_database(self):
+        self.get_data()
+        self.query = (
+            f"INSERT INTO bilet (osoba_id, lot_id, klasa, miejsce_id, asystent) "
+            f"VALUES ({self.person}, {self.flight}, {self.flightclass}, {self.seat}, {self.assistant})"
+        )
+        self.db_handler.execute_query(self.query)
+
+    def update_database(self, id: int):
+        self.get_data()
+        self.query = (
+            f"UPDATE bilet SET "
+            f"osoba_id = {self.person}, "
+            f"lot_id = {self.flight}, "
+            f"miejsce_id = {self.seat}, "
+            f"asystent = {self.assistant}, "
+            f"klasa = {self.flightclass}, "
+            f"WHERE bilet_id = {id}"
+        )
+        self.db_handler.execute_query(self.query)
 
     # def insert_into_database(self):
     #     self.get_data()
@@ -250,23 +274,6 @@ class BookingDialog(QDialog):
     #     query.addBindValue(self.flightclass)
     #     query.addBindValue(id)
     #     self.db_handler.execute_query(query)
-
-    def insert_into_database(self):
-        self.get_data()
-        self.query = f"""INSERT INTO bilet (osoba_id, lot_id, klasa, miejsce_id, asystent) 
-                    VALUES ({self.person}, {self.flight}, {self.flightclass}, {self.seat}, {self.assistant})"""
-        self.db_handler.execute_query(self.query)
-
-    def update_database(self, id: int):
-        self.get_data()
-        self.query = f"""UPDATE bilet SET 
-                        osoba_id = {self.person}, 
-                        lot_id = {self.flight}, 
-                        miejsce_id = {self.seat}, 
-                        asystent = {self.assistant}, 
-                        klasa = {self.flightclass} 
-                        WHERE bilet_id = {id}"""
-        self.db_handler.execute_query(self.query)
 
 
 if __name__ == "__main__":

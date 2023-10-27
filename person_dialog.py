@@ -28,6 +28,25 @@ class PersonDialog(QDialog):
         self.nazwisko = self.lineEdit_nazwisko.text()
         self.stanowisko = self.lineEdit_stanowisko.text()
 
+    def insert_into_database(self):
+        self.get_data()
+        self.query = (
+            f"INSERT INTO osoba (imie, nazwisko, stanowisko) "
+            f"VALUES ('{self.imie}', '{self.nazwisko}', '{self.stanowisko}');"
+        )
+        self.db_handler.execute_query(self.query)
+
+    def update_database(self, id: int):
+        self.get_data()
+        self.query = (
+            f"UPDATE osoba SET "
+            f"imie = '{self.imie}', "
+            f"nazwisko = '{self.nazwisko}', "
+            f"stanowisko = '{self.stanowisko}' "
+            f"WHERE osoba_id = '{id}';"
+        )
+        self.db_handler.execute_query(self.query)
+
     # def insert_into_database(self):
     #     self.get_data()
     #     self.query = f"""INSERT INTO osoba (imie, nazwisko, stanowisko) VALUES ('{self.imie}', '{self.nazwisko}', '{self.stanowisko}')"""
@@ -67,20 +86,6 @@ class PersonDialog(QDialog):
 
     # def exec_query(self):
     #     self.db_handler.execute_query(self.query)
-
-    def insert_into_database(self):
-        self.get_data()
-        self.query = f"""INSERT INTO osoba (imie, nazwisko, stanowisko) VALUES ('{self.imie}', '{self.nazwisko}', '{self.stanowisko}')"""
-        # self.query = QSqlQuery(query)
-        self.db_handler.execute_query(self.query)
-
-    def update_database(self, id: int):
-        self.get_data()
-        self.query = f"""UPDATE osoba SET imie = '{self.imie}', nazwisko = '{self.nazwisko}', stanowisko = '{self.stanowisko}'
-                        WHERE osoba_id = '{id}';
-                        """
-        # self.query = QSqlQuery()
-        self.db_handler.execute_query(self.query)
 
 
 if __name__ == "__main__":

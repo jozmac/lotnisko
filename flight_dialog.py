@@ -132,28 +132,48 @@ class FlightDialog(QDialog):
 
     def insert_into_database(self):
         self.get_data()
-        query = QSqlQuery()
-        query.prepare(
-            "INSERT INTO lot (samolot_id, lotnisko_a_id, lotnisko_b_id, datetime) VALUES (?, ?, ?, ?)"
+        self.query = (
+            f"INSERT INTO lot (samolot_id, lotnisko_a_id, lotnisko_b_id, datetime) "
+            f"VALUES ({self.plane}, {self.airport_a}, {self.airport_b}, {self.qt_datetime})"
         )
-        query.addBindValue(self.plane)
-        query.addBindValue(self.airport_a)
-        query.addBindValue(self.airport_b)
-        query.addBindValue(self.qt_datetime)
-        self.db_handler.execute_query(query)
+        self.db_handler.execute_query(self.query)
 
     def update_database(self, id: int):
         self.get_data()
-        query = QSqlQuery()
-        query.prepare(
-            "UPDATE osoba SET samolot_id = ?, lotnisko_a_id = ?, lotnisko_b_id = ?, datetime = ? WHERE lot_id = ?"
+        self.query = (
+            f"UPDATE osoba SET "
+            f"samolot_id = {self.plane}, "
+            f"lotnisko_a_id = {self.airport_a}, "
+            f"lotnisko_b_id = {self.airport_b}, "
+            f"datetime = {self.qt_datetime} "
+            f"WHERE lot_id = {id}"
         )
-        query.addBindValue(self.plane)
-        query.addBindValue(self.airport_a)
-        query.addBindValue(self.airport_b)
-        query.addBindValue(self.qt_datetime)
-        query.addBindValue(id)
-        self.db_handler.execute_query(query)
+        self.db_handler.execute_query(self.query)
+
+    # def insert_into_database(self):
+    #     self.get_data()
+    #     query = QSqlQuery()
+    #     query.prepare(
+    #         "INSERT INTO lot (samolot_id, lotnisko_a_id, lotnisko_b_id, datetime) VALUES (?, ?, ?, ?)"
+    #     )
+    #     query.addBindValue(self.plane)
+    #     query.addBindValue(self.airport_a)
+    #     query.addBindValue(self.airport_b)
+    #     query.addBindValue(self.qt_datetime)
+    #     self.db_handler.execute_query(query)
+
+    # def update_database(self, id: int):
+    #     self.get_data()
+    #     query = QSqlQuery()
+    #     query.prepare(
+    #         "UPDATE osoba SET samolot_id = ?, lotnisko_a_id = ?, lotnisko_b_id = ?, datetime = ? WHERE lot_id = ?"
+    #     )
+    #     query.addBindValue(self.plane)
+    #     query.addBindValue(self.airport_a)
+    #     query.addBindValue(self.airport_b)
+    #     query.addBindValue(self.qt_datetime)
+    #     query.addBindValue(id)
+    #     self.db_handler.execute_query(query)
 
 
 if __name__ == "__main__":

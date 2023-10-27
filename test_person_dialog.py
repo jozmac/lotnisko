@@ -20,10 +20,9 @@ def test_insert_into_database():
 
     window.insert_into_database()
 
-    assert (
-        window.query
-        == """INSERT INTO osoba (imie, nazwisko, stanowisko) 
-        VALUES ('Jan', 'Kowalski', 'Pilot')"""
+    assert window.query == (
+        "INSERT INTO osoba (imie, nazwisko, stanowisko) "
+        "VALUES ('Jan', 'Kowalski', 'Pilot');"
     )
 
 
@@ -38,10 +37,12 @@ def test_update_database():
 
     window.update_database(1)
 
-    assert (
-        window.query
-        == """UPDATE osoba SET imie = 'Jan', nazwisko = 'Kowalski', stanowisko = 'Pilot'
-        WHERE osoba_id = '1';"""
+    assert window.query == (
+        "UPDATE osoba SET "
+        "imie = 'Jan', "
+        "nazwisko = 'Kowalski', "
+        "stanowisko = 'Pilot' "
+        "WHERE osoba_id = '1';"
     )
 
 
@@ -91,4 +92,4 @@ def test_update_database():
 
 if __name__ == "__main__":
     # sys.argv.append("--qt=qt6")
-    sys.exit(pytest.main(["-v", __file__]))
+    sys.exit(pytest.main(["-vv", __file__]))
