@@ -20,7 +20,6 @@ def main():
 
     window.show()
 
-    # Get the number of rows in the TableView
     row_count = tableView.model().rowCount()
     print("Number of rows in TableView:", row_count)
 

@@ -8,6 +8,8 @@ from unittest.mock import Mock, patch
 from booking_dialog import BookingDialog
 from Classes.DatabaseHandler import DatabaseHandler
 
+# TODO - wszystko do poprawy
+
 
 class MockBookingDialog(BookingDialog):
     def __init__(self, db_handler: DatabaseHandler, *args, **kwargs):
