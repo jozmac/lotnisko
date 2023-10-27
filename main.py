@@ -17,33 +17,17 @@ from PyQt6.QtSql import (
     QSqlRelationalDelegate,
     QSqlQuery,
 )
-from PyQt6.uic import loadUi
-from PyQt6.QtCore import Qt, QSortFilterProxyModel, QDateTime
+from PyQt6.uic import loadUi, loadUiType
+from PyQt6.QtCore import Qt, QSortFilterProxyModel, QDateTime, QModelIndex
 from PyQt6.QtPrintSupport import QPrinter, QPrintDialog, QPrintPreviewDialog
 from PyQt6.QtGui import QPainter, QColor, QTextDocument, QIcon
 import sys, os
-from functions import (
-    get_data,
-    drop_tables,
-    create_tables,
-    select_osoba,
-    select_lotnisko,
-    select_samolot,
-    select_bilet,
-    select_lot,
-    select_miejsce,
-    select_zajete_miejsce,
-    select_zatrudnienie,
-    select_pracownik,
-)
-
 
 from booking_dialog import BookingDialog
 from flight_dialog import FlightDialog
 from person_dialog import PersonDialog
 
 from Classes.DatabaseHandler import DatabaseHandler
-
 
 # # Temat projektu
 # System zarządzania lotami
@@ -85,7 +69,6 @@ from Classes.DatabaseHandler import DatabaseHandler
 # import os
 # zakładki na tabele i sygnały klikania
 # błąd "QSqlDatabase: QPSQL driver not loaded"
-
 # dialog zamawiania biletu - skąd, dokąd, samolot, lotnisko(combo boxy), data(kalendarz)
 # miejsca w samolotach
 # usunąć wybór daty z biletów, dialog dodawania lotów QDateEdit
@@ -101,21 +84,32 @@ from Classes.DatabaseHandler import DatabaseHandler
 # rollback -czy napewno chcesz zatwierdzić zmiany?
 # cena biletu
 # usunąć tabele zatrudnienie, miejsca, lotnisko, miejsce, zajęte miejsce z głównego okna
-# Zmienić nazwy przycisków
+# Zmienić nazwy przycisków w pliku .ui
 # rozdzielić klasy do osobnych plików, osobne foldery dla dialogów, klas, skryptów - (main_window, klasy, dialog_window, db_connection (otwieranie bazy w klasie a nie na początku kodu)) (SRP = single response principle - jedna klasa - jedna funkcja)
 # dodać tytuły i ikony do okien
 # wyświetlanie i edycja id
 # zaznaczanie pojedyńczego wiersza tabeli
 # get_data zamiast get_selected_opitons
+# join zamiast tabledelegate
+# napisać query dla dodawania, usuwania i edycji (self.model.deleteRowFromTable nie działa dla QSqlQueryModel)
+# linter
+# funkcja sprawdzania indesku zaznaczonego wiersza
+# QSqlModelQuery
+# indeksowanie - CREATE INDEX osoba_imie ON osoba(imie) - które tabele powinny być indeksowane - tylko lotnisko?
+# initializeDatabase
+
+# ładuj jedynie dostępne miejsca z danego samolotu do comboboxa
+# indexy osobno ma kolumnę
+# wydzenenie funkcji execute_query
 
 # TODO:
-# pytest - testy klas, sprawdzanie jednego wiersza lotów, sprawdzenie selektów - czy fstring jest taki sam jak query
+# pytest - testy klas, sprawdzanie jednego wiersza lotów, sprawdzenie selektów,
+# dev containers, pipfile, setup.py
+# .addBindValue -> f-string
+#
 
-# Wczytywanie listy dostępnych miejsc - zajete_miejsce
-
-# indeksowanie - CREATE INDEX osoba_imie ON osoba(imie) -
-# join zamiast tabledelegate
-
+# Pytania:
+# - czasami testy uruchamiają wcześnieją wersję klasy
 
 # QItemDelegate - tabele, comboboxy - select id
 # py
@@ -135,46 +129,51 @@ from Classes.DatabaseHandler import DatabaseHandler
 #             self.parent().style().drawControl(QStyle.CE_ItemViewItem,
 #                                               styleOption, painter)
 
+# FORM_CLASS, _ = loadUiType(
+#     os.path.join(os.path.dirname(__file__), "main_window_tableview.ui")
+# )
 
-# Pytania:
-# - formatowanie przy kopiowaniu - dodatkowe spacje
-#
+# UI_PATH = os.path.dirname(os.path.abspath(__file__))
+# FORM_CLASS = loadUiType(os.path.join(UI_PATH, "main_window_tableview.ui"))[0]
+
+#     OSOBA_TAB_INDEX = 0
+#     BILET_TAB_INDEX = 1
+#     LOT_TAB_INDEX = 2
 
 
+# class MainWindow(QWidget, FORM_CLASS):
 class MainWindow(QWidget):
-    def __init__(self, db_handler):
+    def __init__(self, db_handler: DatabaseHandler) -> QWidget:
         super().__init__()
-
+        self.app_path = os.path.dirname(os.path.abspath(sys.argv[0]))
         self.db_handler = db_handler
-        if not self.db_handler.db:
+        if not self.db_handler.con:
             QMessageBox.critical(self, "Warning", "Error. Could not open database.")
             self.close()
             return
+        self.init_ui()
+        self.connect_signals()
+        self.init_tables()
 
-        self.init_gui()
-
-        # get_widget_dict =
-
-    def init_gui(self):
-        directory = os.path.dirname(os.path.realpath(sys.argv[0]))
-        gui_directory = os.path.join(directory, "GUI")
-        os.chdir(gui_directory)
-        # os.chdir(os.path.join(os.path.dirname(os.path.realpath(sys.argv[0]))), 'GUI')
-        loadUi("main_window_tableview.ui", self)
-        os.chdir(directory)
-
+    def init_ui(self):
         self.setGeometry(500, 300, 900, 700)
         self.setWindowTitle("Airport Management System")
         self.setWindowIcon(QIcon("images/airport.png"))
-        # dir_path = os.path.dirname(os.path.realpath(__file__))
-        # print(dir_path)
+        self.load_ui_file()
+        self.set_tab_labels()
 
+    def load_ui_file(self):
+        directory = os.path.dirname(os.path.abspath(__file__))
+        ui_file = os.path.join(directory, "GUI", "main_window_tableview.ui")
+        loadUi(ui_file, self)
+
+    def set_tab_labels(self):
         TAB_LABELS = ["Osoba", "Bilet", "Lot"]
         for index, label in enumerate(TAB_LABELS):
             self.tabWidget.setTabText(index, label)
 
+    def connect_signals(self):
         self.tabWidget.tabBarClicked.connect(self.tabChanged)
-
         self.pushButton_dodaj_osoba.clicked.connect(self.dodaj_osoba)
         self.pushButton_dodaj_bilet.clicked.connect(self.dodaj_bilet)
         self.pushButton_dodaj_lot.clicked.connect(self.dodaj_lot)
@@ -188,7 +187,7 @@ class MainWindow(QWidget):
         self.pushButton_info_bilet.clicked.connect(self.info_bilet)
         self.pushButton_info_lot.clicked.connect(self.info_lot)
 
-        # Disable cell editing
+    def init_tables(self):
         self.tableView_osoba.setEditTriggers(
             QAbstractItemView.EditTrigger.NoEditTriggers
         )
@@ -220,101 +219,51 @@ class MainWindow(QWidget):
         self.tabWidget.setCurrentIndex(1)
         self.load_bilet()
 
-        # # self.tabWidget.setMovable(True)
-        # # self.tabWidget.setTabsClosable(True)
+        # self.tabWidget.setMovable(True)
+        # self.tabWidget.setTabsClosable(True)
 
-    # def on_data_change(self, topLeft, bottomRight):
-    def on_data_change(self):
-        response = QMessageBox.question(
-            self,
-            "Confirm Edit",
-            "Are you sure you want to save this change?",
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-            QMessageBox.StandardButton.No,
-        )
-
-        if response == QMessageBox.StandardButton.Yes:
-            if self.model.submitAll():
-                print("Change submitted successfully.")
-            else:
-                print("Error submitting change:", self.model.lastError().text())
-        else:
-            self.model.dataChanged.disconnect(self.on_data_change)
-            self.model.revertAll()  # TODO - rozbić na 2 metody
-            self.model.dataChanged.connect(self.on_data_change)
-
-    # TODO
     def load_osoba(self):
-        # self.model = QSqlTableModel()
-        self.model = QSqlTableModel(None, self.db_handler.db)
-        # self.model.setEditStrategy(QSqlTableModel.EditStrategy.OnFieldChange)
-        # self.model.setEditStrategy(QSqlTableModel.EditStrategy.OnManualSubmit)
-        # self.model = QSqlRelationalTableModel()
-        # self.model.setEditStrategy(QSqlRelationalTableModel.EditStrategy.OnFieldChange)
-
-        self.model.setTable("osoba")
-
-        # self.model.setRelation(1, QSqlRelation("osoba", "osoba_id", "nazwisko"))
-
-        # query = "SELECT osoba_id, imie, nazwisko, stanowisko FROM osoba"
-        # self.model.setQuery(query, self.db_handler.db)
+        # self.model = QSqlTableModel(None)
+        self.model = QSqlQueryModel(None)
+        query = "SELECT osoba_id, imie, nazwisko, stanowisko FROM osoba"
+        self.model.setQuery(query, self.db_handler.con)
         self.tableView_osoba.setModel(self.model)
-        self.model.select()
-        self.model.dataChanged.connect(self.on_data_change)
-
-        # self.tableView_osoba.setItemDelegate(QSqlRelationalDelegate(self.tableView_osoba)) # combobox
-
-        # for idx, name in enumerate(headerNames):
-        #     model.setHeaderData(idx, Qt.Horizontal, name)
 
         # while self.model.canFetchMore():
         #     self.model.fetchMore()
         # self.tableView_osoba.resizeColumnsToContents()
 
-        # print(f"database open: {db.isOpen()}")
-
         # self.sort = QSortFilterProxyModel()
-        # self.sort.setSourceModel(model)
+        # self.sort.setSourceModel(self.model)
         # self.sort.setDynamicSortFilter(True)
-        # self.sort.sort(0, Qt.SortOrder.AscendingOrder)
+        # # self.sort.sort(0, Qt.SortOrder.AscendingOrder)
+        # self.sort.sort(0, Qt.SortOrder.DescendingOrder)
         # self.tableView_osoba.setModel(self.sort)
 
     def load_bilet(self):
-        self.model = QSqlRelationalTableModel(None, self.db_handler.db)
-        self.model.setEditStrategy(QSqlRelationalTableModel.EditStrategy.OnManualSubmit)
-        # self.model.setEditStrategy(QSqlRelationalTableModel.EditStrategy.OnFieldChange)
-
-        self.model.setTable("bilet")
-        self.model.setRelation(1, QSqlRelation("osoba", "osoba_id", "nazwisko"))
-
-        # query = "SELECT bilet_id, osoba_id, lot_id, miejsce_id, asystent FROM bilet"
-        # self.model.setQuery(query, self.db_handler.db)
+        self.model = QSqlQueryModel(None)
+        query = """
+            SELECT b.bilet_id, o.imie, o.nazwisko, b.lot_id, b.miejsce_id, b.asystent 
+            FROM bilet b
+            INNER JOIN osoba o ON o.osoba_id = b.osoba_id
+            """
+        self.model.setQuery(query, self.db_handler.con)
         self.tableView_bilet.setModel(self.model)
-        self.tableView_bilet.setItemDelegate(
-            QSqlRelationalDelegate(self.tableView_bilet)
-        )  # combobox
-        self.model.select()
-        self.model.dataChanged.connect(self.on_data_change)
-        # self.model.isDirty.connect(self.on_data_change)
 
     def load_lot(self):
-        self.model = QSqlRelationalTableModel(None, self.db_handler.db)
-        self.model.setEditStrategy(QSqlRelationalTableModel.EditStrategy.OnManualSubmit)
-        # self.model.setEditStrategy(QSqlRelationalTableModel.EditStrategy.OnFieldChange)
-
-        self.model.setTable("lot")
-        self.model.setRelation(1, QSqlRelation("samolot", "samolot_id", "model"))
-
+        self.model = QSqlQueryModel(None)
+        query = """
+            SELECT l.lot_id, s.model, l.lotnisko_a_id, la.city, l.lotnisko_b_id, lb.city, l.datetime 
+            FROM lot l
+            INNER JOIN samolot s ON s.samolot_id = l.samolot_id
+            INNER JOIN lotnisko la ON la.lotnisko_id = l.lotnisko_a_id
+            INNER JOIN lotnisko lb ON lb.lotnisko_id = l.lotnisko_b_id
+            """
+        self.model.setQuery(query, self.db_handler.con)
         self.tableView_lot.setModel(self.model)
-        self.tableView_lot.setItemDelegate(
-            QSqlRelationalDelegate(self.tableView_lot)
-        )  # combobox
-        self.model.select()
-        self.model.dataChanged.connect(self.on_data_change)
 
-    def tabChanged(self, index):
+    def tabChanged(self, index: int):
         self.index = index
-        self.model.dataChanged.disconnect(self.on_data_change)
         if index == 0:
             self.load_osoba()
             self.tableView_osoba.resizeColumnsToContents()
@@ -323,35 +272,51 @@ class MainWindow(QWidget):
             self.tableView_bilet.resizeColumnsToContents()
         elif index == 2:
             self.load_lot()
+            self.tableView_bilet.resizeColumnsToContents()
 
     def dodaj_osoba(self):
-        window = PersonDialog()
-        if window.exec():
-            window.insert_to_database()
+        self.window = PersonDialog(self.db_handler)
+        if self.window.exec():
+            self.window.insert_into_database()
             self.tableView_osoba.scrollToBottom()
-            self.model.select()
+            self.load_osoba()
 
     def dodaj_bilet(self):
-        window = BookingDialog(self.db_handler.db)
-        if window.exec():
-            window.insert_to_database()
+        self.window = BookingDialog(self.db_handler)
+        if self.window.exec():
+            self.window.insert_into_database()
             self.tableView_bilet.scrollToBottom()
-            self.model.select()
+            self.load_bilet()
 
     def dodaj_lot(self):
-        window = FlightDialog(self.db_handler.db)
-        if window.exec():
-            window.insert_to_database()
+        self.window = FlightDialog(self.db_handler)
+        if self.window.exec():
+            self.window.insert_into_database()
             self.tableView_lot.scrollToBottom()
-            self.model.select()
+            self.load_lot()
+
+    def select_row_msg(self, text="Select one of the rows."):
+        msg = QMessageBox(self, text=f"{text}")
+        msg.setWindowTitle("Information")
+        msg.exec()
+
+    def get_selected_row_id(self, index: QModelIndex, id_column_name: str) -> int:
+        if index.isValid():
+            row = index.row()
+            column = self.model.record(row).indexOf(f"{id_column_name}")
+            if column != -1:
+                osoba_id = self.model.data(
+                    self.model.index(row, column), role=Qt.ItemDataRole.DisplayRole
+                )
+                return osoba_id
 
     def usun_osoba(self):
-        indexes = self.tableView_osoba.selectedIndexes()
-        if not indexes:
-            msg = QMessageBox(self, text="Select the row to delete.")
-            msg.setWindowTitle("Informacja")
-            msg.exec()
-            return
+        osoba_id = self.get_selected_row_id(
+            self.tableView_osoba.currentIndex(), "osoba_id"
+        )
+        if not osoba_id:
+            return self.select_row_msg()
+
         reply = QMessageBox.question(
             self,
             "Remove Item",
@@ -359,34 +324,22 @@ class MainWindow(QWidget):
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
         )
         if reply == QMessageBox.StandardButton.Yes:
-            # result = self.model.deleteRowFromTable(self.tableView_osoba.currentIndex().row())
-            # # result = self.model.deleteRowFromTable(self.tableView_osoba.selectedIndexes())
-            # # result = self.model.removeRows(self.tableView_osoba.selectedIndexes())
-            # # result = self.model.removeRow(self.tableView_osoba.currentIndex().row())
-            # print(f"result: {result}, {self.tableView_osoba.currentIndex().row()}, {self.tableView_osoba.selectedIndexes()}")
-            # print(self.model.lastError().text())
-            # self.model.select()
-
-            index = self.tableView_osoba.currentIndex()
-            NewIndex = self.tableView_osoba.model().index(index.row(), 0)
-            osoba_id = self.tableView_osoba.model().data(NewIndex)
             query = QSqlQuery()
             query.prepare("DELETE FROM osoba WHERE osoba_id = ?")
             query.addBindValue(osoba_id)
             if query.exec():
-                print(f"Data deleted successfully.")
+                print("Data deleted successfully.")
             else:
                 print(f"Error deleting data: {query.lastError().text()}")
-            print(query.lastError().text())
-            self.model.select()
+            self.load_osoba()
 
     def usun_bilet(self):
-        indexes = self.tableView_bilet.selectedIndexes()
-        if not indexes:
-            msg = QMessageBox(self, text="Select the row to delete.")
-            msg.setWindowTitle("Informacja")
-            msg.exec()
-            return
+        bilet_id = self.get_selected_row_id(
+            self.tableView_bilet.currentIndex(), "bilet_id"
+        )
+        if not bilet_id:
+            return self.select_row_msg()
+
         reply = QMessageBox.question(
             self,
             "Remove Item",
@@ -394,16 +347,20 @@ class MainWindow(QWidget):
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
         )
         if reply == QMessageBox.StandardButton.Yes:
-            self.model.deleteRowFromTable(self.tableView_bilet.currentIndex().row())
-            self.model.select()
+            query = QSqlQuery()
+            query.prepare("DELETE FROM bilet WHERE bilet_id = ?")
+            query.addBindValue(bilet_id)
+            if query.exec():
+                print("Data deleted successfully.")
+            else:
+                print(f"Error deleting data: {query.lastError().text()}")
+            self.load_bilet()
 
     def usun_lot(self):
-        indexes = self.tableView_lot.selectedIndexes()
-        if not indexes:
-            msg = QMessageBox(self, text="Select the row to delete.")
-            msg.setWindowTitle("Informacja")
-            msg.exec()
-            return
+        lot_id = self.get_selected_row_id(self.tableView_lot.currentIndex(), "lot_id")
+        if not lot_id:
+            return self.select_row_msg()
+
         reply = QMessageBox.question(
             self,
             "Remove Item",
@@ -411,128 +368,64 @@ class MainWindow(QWidget):
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
         )
         if reply == QMessageBox.StandardButton.Yes:
-            self.model.deleteRowFromTable(self.tableView_lot.currentIndex().row())
-            self.model.select()
+            query = QSqlQuery()
+            query.prepare("DELETE FROM lot WHERE lot_id = ?")
+            query.addBindValue(lot_id)
+            if query.exec():
+                print("Data deleted successfully.")
+            else:
+                print(f"Error deleting data: {query.lastError().text()}")
+            self.load_lot()
 
-    # TODO - model queries
     def edytuj_osoba(self):
-        indexes = self.tableView_osoba.selectedIndexes()
-        if not indexes:
-            msg = QMessageBox(self, text="Select the row to edit.")
-            msg.setWindowTitle("Informacja")
-            msg.exec()
-            return
-        index = self.tableView_osoba.currentIndex()
-        NewIndex = self.tableView_osoba.model().index(index.row(), 0)
-        osoba_id = self.tableView_osoba.model().data(NewIndex)
-        window = PersonDialog()
-        if not window.exec():
-            return
-
-        window.get_data()
-        query = QSqlQuery()
-        query.prepare(
-            "UPDATE osoba SET imie = ?, nazwisko = ?, stanowisko = ? WHERE osoba_id = ?"
+        osoba_id = self.get_selected_row_id(
+            self.tableView_osoba.currentIndex(), "osoba_id"
         )
-        query.addBindValue(window.imie)
-        query.addBindValue(window.nazwisko)
-        query.addBindValue(window.stanowisko)
-        query.addBindValue(osoba_id)
-        if query.exec():
-            print(f"Data edited successfully.")
-        else:
-            print(f"Error editing data: {query.lastError().text()}")
-        print(query.lastError().text())
-        self.model.select()
+        if not osoba_id:
+            return self.select_row_msg()
+        self.window = PersonDialog(self.db_handler)
+        if not self.window.exec():
+            return
+        self.window.update_database(osoba_id)
+        self.load_osoba()
 
     def edytuj_bilet(self):
-        indexes = self.tableView_bilet.selectedIndexes()
-        if not indexes:
-            msg = QMessageBox(self, text="Select the row to edit.")
-            msg.setWindowTitle("Informacja")
-            msg.exec()
-            return
-        index = self.tableView_bilet.currentIndex()
-        NewIndex = self.tableView_bilet.model().index(index.row(), 0)
-        bilet_id = self.tableView_bilet.model().data(NewIndex)
-        window = BookingDialog(self.db_handler.db)
-        if not window.exec():
-            return
-
-        window.get_data()
-        query = QSqlQuery()
-        query.prepare(
-            "UPDATE bilet SET osoba_id = ?, lot_id = ?, miejsce_id = ?, asystent = ?, klasa = ? WHERE bilet_id = ?"
+        bilet_id = self.get_selected_row_id(
+            self.tableView_bilet.currentIndex(), "bilet_id"
         )
-        query.addBindValue(window.person)
-        query.addBindValue(window.flight)
-        query.addBindValue(window.seat)
-        query.addBindValue(window.assistant)
-        query.addBindValue(window.flightclass)
-        query.addBindValue(bilet_id)
-        if query.exec():
-            print(f"Data edited successfully.")
-        else:
-            print(f"Error editing data: {query.lastError().text()}")
-        print(query.lastError().text())
-        self.model.select()
+        if not bilet_id:
+            return self.select_row_msg()
+        self.window = BookingDialog(self.db_handler)
+        if not self.window.exec():
+            return
+        self.window.update_database(bilet_id)
+        self.load_bilet()
 
     def edytuj_lot(self):
-        indexes = self.tableView_lot.selectedIndexes()
-        if not indexes:
-            msg = QMessageBox(self, text="Select the row to edit.")
-            msg.setWindowTitle("Informacja")
-            msg.exec()
+        lot_id = self.get_selected_row_id(self.tableView_lot.currentIndex(), "lot_id")
+        if not lot_id:
+            return self.select_row_msg()
+        self.window = FlightDialog(self.db_handler)
+        if not self.window.exec():
             return
-        index = self.tableView_lot.currentIndex()
-        NewIndex = self.tableView_lot.model().index(index.row(), 0)
-        lot_id = self.tableView_lot.model().data(NewIndex)
-        window = FlightDialog(self.db_handler.db)
-        window.get_data()
-        if not window.exec():
-            return
-        # imie, nazwisko, stanowisko = window.get_selected_options()
-        query = QSqlQuery()
-        query.prepare(
-            "UPDATE osoba SET samolot_id = ?, lotnisko_a_id = ?, lotnisko_b_id = ?, datetime = ? WHERE lot_id = ?"
-        )
-        query.addBindValue(window.plane)
-        query.addBindValue(window.airport_a)
-        query.addBindValue(window.airport_b)
-        query.addBindValue(window.qt_datetime)
-
-        if query.exec():
-            print(f"Data edited successfully.")
-        else:
-            print(f"Error editing data: {query.lastError().text()}")
-        print(query.lastError().text())
-        self.model.select()
-
-    # def edytuj_bilet(self):
-    #     selected_index = self.tableView_bilet.selectionModel().currentIndex()
-    #     if selected_index.isValid():
-    #         self.tableView_bilet.edit(selected_index)
-
-    # def edytuj_lot(self):
-    #     selected_index = self.tableView_lot.selectionModel().currentIndex()
-    #     if selected_index.isValid():
-    #         self.tableView_lot.edit(selected_index)
+        self.window.update_database(lot_id)
+        self.load_lot()
 
     def info_osoba(self):
-        pass
+        osoba_id = self.get_selected_row_id(
+            self.tableView_osoba.currentIndex(), "osoba_id"
+        )
+        if not osoba_id:
+            return self.select_row_msg()
+        print(osoba_id)
 
     def info_bilet(self):
-        indexes = self.tableView_bilet.selectedIndexes()
-        if not indexes:
-            msg = QMessageBox(self, text="Select row to print boarding pass.")
-            msg.setWindowTitle("Informacja")
-            msg.exec()
-            return
+        if not self.tableView_bilet.selectedIndexes():
+            return self.select_row_msg("Select row to print boarding pass.")
 
         self.print_preview()
-        # print("Boarding pass printed successfully.")
         msg = QMessageBox(self, text="Boarding pass printed successfully.")
-        msg.setWindowTitle("Informacja")
+        msg.setWindowTitle("Information")
         msg.exec()
 
     def print_preview(self):
@@ -542,15 +435,14 @@ class MainWindow(QWidget):
         previewDialog.paintRequested.connect(self.print_boarding_pass)
         previewDialog.exec()
 
-    def print_boarding_pass(self, printer):
+    def print_boarding_pass(self, printer: QPrinter):
         painter = QPainter()
         painter.begin(printer)
         painter.setPen(QColor(0, 0, 0, 255))
         # painter.setFont(self.font())
-        index = self.tableView_bilet.currentIndex()
-        NewIndex = self.tableView_bilet.model().index(index.row(), 0)
-        bilet_id = self.tableView_bilet.model().data(NewIndex)
-        # print(bilet_id)
+        bilet_id = self.get_selected_row_id(
+            self.tableView_bilet.currentIndex(), "bilet_id"
+        )
         query = QSqlQuery()
         query.prepare(
             """
@@ -563,12 +455,11 @@ class MainWindow(QWidget):
             INNER JOIN lotnisko la ON la.lotnisko_id = l.lotnisko_a_id
             INNER JOIN lotnisko lb ON lb.lotnisko_id = l.lotnisko_b_id
             WHERE b.bilet_id = ?;
-        """
+            """
         )
         query.addBindValue(bilet_id)
         query.exec()
         query.next()
-
         name = f"{query.value(0)} {query.value(1)}"
         qt_datetime = query.value(2)
         datetime = qt_datetime.toString("yyyy-MM-dd HH:mm:ss")
@@ -589,14 +480,17 @@ class MainWindow(QWidget):
         painter.drawText(100, 1500, f"Class: {klasa}")
 
         if klasa == "Economic":
-            painter.drawText(100, 1700, f"Price: 300$")
+            painter.drawText(100, 1900, "Price: 300$")
         else:
-            painter.drawText(100, 1900, f"Price: 1000$")
+            painter.drawText(100, 1900, "Price: 1000$")
 
         painter.end()
 
     def info_lot(self):
-        pass
+        lot_id = self.get_selected_row_id(self.tableView_osoba.currentIndex(), "lot_id")
+        if not lot_id:
+            return self.select_row_msg()
+        print(lot_id)
 
     def closeEvent(self, event):
         self.db_handler.close_connection()
@@ -611,10 +505,9 @@ def run_app():
     # app.setStyle("macOS")
     # app.setStyle("Windows")
 
-    # drop_tables()
-    # create_tables()
-    # osoba, lotnisko, samolot = get_data()
     db_handler = DatabaseHandler()
+    db_handler.create_connection()
+    # db_handler = DatabaseHandler(database_name="test_lotnisko")
     window = MainWindow(db_handler)
     window.show()
     sys.exit(app.exec())
