@@ -29,6 +29,7 @@ from person_dialog import PersonDialog
 
 from Classes.DatabaseHandler import DatabaseHandler
 
+
 # # Temat projektu
 # System zarządzania lotami
 
@@ -102,22 +103,16 @@ from Classes.DatabaseHandler import DatabaseHandler
 # ładuj jedynie dostępne miejsca z danego samolotu do comboboxa
 # indexy osobno ma kolumnę
 # wydzenenie funkcji execute_query
+# .addBindValue -> f-string
+# Klasa Tab i klasy OsobaTab, BiletTab i LotTab
 
 # TODO:
 # pytest - testy klas, sprawdzanie jednego wiersza lotów, sprawdzenie selektów,
 # dev containers, pipfile, setup.py
-# .addBindValue -> f-string
-
-# fields = "field1, field2, field3, field4"
-# table = "table"
-# conditions = "condition1=1 AND condition2=2"
-# sql = (f"SELECT {fields} "
-#        f"FROM {table} "
-#        f"WHERE {conditions};")
 
 
 # Pytania:
-# - czasami testy uruchamiają wcześnieją wersję klasy
+# - czasami testy uruchamiają wcześniejszą wersję klasy
 # - query.exec() zwraca False mimo poprawnego wykonania zapytania (person_dialog)
 # - zapytania w booking_dialog i flight_dialog nie działają (poza usuwaniem)
 # Error inserting data: ERROR:  syntax error at end of input
@@ -151,164 +146,43 @@ from Classes.DatabaseHandler import DatabaseHandler
 # UI_PATH = os.path.dirname(os.path.abspath(__file__))
 # FORM_CLASS = loadUiType(os.path.join(UI_PATH, "main_window_tableview.ui"))[0]
 
-#     OSOBA_TAB_INDEX = 0
-#     BILET_TAB_INDEX = 1
-#     LOT_TAB_INDEX = 2
+
+from PyQt6.QtWidgets import QWidget, QTabWidget, QApplication
+from PyQt6.QtSql import QSqlQueryModel
+from PyQt6.QtWidgets import QAbstractItemView, QMainWindow
+import os
+from PyQt6.uic import loadUi
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QIcon
+import sys
 
 
-# class MainWindow(QWidget, FORM_CLASS):
-class MainWindow(QWidget):
-    def __init__(self, db_handler: DatabaseHandler) -> QWidget:
+OSOBA_TAB_INDEX = 0
+BILET_TAB_INDEX = 1
+LOT_TAB_INDEX = 2
+
+
+class Tab(QWidget):
+    def __init__(self, db_handler, tab_name, table, query, id_column, dialog_class):
         super().__init__()
-        self.app_path = os.path.dirname(os.path.abspath(sys.argv[0]))
         self.db_handler = db_handler
-        if not self.db_handler.con:
-            QMessageBox.critical(self, "Warning", "Error. Could not open database.")
-            self.close()
-            return
+        self.tab_name = tab_name
+        self.table = table
+        self.query = query
+        self.id_column = id_column
+        self.dialog_class = dialog_class
         self.init_ui()
-        self.connect_signals()
-        self.init_tables()
 
     def init_ui(self):
-        self.setGeometry(500, 300, 900, 700)
-        self.setWindowTitle("Airport Management System")
-        self.setWindowIcon(QIcon("images/airport.png"))
-        self.load_ui_file()
-        self.set_tab_labels()
-
-    def load_ui_file(self):
-        directory = os.path.dirname(os.path.abspath(__file__))
-        ui_file = os.path.join(directory, "GUI", "main_window_tableview.ui")
-        loadUi(ui_file, self)
-
-    def set_tab_labels(self):
-        TAB_LABELS = ["Osoba", "Bilet", "Lot"]
-        for index, label in enumerate(TAB_LABELS):
-            self.tabWidget.setTabText(index, label)
-
-    def connect_signals(self):
-        self.tabWidget.tabBarClicked.connect(self.tabChanged)
-        self.pushButton_dodaj_osoba.clicked.connect(self.dodaj_osoba)
-        self.pushButton_dodaj_bilet.clicked.connect(self.dodaj_bilet)
-        self.pushButton_dodaj_lot.clicked.connect(self.dodaj_lot)
-        self.pushButton_usun_osoba.clicked.connect(self.usun_osoba)
-        self.pushButton_usun_bilet.clicked.connect(self.usun_bilet)
-        self.pushButton_usun_lot.clicked.connect(self.usun_lot)
-        self.pushButton_edytuj_osoba.clicked.connect(self.edytuj_osoba)
-        self.pushButton_edytuj_bilet.clicked.connect(self.edytuj_bilet)
-        self.pushButton_edytuj_lot.clicked.connect(self.edytuj_lot)
-        self.pushButton_info_osoba.clicked.connect(self.info_osoba)
-        self.pushButton_info_bilet.clicked.connect(self.info_bilet)
-        self.pushButton_info_lot.clicked.connect(self.info_lot)
-
-    def init_tables(self):
-        self.tableView_osoba.setEditTriggers(
-            QAbstractItemView.EditTrigger.NoEditTriggers
-        )
-        self.tableView_bilet.setEditTriggers(
-            QAbstractItemView.EditTrigger.NoEditTriggers
-        )
-        self.tableView_lot.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
-        self.tableView_osoba.setSelectionMode(
-            QAbstractItemView.SelectionMode.SingleSelection
-        )
-        self.tableView_bilet.setSelectionMode(
-            QAbstractItemView.SelectionMode.SingleSelection
-        )
-        self.tableView_lot.setSelectionMode(
-            QAbstractItemView.SelectionMode.SingleSelection
-        )
-        self.tableView_osoba.setSelectionBehavior(
-            QAbstractItemView.SelectionBehavior.SelectRows
-        )
-        self.tableView_bilet.setSelectionBehavior(
-            QAbstractItemView.SelectionBehavior.SelectRows
-        )
-        self.tableView_lot.setSelectionBehavior(
-            QAbstractItemView.SelectionBehavior.SelectRows
-        )
-
-        # self.tabWidget.setCurrentIndex(0)
-        # self.load_osoba()
-        self.tabWidget.setCurrentIndex(1)
-        self.load_bilet()
-
-        # self.tabWidget.setMovable(True)
-        # self.tabWidget.setTabsClosable(True)
-
-    def load_osoba(self):
-        # self.model = QSqlTableModel(None)
         self.model = QSqlQueryModel(None)
-        query = "SELECT osoba_id, imie, nazwisko, stanowisko FROM osoba"
-        self.model.setQuery(query, self.db_handler.con)
-        self.tableView_osoba.setModel(self.model)
+        self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
+        self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
 
-        # while self.model.canFetchMore():
-        #     self.model.fetchMore()
-        # self.tableView_osoba.resizeColumnsToContents()
-
-        # self.sort = QSortFilterProxyModel()
-        # self.sort.setSourceModel(self.model)
-        # self.sort.setDynamicSortFilter(True)
-        # # self.sort.sort(0, Qt.SortOrder.AscendingOrder)
-        # self.sort.sort(0, Qt.SortOrder.DescendingOrder)
-        # self.tableView_osoba.setModel(self.sort)
-
-    def load_bilet(self):
-        self.model = QSqlQueryModel(None)
-        query = """
-            SELECT b.bilet_id, o.imie, o.nazwisko, b.lot_id, b.miejsce_id, b.asystent 
-            FROM bilet b
-            INNER JOIN osoba o ON o.osoba_id = b.osoba_id
-            """
-        self.model.setQuery(query, self.db_handler.con)
-        self.tableView_bilet.setModel(self.model)
-
-    def load_lot(self):
-        self.model = QSqlQueryModel(None)
-        query = """
-            SELECT l.lot_id, s.model, l.lotnisko_a_id, la.city, l.lotnisko_b_id, lb.city, l.datetime 
-            FROM lot l
-            INNER JOIN samolot s ON s.samolot_id = l.samolot_id
-            INNER JOIN lotnisko la ON la.lotnisko_id = l.lotnisko_a_id
-            INNER JOIN lotnisko lb ON lb.lotnisko_id = l.lotnisko_b_id
-            """
-        self.model.setQuery(query, self.db_handler.con)
-        self.tableView_lot.setModel(self.model)
-
-    def tabChanged(self, index: int):
-        self.index = index
-        if index == 0:
-            self.load_osoba()
-            self.tableView_osoba.resizeColumnsToContents()
-        elif index == 1:
-            self.load_bilet()
-            self.tableView_bilet.resizeColumnsToContents()
-        elif index == 2:
-            self.load_lot()
-            self.tableView_bilet.resizeColumnsToContents()
-
-    def dodaj_osoba(self):
-        self.window = PersonDialog(self.db_handler)
-        if self.window.exec():
-            self.window.insert_into_database()
-            self.tableView_osoba.scrollToBottom()
-            self.load_osoba()
-
-    def dodaj_bilet(self):
-        self.window = BookingDialog(self.db_handler)
-        if self.window.exec():
-            self.window.insert_into_database()
-            self.tableView_bilet.scrollToBottom()
-            self.load_bilet()
-
-    def dodaj_lot(self):
-        self.window = FlightDialog(self.db_handler)
-        if self.window.exec():
-            self.window.insert_into_database()
-            self.tableView_lot.scrollToBottom()
-            self.load_lot()
+    def load_data(self):
+        self.model.setQuery(self.query, self.db_handler.con)
+        self.table.setModel(self.model)
+        self.table.resizeColumnsToContents()
 
     def select_row_msg(self, text="Select one of the rows."):
         msg = QMessageBox(self, text=f"{text}")
@@ -320,16 +194,30 @@ class MainWindow(QWidget):
             row = index.row()
             column = self.model.record(row).indexOf(f"{id_column_name}")
             if column != -1:
-                osoba_id = self.model.data(
+                return self.model.data(
                     self.model.index(row, column), role=Qt.ItemDataRole.DisplayRole
                 )
-                return osoba_id
 
-    def usun_osoba(self):
-        osoba_id = self.get_selected_row_id(
-            self.tableView_osoba.currentIndex(), "osoba_id"
-        )
-        if not osoba_id:
+    def add_row(self):
+        window = self.dialog_class(self.db_handler)
+        if window.exec():
+            window.insert_into_database()
+            # self.table.scrollToBottom()
+            self.load_data()
+
+    def edit_row(self):
+        id = self.get_selected_row_id(self.table.currentIndex(), self.id_column)
+        if id is None:
+            return self.select_row_msg()
+        window = self.dialog_class(self.db_handler)
+        if not window.exec():
+            return
+        window.update_database(id)
+        self.load_data()
+
+    def delete_row(self):
+        id = self.get_selected_row_id(self.table.currentIndex(), self.id_column)
+        if id is None:
             return self.select_row_msg()
 
         reply = QMessageBox.question(
@@ -340,104 +228,45 @@ class MainWindow(QWidget):
         )
         if reply == QMessageBox.StandardButton.Yes:
             query = QSqlQuery()
-            query.prepare("DELETE FROM osoba WHERE osoba_id = ?")
-            query.addBindValue(osoba_id)
+            query.prepare(f"DELETE FROM {self.tab_name} WHERE {self.id_column} = ?")
+            query.addBindValue(id)
             if query.exec():
                 print("Data deleted successfully.")
             else:
                 print(f"Error deleting data: {query.lastError().text()}")
-            self.load_osoba()
+            self.load_data()
 
-    def usun_bilet(self):
-        bilet_id = self.get_selected_row_id(
-            self.tableView_bilet.currentIndex(), "bilet_id"
-        )
-        if not bilet_id:
+    def info(self):
+        id = self.get_selected_row_id(self.table.currentIndex(), self.id_column)
+        if not id:
             return self.select_row_msg()
+        print(id)
 
-        reply = QMessageBox.question(
-            self,
-            "Remove Item",
-            "Do you want to remove selected row?",
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+
+class OsobaTab(Tab):
+    def __init__(self, db_handler, table):
+        tab_name = "osoba"
+        id_column = "osoba_id"
+        dialog_class = PersonDialog
+        query = "SELECT osoba_id, imie, nazwisko, stanowisko FROM osoba"
+        super().__init__(db_handler, tab_name, table, query, id_column, dialog_class)
+
+
+class BiletTab(Tab):
+    def __init__(self, db_handler, table):
+        tab_name = "bilet"
+        id_column = "bilet_id"
+        dialog_class = BookingDialog
+        query = (
+            "SELECT b.bilet_id, o.imie, o.nazwisko, b.lot_id, b.miejsce_id, b.asystent "
+            "FROM bilet b "
+            "INNER JOIN osoba o ON o.osoba_id = b.osoba_id "
         )
-        if reply == QMessageBox.StandardButton.Yes:
-            query = QSqlQuery()
-            query.prepare("DELETE FROM bilet WHERE bilet_id = ?")
-            query.addBindValue(bilet_id)
-            if query.exec():
-                print("Data deleted successfully.")
-            else:
-                print(f"Error deleting data: {query.lastError().text()}")
-            self.load_bilet()
-
-    def usun_lot(self):
-        lot_id = self.get_selected_row_id(self.tableView_lot.currentIndex(), "lot_id")
-        if not lot_id:
-            return self.select_row_msg()
-
-        reply = QMessageBox.question(
-            self,
-            "Remove Item",
-            "Do you want to remove selected row?",
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-        )
-        if reply == QMessageBox.StandardButton.Yes:
-            query = QSqlQuery()
-            query.prepare("DELETE FROM lot WHERE lot_id = ?")
-            query.addBindValue(lot_id)
-            if query.exec():
-                print("Data deleted successfully.")
-            else:
-                print(f"Error deleting data: {query.lastError().text()}")
-            self.load_lot()
-
-    def edytuj_osoba(self):
-        osoba_id = self.get_selected_row_id(
-            self.tableView_osoba.currentIndex(), "osoba_id"
-        )
-        if not osoba_id:
-            return self.select_row_msg()
-        self.window = PersonDialog(self.db_handler)
-        if not self.window.exec():
-            return
-        self.window.update_database(osoba_id)
-        self.load_osoba()
-
-    def edytuj_bilet(self):
-        bilet_id = self.get_selected_row_id(
-            self.tableView_bilet.currentIndex(), "bilet_id"
-        )
-        if not bilet_id:
-            return self.select_row_msg()
-        self.window = BookingDialog(self.db_handler)
-        if not self.window.exec():
-            return
-        self.window.update_database(bilet_id)
-        self.load_bilet()
-
-    def edytuj_lot(self):
-        lot_id = self.get_selected_row_id(self.tableView_lot.currentIndex(), "lot_id")
-        if not lot_id:
-            return self.select_row_msg()
-        self.window = FlightDialog(self.db_handler)
-        if not self.window.exec():
-            return
-        self.window.update_database(lot_id)
-        self.load_lot()
-
-    def info_osoba(self):
-        osoba_id = self.get_selected_row_id(
-            self.tableView_osoba.currentIndex(), "osoba_id"
-        )
-        if not osoba_id:
-            return self.select_row_msg()
-        print(osoba_id)
+        super().__init__(db_handler, tab_name, table, query, id_column, dialog_class)
 
     def info_bilet(self):
-        if not self.tableView_bilet.selectedIndexes():
+        if not self.table.selectedIndexes():
             return self.select_row_msg("Select row to print boarding pass.")
-
         self.print_preview()
         msg = QMessageBox(self, text="Boarding pass printed successfully.")
         msg.setWindowTitle("Information")
@@ -455,9 +284,7 @@ class MainWindow(QWidget):
         painter.begin(printer)
         painter.setPen(QColor(0, 0, 0, 255))
         # painter.setFont(self.font())
-        bilet_id = self.get_selected_row_id(
-            self.tableView_bilet.currentIndex(), "bilet_id"
-        )
+        id = self.get_selected_row_id(self.table.currentIndex(), self.id_column)
         query = QSqlQuery()
         query.prepare(
             """
@@ -472,7 +299,7 @@ class MainWindow(QWidget):
             WHERE b.bilet_id = ?;
             """
         )
-        query.addBindValue(bilet_id)
+        query.addBindValue(id)
         query.exec()
         query.next()
         name = f"{query.value(0)} {query.value(1)}"
@@ -501,11 +328,86 @@ class MainWindow(QWidget):
 
         painter.end()
 
-    def info_lot(self):
-        lot_id = self.get_selected_row_id(self.tableView_osoba.currentIndex(), "lot_id")
-        if not lot_id:
-            return self.select_row_msg()
-        print(lot_id)
+
+class LotTab(Tab):
+    def __init__(self, db_handler, table):
+        tab_name = "lot"
+        id_column = "lot_id"
+        dialog_class = FlightDialog
+        query = (
+            "SELECT l.lot_id, s.model, l.lotnisko_a_id, la.city, l.lotnisko_b_id, lb.city, l.datetime "
+            "FROM lot l "
+            "INNER JOIN samolot s ON s.samolot_id = l.samolot_id "
+            "INNER JOIN lotnisko la ON la.lotnisko_id = l.lotnisko_a_id "
+            "INNER JOIN lotnisko lb ON lb.lotnisko_id = l.lotnisko_b_id "
+        )
+        super().__init__(db_handler, tab_name, table, query, id_column, dialog_class)
+
+
+class MainWindow(QWidget):
+    def __init__(self, db_handler: DatabaseHandler) -> QWidget:
+        super().__init__()
+        self.app_path = os.path.dirname(os.path.abspath(sys.argv[0]))
+        self.db_handler = db_handler
+        if not self.db_handler.con:
+            QMessageBox.critical(self, "Warning", "Error. Could not open database.")
+            self.close()
+            return
+        self.init_ui()
+        self.init_tabs()
+        self.connect_signals()
+
+    def init_ui(self):
+        self.setGeometry(500, 300, 900, 700)
+        self.setWindowTitle("Airport Management System")
+        self.setWindowIcon(QIcon("images/airport.png"))
+        self.load_ui_file()
+        self.set_tab_labels()
+
+    def init_tabs(self):
+        self.osoba_tab = OsobaTab(self.db_handler, self.tableView_osoba)
+        self.bilet_tab = BiletTab(self.db_handler, self.tableView_bilet)
+        self.lot_tab = LotTab(self.db_handler, self.tableView_lot)
+        # self.tabWidget.setCurrentIndex(OSOBA_TAB_INDEX)
+        # self.osoba_tab.load_data()
+        self.tabWidget.setCurrentIndex(BILET_TAB_INDEX)
+        self.bilet_tab.load_data()
+        # self.tabWidget.setMovable(True)
+        # self.tabWidget.setTabsClosable(True)
+
+    def load_ui_file(self):
+        directory = os.path.dirname(os.path.abspath(__file__))
+        ui_file = os.path.join(directory, "GUI", "main_window_tableview.ui")
+        loadUi(ui_file, self)
+
+    def set_tab_labels(self):
+        TAB_LABELS = ["Osoba", "Bilet", "Lot"]
+        for index, label in enumerate(TAB_LABELS):
+            self.tabWidget.setTabText(index, label)
+
+    def connect_signals(self):
+        self.tabWidget.tabBarClicked.connect(self.tabChanged)
+        self.pushButton_dodaj_osoba.clicked.connect(self.osoba_tab.add_row)
+        self.pushButton_dodaj_bilet.clicked.connect(self.bilet_tab.add_row)
+        self.pushButton_dodaj_lot.clicked.connect(self.lot_tab.add_row)
+        self.pushButton_usun_osoba.clicked.connect(self.osoba_tab.delete_row)
+        self.pushButton_usun_bilet.clicked.connect(self.bilet_tab.delete_row)
+        self.pushButton_usun_lot.clicked.connect(self.lot_tab.delete_row)
+        self.pushButton_edytuj_osoba.clicked.connect(self.osoba_tab.edit_row)
+        self.pushButton_edytuj_bilet.clicked.connect(self.bilet_tab.edit_row)
+        self.pushButton_edytuj_lot.clicked.connect(self.lot_tab.edit_row)
+        self.pushButton_info_osoba.clicked.connect(self.osoba_tab.info)
+        self.pushButton_info_bilet.clicked.connect(self.bilet_tab.info_bilet)
+        self.pushButton_info_lot.clicked.connect(self.lot_tab.info)
+
+    def tabChanged(self, index: int):
+        self.index = index
+        if index == OSOBA_TAB_INDEX:
+            self.osoba_tab.load_data()
+        elif index == BILET_TAB_INDEX:
+            self.bilet_tab.load_data()
+        elif index == LOT_TAB_INDEX:
+            self.lot_tab.load_data()
 
     def closeEvent(self, event):
         self.db_handler.close_connection()
@@ -522,7 +424,6 @@ def run_app():
 
     db_handler = DatabaseHandler()
     db_handler.create_connection()
-    # db_handler = DatabaseHandler(database_name="test_lotnisko")
     window = MainWindow(db_handler)
     window.show()
     sys.exit(app.exec())

@@ -14,23 +14,6 @@ from Classes.DatabaseHandler import DatabaseHandler
 
 # pytest -v C:\PycharmProjects\lotnisko\test_main.py
 
-# def test_pay_order(monkeypatch: MonkeyPatch):
-#     inputs = ["1249190007575069", "12", "2024"]
-#     monkeypatch.setattr("builtins.input", lambda _: inputs.pop(0))
-#     monkeypatch.setattr(PaymentProcessor, "_check_api_key", lambda _: True)
-#     order = Order()
-#     order.line_items.append(LineItem(name="Shoes", price=100_00, quantity=2))
-#     pay_order(order)
-
-
-# def test_pay_order_invalid(monkeypatch: MonkeyPatch):
-#     with pytest.raises(ValueError):
-#         inputs = ["1249190007575069", "12", "2024"]
-#         monkeypatch.setattr("builtins.input", lambda _: inputs.pop(0))
-#         monkeypatch.setattr(PaymentProcessor, "_check_api_key", lambda _: True)
-#         order = Order()
-#         pay_order(order)
-
 
 @pytest.fixture
 def app():
@@ -51,6 +34,24 @@ def app():
 # @pytest.fixture
 def test_database_connection(app):
     assert app.db_handler.db.isOpen()
+
+
+# def test_pay_order(monkeypatch: MonkeyPatch):
+#     inputs = ["1249190007575069", "12", "2024"]
+#     monkeypatch.setattr("builtins.input", lambda _: inputs.pop(0))
+#     monkeypatch.setattr(PaymentProcessor, "_check_api_key", lambda _: True)
+#     order = Order()
+#     order.line_items.append(LineItem(name="Shoes", price=100_00, quantity=2))
+#     pay_order(order)
+
+
+# def test_pay_order_invalid(monkeypatch: MonkeyPatch):
+#     with pytest.raises(ValueError):
+#         inputs = ["1249190007575069", "12", "2024"]
+#         monkeypatch.setattr("builtins.input", lambda _: inputs.pop(0))
+#         monkeypatch.setattr(PaymentProcessor, "_check_api_key", lambda _: True)
+#         order = Order()
+#         pay_order(order)
 
 
 # def test_insert_osoba(app):
@@ -181,7 +182,8 @@ def test_database_connection(app):
 
 
 if __name__ == "__main__":
-    pytest.main(["-v", f"C:\\PycharmProjects\\lotnisko\\test_main.py"])
+    # pytest.main(["-vv", f"C:\\PycharmProjects\\lotnisko\\test_main.py"])
+    sys.exit(pytest.main(["-vv", __file__]))
 
 
 # def test_database_connection(qtbot):
