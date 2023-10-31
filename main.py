@@ -20,7 +20,7 @@ from PyQt6.QtSql import (
 from PyQt6.uic import loadUi, loadUiType
 from PyQt6.QtCore import Qt, QSortFilterProxyModel, QDateTime, QModelIndex
 from PyQt6.QtPrintSupport import QPrinter, QPrintDialog, QPrintPreviewDialog
-from PyQt6.QtGui import QPainter, QColor, QTextDocument, QIcon
+from PyQt6.QtGui import QPainter, QColor, QTextDocument, QIcon, QFont
 import sys, os
 
 from booking_dialog import BookingDialog
@@ -99,26 +99,23 @@ from Classes.DatabaseHandler import DatabaseHandler
 # indeksowanie - CREATE INDEX osoba_imie ON osoba(imie) - które tabele powinny być indeksowane - tylko lotnisko?
 # initializeDatabase
 
-# poprawne formatowanie zapytań SQL
+# poprawne formatowanie zapytań SQL - https://stackoverflow.com/questions/5243596/python-sql-query-string-formatting
+# .addBindValue -> f-string
 # ładuj jedynie dostępne miejsca z danego samolotu do comboboxa
 # indexy osobno ma kolumnę
-# wydzenenie funkcji execute_query
-# .addBindValue -> f-string
+# wydzenenie funkcji execute_query - DatabaseHandler
 # Klasa Tab i klasy OsobaTab, BiletTab i LotTab
+# Klasa Tab dziedziczy po QWidget żeby QMessageBox działały poprawnie
 
 # TODO:
 # pytest - testy klas, sprawdzanie jednego wiersza lotów, sprawdzenie selektów,
-# dev containers, pipfile, setup.py
+# docker
 
 
 # Pytania:
-# - czasami testy uruchamiają wcześniejszą wersję klasy
+# - czasami testy uruchamiają wcześniejszą wersję klasy (sprzed zapisania pliku)
 # - query.exec() zwraca False mimo poprawnego wykonania zapytania (person_dialog)
-# - zapytania w booking_dialog i flight_dialog nie działają (poza usuwaniem)
-# Error inserting data: ERROR:  syntax error at end of input
-# LINE 1: EXECUTE
-#                 ^
-# (42601) QPSQL: Unable to create query
+# - organizacja folderu projektu
 
 
 # QItemDelegate - tabele, comboboxy - select id
@@ -152,7 +149,7 @@ BILET_TAB_INDEX = 1
 LOT_TAB_INDEX = 2
 
 
-class Tab:
+class Tab(QWidget):
     def __init__(self, db_handler, tab_name, table, query, id_column, dialog_class):
         self.db_handler = db_handler
         self.tab_name = tab_name
@@ -161,6 +158,7 @@ class Tab:
         self.id_column = id_column
         self.dialog_class = dialog_class
         self.init_ui()
+        super().__init__()
 
     def init_ui(self):
         self.model = QSqlQueryModel(None)
@@ -218,7 +216,7 @@ class Tab:
         if reply == QMessageBox.StandardButton.Yes:
             query = QSqlQuery()
             query.prepare(f"DELETE FROM {self.tab_name} WHERE {self.id_column} = ?")
-            query.addBindValue(id)
+            query.addBindValue(row_id)
             if query.exec():
                 print("Data deleted successfully.")
             else:
@@ -227,9 +225,9 @@ class Tab:
 
     def info_row(self):
         row_id = self.get_selected_row_id(self.table.currentIndex())
-        if not id:
+        if not row_id:
             return self.select_row_msg()
-        print(id)
+        print(row_id)
 
 
 class OsobaTab(Tab):
@@ -272,7 +270,10 @@ class BiletTab(Tab):
         painter = QPainter()
         painter.begin(printer)
         painter.setPen(QColor(0, 0, 0, 255))
-        # painter.setFont(self.font())
+        font = QFont()
+        font.setPointSize(14)
+        font.setFamily("Calibri")
+        painter.setFont(font())
         id = self.get_selected_row_id(self.table.currentIndex(), self.id_column)
         query = QSqlQuery()
         query.prepare(
@@ -339,8 +340,6 @@ class MainWindow(QWidget):
         self.app_path = os.path.dirname(os.path.abspath(sys.argv[0]))
         self.db_handler = db_handler
         if not self.db_handler.con:
-            QMessageBox.critical(self, "Warning", "Error. Could not open database.")
-            self.close()
             return
         self.init_ui()
         self.init_tabs()
@@ -397,6 +396,11 @@ class MainWindow(QWidget):
 
     def closeEvent(self, event):
         self.db_handler.close_connection()
+
+    # def closeEvent(self, event: QCloseEvent):
+    #     if self.db_handler:
+    #         self.db_handler.close_connection()
+    #     event.accept()
 
 
 def run_app():

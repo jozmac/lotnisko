@@ -1,9 +1,6 @@
-/.idea
-/functions_backup.py
-/venv
 /__pycache__
-/main_btn.py
-/main_window_btn.ui
-/_trash
 /_examples
-/QComboBox_test.py
+/_trash
+/.idea
+/.pytest_cache
+/venv

@@ -1,26 +1,37 @@
 from PyQt6.QtSql import QSqlDatabase, QSqlQuery
+from PyQt6.QtWidgets import QMessageBox
 
 
 class DatabaseHandler:
-    def __init__(self, database_name="lotnisko"):
+    def __init__(
+        self,
+        database_name="lotnisko",
+        host="localhost",
+        username="postgres",
+        password="password",
+        port=5432,
+    ):
         self.database_name = database_name
+        self.host = host
+        self.username = username
+        self.password = password
+        self.port = port
 
     def create_connection(self):
-        try:
-            self.con = QSqlDatabase.addDatabase("QPSQL")
-            self.con.setHostName("localhost")
-            self.con.setDatabaseName(self.database_name)
-            self.con.setUserName("postgres")
-            self.con.setPassword("password")
-            self.con.setPort(5432)
+        self.con = QSqlDatabase.addDatabase("QPSQL")
+        self.con.setHostName(self.host)
+        self.con.setDatabaseName(self.database_name)
+        self.con.setUserName(self.username)
+        self.con.setPassword(self.password)
+        self.con.setPort(self.port)
 
-            if not self.con.open():
-                raise ConnectionError(
-                    f"Could not open database. Error: {self.con.lastError().text()}"
-                )
-            return self.con
-        except Exception as e:
-            raise ConnectionError(f"Connection error: {e}")
+        if not self.con.open():
+            error_text = (
+                f"Could not open database. Error: {self.con.lastError().text()}"
+            )
+            self.display_error(error_text)
+            raise ConnectionError(error_text)
+        return self.con
 
     def close_connection(self):
         self.con.close()
@@ -37,6 +48,10 @@ class DatabaseHandler:
         # else:
         #     # print(f"Error inserting data: {query.lastError().text()}")
         #     print("Error inserting data.")
+        # self.display_error(f"Query execution error: {qsqlquery.lastError().text()}")
+
+    def display_error(self, message):
+        QMessageBox.critical(None, "Error", message)
 
 
 # import psycopg2 as pg2
