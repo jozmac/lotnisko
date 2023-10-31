@@ -147,24 +147,13 @@ from Classes.DatabaseHandler import DatabaseHandler
 # FORM_CLASS = loadUiType(os.path.join(UI_PATH, "main_window_tableview.ui"))[0]
 
 
-from PyQt6.QtWidgets import QWidget, QTabWidget, QApplication
-from PyQt6.QtSql import QSqlQueryModel
-from PyQt6.QtWidgets import QAbstractItemView, QMainWindow
-import os
-from PyQt6.uic import loadUi
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QIcon
-import sys
-
-
 OSOBA_TAB_INDEX = 0
 BILET_TAB_INDEX = 1
 LOT_TAB_INDEX = 2
 
 
-class Tab(QWidget):
+class Tab:
     def __init__(self, db_handler, tab_name, table, query, id_column, dialog_class):
-        super().__init__()
         self.db_handler = db_handler
         self.tab_name = tab_name
         self.table = table
@@ -189,10 +178,10 @@ class Tab(QWidget):
         msg.setWindowTitle("Information")
         msg.exec()
 
-    def get_selected_row_id(self, index: QModelIndex, id_column_name: str) -> int:
+    def get_selected_row_id(self, index: QModelIndex) -> int:
         if index.isValid():
             row = index.row()
-            column = self.model.record(row).indexOf(f"{id_column_name}")
+            column = self.model.record(row).indexOf(f"{self.id_column}")
             if column != -1:
                 return self.model.data(
                     self.model.index(row, column), role=Qt.ItemDataRole.DisplayRole
@@ -206,8 +195,8 @@ class Tab(QWidget):
             self.load_data()
 
     def edit_row(self):
-        id = self.get_selected_row_id(self.table.currentIndex(), self.id_column)
-        if id is None:
+        row_id = self.get_selected_row_id(self.table.currentIndex())
+        if row_id is None:
             return self.select_row_msg()
         window = self.dialog_class(self.db_handler)
         if not window.exec():
@@ -216,8 +205,8 @@ class Tab(QWidget):
         self.load_data()
 
     def delete_row(self):
-        id = self.get_selected_row_id(self.table.currentIndex(), self.id_column)
-        if id is None:
+        row_id = self.get_selected_row_id(self.table.currentIndex())
+        if row_id is None:
             return self.select_row_msg()
 
         reply = QMessageBox.question(
@@ -236,8 +225,8 @@ class Tab(QWidget):
                 print(f"Error deleting data: {query.lastError().text()}")
             self.load_data()
 
-    def info(self):
-        id = self.get_selected_row_id(self.table.currentIndex(), self.id_column)
+    def info_row(self):
+        row_id = self.get_selected_row_id(self.table.currentIndex())
         if not id:
             return self.select_row_msg()
         print(id)
@@ -264,7 +253,7 @@ class BiletTab(Tab):
         )
         super().__init__(db_handler, tab_name, table, query, id_column, dialog_class)
 
-    def info_bilet(self):
+    def info_row(self):
         if not self.table.selectedIndexes():
             return self.select_row_msg("Select row to print boarding pass.")
         self.print_preview()
@@ -275,9 +264,9 @@ class BiletTab(Tab):
     def print_preview(self):
         printer = QPrinter(QPrinter.PrinterMode.HighResolution)
         printer.setOutputFileName("boarding_pass.pdf")
-        previewDialog = QPrintPreviewDialog(printer, self)
-        previewDialog.paintRequested.connect(self.print_boarding_pass)
-        previewDialog.exec()
+        preview_dialog = QPrintPreviewDialog(printer, self)
+        preview_dialog.paintRequested.connect(self.print_boarding_pass)
+        preview_dialog.exec()
 
     def print_boarding_pass(self, printer: QPrinter):
         painter = QPainter()
@@ -368,12 +357,9 @@ class MainWindow(QWidget):
         self.osoba_tab = OsobaTab(self.db_handler, self.tableView_osoba)
         self.bilet_tab = BiletTab(self.db_handler, self.tableView_bilet)
         self.lot_tab = LotTab(self.db_handler, self.tableView_lot)
-        # self.tabWidget.setCurrentIndex(OSOBA_TAB_INDEX)
-        # self.osoba_tab.load_data()
         self.tabWidget.setCurrentIndex(BILET_TAB_INDEX)
         self.bilet_tab.load_data()
-        # self.tabWidget.setMovable(True)
-        # self.tabWidget.setTabsClosable(True)
+        self.tabWidget.setMovable(True)
 
     def load_ui_file(self):
         directory = os.path.dirname(os.path.abspath(__file__))
@@ -386,7 +372,7 @@ class MainWindow(QWidget):
             self.tabWidget.setTabText(index, label)
 
     def connect_signals(self):
-        self.tabWidget.tabBarClicked.connect(self.tabChanged)
+        self.tabWidget.currentChanged.connect(self.tabChanged)
         self.pushButton_dodaj_osoba.clicked.connect(self.osoba_tab.add_row)
         self.pushButton_dodaj_bilet.clicked.connect(self.bilet_tab.add_row)
         self.pushButton_dodaj_lot.clicked.connect(self.lot_tab.add_row)
@@ -396,9 +382,9 @@ class MainWindow(QWidget):
         self.pushButton_edytuj_osoba.clicked.connect(self.osoba_tab.edit_row)
         self.pushButton_edytuj_bilet.clicked.connect(self.bilet_tab.edit_row)
         self.pushButton_edytuj_lot.clicked.connect(self.lot_tab.edit_row)
-        self.pushButton_info_osoba.clicked.connect(self.osoba_tab.info)
-        self.pushButton_info_bilet.clicked.connect(self.bilet_tab.info_bilet)
-        self.pushButton_info_lot.clicked.connect(self.lot_tab.info)
+        self.pushButton_info_osoba.clicked.connect(self.osoba_tab.info_row)
+        self.pushButton_info_bilet.clicked.connect(self.bilet_tab.info_row)
+        self.pushButton_info_lot.clicked.connect(self.lot_tab.info_row)
 
     def tabChanged(self, index: int):
         self.index = index
@@ -418,7 +404,7 @@ def run_app():
     # app.setStyle("Basic")
     # app.setStyle("Material") # Android
     # app.setStyle("iOS")
-    # app.setStyle("Fusion") # Linux
+    # app.setStyle("Fusion")  # Linux
     # app.setStyle("macOS")
     # app.setStyle("Windows")
 
