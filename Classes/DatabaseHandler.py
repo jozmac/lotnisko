@@ -95,7 +95,6 @@ class DatabaseHandler:
 #             print(f"Error executing query: {e}")
 
 
-# TODO
 # from PyQt6.QtSql import QSqlDatabase
 
 # connection_string = f"postgresql://{username}:{password}@localhost:5432/{database_name}"

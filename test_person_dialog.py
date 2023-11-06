@@ -18,18 +18,36 @@ def window():
     # sys.exit(app.exec())
 
 
-# @mock.patch("person_dialog.get_data", self.imie="Jan")
-def test_insert_into_database(window):
-    window.lineEdit_imie.setText("Jan")
-    window.lineEdit_nazwisko.setText("Kowalski")
-    window.lineEdit_stanowisko.setText("Pilot")
+def insert_into_database_query(window, imie, nazwisko, stanowisko):
+    window.lineEdit_imie.setText(imie)
+    window.lineEdit_nazwisko.setText(nazwisko)
+    window.lineEdit_stanowisko.setText(stanowisko)
 
     window.insert_into_database()
 
     assert window.query == (
         "INSERT INTO osoba (imie, nazwisko, stanowisko) "
-        "VALUES ('Jan', 'Kowalski', 'Pilot');"
+        f"VALUES ('{imie}', '{nazwisko}', '{stanowisko}');"
     )
+
+
+# @mock.patch("person_dialog.get_data", self.imie="Jan")
+def test_insert_into_database_query(window):
+    insert_into_database_query(window, "Jan", "Kowalski", "Pilot")
+    insert_into_database_query(window, "Jan4", "Kowalski2", "Pilot")
+    insert_into_database_query(window, "Jand", "Kowalski3", "Pilot")
+    insert_into_database_query(window, "", "Kowalski", "Pilot")
+
+    # window.lineEdit_imie.setText("Jan")
+    # window.lineEdit_nazwisko.setText("Kowalski")
+    # window.lineEdit_stanowisko.setText("Pilot")
+
+    # window.insert_into_database()
+
+    # assert window.query == (
+    #     "INSERT INTO osoba (imie, nazwisko, stanowisko) "
+    #     "VALUES ('Jan', 'Kowalski', 'Pilot');"
+    # )
 
 
 def test_update_database(window):

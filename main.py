@@ -110,6 +110,7 @@ from Classes.DatabaseHandler import DatabaseHandler
 # TODO:
 # pytest - testy klas, sprawdzanie jednego wiersza lotów, sprawdzenie selektów,
 # docker
+# hashowanie
 
 
 # Pytania:
@@ -271,10 +272,10 @@ class BiletTab(Tab):
         painter.begin(printer)
         painter.setPen(QColor(0, 0, 0, 255))
         font = QFont()
-        font.setPointSize(14)
+        font.setPointSize(10)
         font.setFamily("Calibri")
-        painter.setFont(font())
-        id = self.get_selected_row_id(self.table.currentIndex(), self.id_column)
+        painter.setFont(font)
+        id = self.get_selected_row_id(self.table.currentIndex())
         query = QSqlQuery()
         query.prepare(
             """
@@ -346,11 +347,11 @@ class MainWindow(QWidget):
         self.connect_signals()
 
     def init_ui(self):
-        self.setGeometry(500, 300, 900, 700)
-        self.setWindowTitle("Airport Management System")
-        self.setWindowIcon(QIcon("images/airport.png"))
         self.load_ui_file()
         self.set_tab_labels()
+        self.setGeometry(500, 300, 900, 700)
+        self.setWindowIcon(QIcon("images/airport.png"))
+        self.setWindowTitle("Airport Management System")
 
     def init_tabs(self):
         self.osoba_tab = OsobaTab(self.db_handler, self.tableView_osoba)
