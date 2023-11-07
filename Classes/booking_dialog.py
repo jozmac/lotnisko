@@ -1,3 +1,5 @@
+from classes.database_handler import DatabaseHandler
+
 from PyQt6.QtWidgets import QDialog, QApplication, QComboBox
 from PyQt6.uic import loadUi
 from PyQt6.QtSql import (
@@ -22,8 +24,6 @@ from PyQt6.QtCore import (
 from PyQt6.QtGui import QIcon
 
 import sys, os
-
-from Classes.DatabaseHandler import DatabaseHandler
 
 
 # class CustomSqlRelationalTableModel(QSqlRelationalTableModel):
@@ -74,11 +74,12 @@ class BookingDialog(QDialog):
 
     def init_gui(self):
         directory = os.path.dirname(os.path.abspath(__file__))
+        directory = os.path.join(directory, "..")
         ui_file = os.path.join(directory, "GUI", "booking_dialog.ui")
         loadUi(ui_file, self)
 
         self.setWindowTitle("Airport Management System")
-        self.setWindowIcon(QIcon("images/airport.png"))
+        self.setWindowIcon(QIcon("GUI/airport.png"))
         self.load_combo_boxes()
         self.comboBox_flight.currentIndexChanged.connect(self.select_miejsce)
 
@@ -115,18 +116,15 @@ class BookingDialog(QDialog):
 
     def select_miejsce(self):
         self.get_data()
-
         self.model = QSqlQueryModel(None)
-
         query = (
             f"SELECT m.miejsce_id "
             f"FROM miejsce m "
             f"LEFT JOIN bilet b ON m.miejsce_id = b.miejsce_id "
             f"WHERE m.samolot_id = (SELECT l.samolot_id FROM lot l WHERE lot_id = {self.flight}) "
-            f"AND b.miejsce_id IS NULL "
+            f"AND b.miejsce_id IS NULL"
         )
         self.model.setQuery(query, self.db_handler.con)
-
         self.comboBox_seat.setModel(self.model)
         return self.model
 
@@ -152,23 +150,29 @@ class BookingDialog(QDialog):
 
     def insert_into_database(self):
         self.get_data()
-        self.query = (
-            f"INSERT INTO bilet (osoba_id, lot_id, klasa, miejsce_id, asystent) "
-            f"VALUES ({self.person}, {self.flight}, {self.flightclass}, {self.seat}, {self.assistant})"
+        self.query = QSqlQuery()
+        self.query.prepare(
+            "INSERT INTO bilet (osoba_id, lot_id, klasa, miejsce_id, asystent) VALUES (?, ?, ?, ?, ?)"
         )
+        self.query.addBindValue(self.person)
+        self.query.addBindValue(self.flight)
+        self.query.addBindValue(self.flightclass)
+        self.query.addBindValue(self.seat)
+        self.query.addBindValue(self.assistant)
         self.db_handler.execute_query(self.query)
 
     def update_database(self, id: int):
         self.get_data()
-        self.query = (
-            f"UPDATE bilet SET "
-            f"osoba_id = {self.person}, "
-            f"lot_id = {self.flight}, "
-            f"miejsce_id = {self.seat}, "
-            f"asystent = {self.assistant}, "
-            f"klasa = {self.flightclass}, "
-            f"WHERE bilet_id = {id}"
+        self.query = QSqlQuery()
+        self.query.prepare(
+            "UPDATE bilet SET osoba_id = ?, lot_id = ?, miejsce_id = ?, asystent = ?, klasa = ? WHERE bilet_id = ?"
         )
+        self.query.addBindValue(self.person)
+        self.query.addBindValue(self.flight)
+        self.query.addBindValue(self.seat)
+        self.query.addBindValue(self.assistant)
+        self.query.addBindValue(self.flightclass)
+        self.query.addBindValue(id)
         self.db_handler.execute_query(self.query)
 
 
@@ -179,3 +183,24 @@ if __name__ == "__main__":
     window = BookingDialog(db_handler)
     window.show()
     sys.exit(app.exec())
+
+    # def insert_into_database(self):
+    #     self.get_data()
+    #     self.query = (
+    #         f"INSERT INTO bilet (osoba_id, lot_id, klasa, miejsce_id, asystent) "
+    #         f"VALUES ({self.person}, {self.flight}, {self.flightclass}, {self.seat}, {self.assistant});"
+    #     )
+    #     self.db_handler.execute_query(self.query)
+
+    # def update_database(self, id: int):
+    #     self.get_data()
+    #     self.query = (
+    #         f"UPDATE bilet SET "
+    #         f"osoba_id = {self.person}, "
+    #         f"lot_id = {self.flight}, "
+    #         f"miejsce_id = {self.seat}, "
+    #         f"asystent = {self.assistant}, "
+    #         f"klasa = {self.flightclass}, "
+    #         f"WHERE bilet_id = {id};"
+    #     )
+    #     self.db_handler.execute_query(self.query)

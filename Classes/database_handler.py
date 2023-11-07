@@ -41,14 +41,11 @@ class DatabaseHandler:
             print("Database closed.")
 
     def execute_query(self, query):
-        qsqlquery = QSqlQuery(query, self.con)
-        print(qsqlquery.exec())
-        # if qsqlquery.exec():
-        #     print(f"Data inserted successfully.")
-        # else:
-        #     # print(f"Error inserting data: {query.lastError().text()}")
-        #     print("Error inserting data.")
-        # self.display_error(f"Query execution error: {qsqlquery.lastError().text()}")
+        if query.exec():
+            print(f"Data inserted successfully.")
+        else:
+            print("Error inserting data.")
+            self.display_error(f"Query execution error: {query.lastError().text()}")
 
     def display_error(self, message):
         QMessageBox.critical(None, "Error", message)

@@ -5,12 +5,13 @@ from PyQt6.QtWidgets import QApplication
 from PyQt6.QtTest import QTest
 from PyQt6.QtCore import Qt
 from main import MainWindow
-from booking_dialog import BookingDialog
-from flight_dialog import FlightDialog
-from person_dialog import PersonDialog
+from dialogs.booking_dialog import BookingDialog
+from dialogs.flight_dialog import FlightDialog
+from dialogs.person_dialog import PersonDialog
 import sys, os
-from Classes.InitializeDatabase import InitializeDatabase
-from Classes.DatabaseHandler import DatabaseHandler
+from classes.initialize_database import InitializeDatabase
+from classes.database_handler import DatabaseHandler
+
 
 # pytest -v C:\PycharmProjects\lotnisko\test_main.py
 
@@ -18,8 +19,8 @@ from Classes.DatabaseHandler import DatabaseHandler
 @pytest.fixture
 def app():
     application = QApplication(sys.argv)
-    dbinit = InitializeDatabase(database_name="test_lotnisko")
-    dbinit.initialize()
+    # dbinit = InitializeDatabase(database_name="test_lotnisko")
+    # dbinit.initialize()
     db_handler = DatabaseHandler(database_name="test_lotnisko")
     db_handler.create_connection()
     # db_handler.initialize_database()
@@ -31,9 +32,8 @@ def app():
     # sys.exit(application.exec())
 
 
-# @pytest.fixture
 def test_database_connection(app):
-    assert app.db_handler.db.isOpen()
+    assert app.db_handler.con.isOpen()
 
 
 # def test_pay_order(monkeypatch: MonkeyPatch):

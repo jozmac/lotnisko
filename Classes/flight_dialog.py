@@ -1,3 +1,5 @@
+from classes.database_handler import DatabaseHandler
+
 from PyQt6.QtWidgets import (
     QDialog,
     QApplication,
@@ -31,7 +33,6 @@ from PyQt6.QtGui import QIcon
 
 import sys, os
 
-from Classes.DatabaseHandler import DatabaseHandler
 
 from datetime import datetime
 
@@ -70,11 +71,12 @@ class FlightDialog(QDialog):
 
     def init_gui(self):
         directory = os.path.dirname(os.path.abspath(__file__))
+        directory = os.path.join(directory, "..")
         ui_file = os.path.join(directory, "GUI", "flight_dialog.ui")
         loadUi(ui_file, self)
 
         self.setWindowTitle("Airport Management System")
-        self.setWindowIcon(QIcon("images/airport.png"))
+        self.setWindowIcon(QIcon("GUI/airport.png"))
 
         self.load_combo_boxes()
 
@@ -132,22 +134,27 @@ class FlightDialog(QDialog):
 
     def insert_into_database(self):
         self.get_data()
-        self.query = (
-            f"INSERT INTO lot (samolot_id, lotnisko_a_id, lotnisko_b_id, datetime) "
-            f"VALUES ({self.plane}, {self.airport_a}, {self.airport_b}, {self.qt_datetime})"
+        self.query = QSqlQuery()
+        self.query.prepare(
+            "INSERT INTO lot (samolot_id, lotnisko_a_id, lotnisko_b_id, datetime) VALUES (?, ?, ?, ?)"
         )
+        self.query.addBindValue(self.plane)
+        self.query.addBindValue(self.airport_a)
+        self.query.addBindValue(self.airport_b)
+        self.query.addBindValue(self.qt_datetime)
         self.db_handler.execute_query(self.query)
 
     def update_database(self, id: int):
         self.get_data()
-        self.query = (
-            f"UPDATE osoba SET "
-            f"samolot_id = {self.plane}, "
-            f"lotnisko_a_id = {self.airport_a}, "
-            f"lotnisko_b_id = {self.airport_b}, "
-            f"datetime = {self.qt_datetime} "
-            f"WHERE lot_id = {id}"
+        self.query = QSqlQuery()
+        self.query.prepare(
+            "UPDATE osoba SET samolot_id = ?, lotnisko_a_id = ?, lotnisko_b_id = ?, datetime = ? WHERE lot_id = ?"
         )
+        self.query.addBindValue(self.plane)
+        self.query.addBindValue(self.airport_a)
+        self.query.addBindValue(self.airport_b)
+        self.query.addBindValue(self.qt_datetime)
+        self.query.addBindValue(id)
         self.db_handler.execute_query(self.query)
 
 
@@ -159,3 +166,23 @@ if __name__ == "__main__":
     window.show()
 
     sys.exit(app.exec())
+
+    # def insert_into_database(self):
+    #     self.get_data()
+    #     self.query = (
+    #         f"INSERT INTO lot (samolot_id, lotnisko_a_id, lotnisko_b_id, datetime) "
+    #         f"VALUES ({self.plane}, {self.airport_a}, {self.airport_b}, {self.qt_datetime});"
+    #     )
+    #     self.db_handler.execute_query(self.query)
+
+    # def update_database(self, id: int):
+    #     self.get_data()
+    #     self.query = (
+    #         f"UPDATE osoba SET "
+    #         f"samolot_id = {self.plane}, "
+    #         f"lotnisko_a_id = {self.airport_a}, "
+    #         f"lotnisko_b_id = {self.airport_b}, "
+    #         f"datetime = {self.qt_datetime} "
+    #         f"WHERE lot_id = {id};"
+    #     )
+    #     self.db_handler.execute_query(self.query)
