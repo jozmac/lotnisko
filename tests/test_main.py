@@ -5,9 +5,9 @@ from PyQt6.QtWidgets import QApplication
 from PyQt6.QtTest import QTest
 from PyQt6.QtCore import Qt
 from main import MainWindow
-from dialogs.booking_dialog import BookingDialog
-from dialogs.flight_dialog import FlightDialog
-from dialogs.person_dialog import PersonDialog
+from classes.booking_dialog import BookingDialog
+from classes.flight_dialog import FlightDialog
+from classes.person_dialog import PersonDialog
 import sys, os
 from classes.initialize_database import InitializeDatabase
 from classes.database_handler import DatabaseHandler

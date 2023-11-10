@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import QApplication
 from unittest.mock import Mock, patch
 
 from booking_dialog import BookingDialog
-from Classes.DatabaseHandler import DatabaseHandler
+from classes.DatabaseHandler import DatabaseHandler
 
 # TODO - wszystko do poprawy
 

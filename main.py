@@ -22,7 +22,7 @@ from PyQt6.uic import loadUi, loadUiType
 from PyQt6.QtCore import Qt, QSortFilterProxyModel, QDateTime, QModelIndex
 
 # from PyQt6.QtPrintSupport import QPrinter, QPrintDialog, QPrintPreviewDialog
-from PyQt6.QtGui import QPainter, QColor, QTextDocument, QIcon, QFont
+from PyQt6.QtGui import QPainter, QColor, QTextDocument, QIcon, QFont, QImage
 import sys, os
 
 # from dialogs.booking_dialog import BookingDialog
@@ -105,33 +105,37 @@ from classes.database_handler import DatabaseHandler
 # indeksowanie - CREATE INDEX osoba_imie ON osoba(imie) - które tabele powinny być indeksowane - tylko lotnisko?
 # initializeDatabase
 # indexy osobno na kolumnę
-
 # poprawne formatowanie zapytań SQL - https://stackoverflow.com/questions/5243596/python-sql-query-string-formatting
 # .addBindValue -> f-string
 # ładuj jedynie dostępne miejsca z danego samolotu do comboboxa
 # wydzenenie funkcji execute_query - DatabaseHandler
 # Klasa Tab i klasy OsobaTab, BiletTab i LotTab (Klasa Tab dziedziczy po QWidget żeby QMessageBox działały poprawnie)
 
+# 1 plik 1 klasa
+# fast return
+# QSqlQuery bindvalue
+# combobox nie zwraca indexu modelu zaznaczonej opcji - jedynie int
+
 
 # TODO:
 # ładowanie danych do dialogu edycji, zmiana miejsca w samolocie
-# lepsze wyświetlanie miejsc w samolocie (np. 14A)
-# 1 plik 1 klasa
-# QSqlQuery bindvalue
-# fast return
+# lepsze wyświetlanie miejsc w samolocie (np. 14A) - QItemDelegate
 # mockowanie dialogu
+# pytest - QSqlQuery nie buduje zapytania w przypadku zmockowanego db_handlera
+# organizacja folderu projektu
+# pytest - sprawdzenie wartości w oknie edycji
+# FORM_CLASS dla każdego okna
 #
-# pytest - przypadki brzegowe, sprawdzanie errorów przy wpisywaniu "drop table" lub niepoprawnego formatu danych
+# materiały:
+# pytest - co testować? - przypadki brzegowe, sprawdzanie errorów przy wpisywaniu "drop table" lub niepoprawnego formatu danych
 # docker compose - baza danych postgres w kontenerze + dane w wolumenie
 # API - client-server -
 # hashowanie
+# rozdzielenie backend-frontend
 
 
 # Pytania:
-# - czasami testy uruchamiają wcześniejszą wersję klasy (sprzed zapisania pliku)
-# - query.exec() zwraca False mimo poprawnego wykonania zapytania (person_dialog)
-# - organizacja folderu projektu
-# - docker + postgres
+# - program do śledzenia połączeń w kodzie
 # -
 
 
@@ -153,35 +157,36 @@ from classes.database_handler import DatabaseHandler
 #             self.parent().style().drawControl(QStyle.CE_ItemViewItem,
 #                                               styleOption, painter)
 
-# FORM_CLASS, _ = loadUiType(
-#     os.path.join(os.path.dirname(__file__), "main.ui")
-# )
-
-# UI_PATH = os.path.dirname(os.path.abspath(__file__))
-# FORM_CLASS = loadUiType(os.path.join(UI_PATH, "main.ui"))[0]
-
 
 OSOBA_TAB_INDEX = 0
 BILET_TAB_INDEX = 1
 LOT_TAB_INDEX = 2
+TAB_LABELS = ["Osoba", "Bilet", "Lot"]
+
+UI_PATH = os.path.join(os.path.dirname(__file__), "GUI")
+FORM_CLASS, BASE_CLASS = loadUiType(os.path.join(UI_PATH, "main.ui"))
 
 
-class MainWindow(QWidget):
+class MainWindow(QWidget, FORM_CLASS):
     def __init__(self, db_handler: DatabaseHandler) -> QWidget:
         super().__init__()
-        self.app_path = os.path.dirname(os.path.abspath(sys.argv[0]))
+        self.setupUi(self)
         self.db_handler = db_handler
         if not self.db_handler.con:
             return
         self.init_ui()
         self.init_tabs()
         self.connect_signals()
+        self.tab = {
+            OSOBA_TAB_INDEX: self.osoba_tab,
+            BILET_TAB_INDEX: self.bilet_tab,
+            LOT_TAB_INDEX: self.lot_tab,
+        }
 
     def init_ui(self):
-        self.load_ui_file()
         self.set_tab_labels()
         self.setGeometry(500, 300, 900, 700)
-        self.setWindowIcon(QIcon("GUI/airport.png"))
+        self.setWindowIcon(QIcon(os.path.join(UI_PATH, "airport.png")))
         self.setWindowTitle("Airport Management System")
 
     def init_tabs(self):
@@ -192,13 +197,7 @@ class MainWindow(QWidget):
         self.bilet_tab.load_data()
         self.tabWidget.setMovable(True)
 
-    def load_ui_file(self):
-        directory = os.path.dirname(os.path.abspath(__file__))
-        ui_file = os.path.join(directory, "GUI", "main.ui")
-        loadUi(ui_file, self)
-
     def set_tab_labels(self):
-        TAB_LABELS = ["Osoba", "Bilet", "Lot"]
         for index, label in enumerate(TAB_LABELS):
             self.tabWidget.setTabText(index, label)
 
@@ -219,20 +218,10 @@ class MainWindow(QWidget):
 
     def tabChanged(self, index: int):
         self.index = index
-        if index == OSOBA_TAB_INDEX:
-            self.osoba_tab.load_data()
-        elif index == BILET_TAB_INDEX:
-            self.bilet_tab.load_data()
-        elif index == LOT_TAB_INDEX:
-            self.lot_tab.load_data()
+        self.tab[index].load_data()
 
     def closeEvent(self, event):
         self.db_handler.close_connection()
-
-    # def closeEvent(self, event: QCloseEvent):
-    #     if self.db_handler:
-    #         self.db_handler.close_connection()
-    #     event.accept()
 
 
 def run_app():

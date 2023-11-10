@@ -5,12 +5,12 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication
 from unittest.mock import Mock, patch
 
-from dialogs.person_dialog import PersonDialog
+from classes.person_dialog import PersonDialog
 
 # from Classes.DatabaseHandler import DatabaseHandler
 
 
-# QSqlQuery() nie działa poprawnie przez db_handler mock
+# QSqlQuery(None, self.db_handler.con) nie działa poprawnie przez db_handler mock
 
 
 @pytest.fixture

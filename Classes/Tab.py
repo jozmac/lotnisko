@@ -39,13 +39,10 @@ class Tab(QWidget):
         msg.exec()
 
     def get_selected_row_id(self, index: QModelIndex) -> int:
-        if index.isValid():
-            row = index.row()
-            column = self.model.record(row).indexOf(f"{self.id_column}")
-            if column != -1:
-                return self.model.data(
-                    self.model.index(row, column), role=Qt.ItemDataRole.DisplayRole
-                )
+        if not index.isValid():
+            return
+        # TODO - aktualnie pierwsza kolumna tabeli musi zawierać id (index.siblingAtColumn(0))
+        return self.model.data(index.siblingAtColumn(0), 0)
 
     def add_row(self):
         window = self.dialog_class(self.db_handler)
@@ -58,10 +55,11 @@ class Tab(QWidget):
         row_id = self.get_selected_row_id(self.table.currentIndex())
         if row_id is None:
             return self.select_row_msg()
-        window = self.dialog_class(self.db_handler)
+        window = self.dialog_class(self.db_handler, row_id)
         if not window.exec():
             return
-        window.update_database(id)
+        # window.set_edit_values()
+        window.update_database()
         self.load_data()
 
     def delete_row(self):
@@ -75,18 +73,18 @@ class Tab(QWidget):
             "Do you want to remove selected row?",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
         )
-        if reply == QMessageBox.StandardButton.Yes:
-            query = QSqlQuery()
-            query.prepare(f"DELETE FROM {self.tab_name} WHERE {self.id_column} = ?")
-            query.addBindValue(row_id)
-            if query.exec():
-                print("Data deleted successfully.")
-            else:
-                print(f"Error deleting data: {query.lastError().text()}")
-            self.load_data()
+        if reply == QMessageBox.StandardButton.No:
+            return
+        query = QSqlQuery(None, self.db_handler.con)
+        query.prepare(f"DELETE FROM {self.tab_name} WHERE {self.id_column} = ?")
+        query.addBindValue(row_id)
+        if query.exec():
+            print("Data deleted successfully.")
+        else:
+            print(f"Error deleting data: {query.lastError().text()}")
+        self.load_data()
 
     def info_row(self):
         row_id = self.get_selected_row_id(self.table.currentIndex())
         if not row_id:
             return self.select_row_msg()
-        print(row_id)
