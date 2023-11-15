@@ -55,10 +55,9 @@ class Tab(QWidget):
         row_id = self.get_selected_row_id(self.table.currentIndex())
         if row_id is None:
             return self.select_row_msg()
-        window = self.dialog_class(self.db_handler, row_id)
+        window = self.dialog_class(self.db_handler, row_id=row_id)
         if not window.exec():
             return
-        # window.set_edit_values()
         window.update_database()
         self.load_data()
 

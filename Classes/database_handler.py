@@ -43,8 +43,13 @@ class DatabaseHandler:
     def execute_query(self, query):
         if query.exec():
             print(f"Data inserted successfully.")
+            print(f"Last query -> {query.lastQuery()}")
+            print(f"Bound values -> {query.boundValues()}")
         else:
             print("Error inserting data.")
+            print(query.lastError().text())
+            print(f"Last query -> {query.lastQuery()}")
+            print(f"Bound values -> {query.boundValues()}")
             self.display_error(f"Query execution error: {query.lastError().text()}")
 
     def display_error(self, message):

@@ -1,8 +1,3 @@
-# from database_handler import DatabaseHandler
-
-from classes.database_handler import DatabaseHandler
-
-
 from PyQt6.QtWidgets import (
     QDialog,
     QApplication,
@@ -30,6 +25,7 @@ from PyQt6.QtCore import (
     QAbstractItemModel,
     QSize,
     QDateTime,
+    QSortFilterProxyModel,
 )
 
 from PyQt6.QtGui import QIcon
@@ -37,16 +33,15 @@ from PyQt6.QtGui import QIcon
 import sys, os
 
 from datetime import datetime
+from run_test_dialog import RunTestDialog
 
 
 class FlightDialog(QDialog):
-    def __init__(
-        self, db_handler: DatabaseHandler, row_id: int = None, *args, **kwargs
-    ):
+    def __init__(self, db_handler, row_id=0, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.db_handler = db_handler
-        self.init_gui()
         self.row_id = row_id
+        self.init_gui()
         if self.row_id:
             self.set_edit_values()
         self.set_combo_boxes_model_column()
@@ -88,8 +83,65 @@ class FlightDialog(QDialog):
         self.model_lotnisko.setQuery(query, self.db_handler.con)
 
         self.comboBox_plane.setModel(self.model_samolot)
-        self.comboBox_from.setModel(self.model_lotnisko)
-        self.comboBox_to.setModel(self.model_lotnisko)
+        # self.comboBox_from.setModel(self.model_lotnisko)
+        # self.comboBox_to.setModel(self.model_lotnisko)
+
+        # self.lineEdit_from.textChanged.connect(
+        #     lambda: self.filter_combobox_from(self.lineEdit_from.text())
+        # )
+        self.lineEdit_from.textChanged.connect(self.filter_combobox_from)
+        self.lineEdit_to.textChanged.connect(self.filter_combobox_to)
+
+        self.proxy_model_from = QSortFilterProxyModel()
+        self.proxy_model_from.setSourceModel(self.model_lotnisko)
+        self.proxy_model_from.setFilterKeyColumn(1)
+
+        self.proxy_model_to = QSortFilterProxyModel()
+        self.proxy_model_to.setSourceModel(self.model_lotnisko)
+        self.proxy_model_to.setFilterKeyColumn(1)
+
+    def filter_combobox_from(self, text):
+        # text = self.lineEdit_from.text()
+
+        # self.proxy_model_from.setDynamicSortFilter(True)
+
+        # Set the filter on the proxy model based on the text entered in the line edit
+        # self.proxy_model_from.invalidate()
+        # self.proxy_model_from.setFilterFixedString(const QString &pattern)
+        # self.proxy_model_from.setFilterRegularExpression(const QString &pattern)
+        # self.proxy_model_from.setFilterRegularExpression(const QRegularExpression &regularExpression)
+        # self.proxy_model_from.setFilterWildcard(const QString &pattern)
+        # self.proxy_model_from.setFilterWildcard(f"*{text}*")
+        # self.proxy_model_from.setFilterWildcard(text)
+        self.proxy_model_from.setFilterFixedString(text)
+
+        # self.proxy_model_from.setAutoAcceptChildRows(bool accept)
+        # self.proxy_model_from.setDynamicSortFilter(bool enable)
+        self.proxy_model_from.setFilterCaseSensitivity(
+            Qt.CaseSensitivity.CaseInsensitive
+        )
+        # self.proxy_model_from.setFilterKeyColumn(1)
+        # self.proxy_model_from.setFilterRole(int role)
+        # self.proxy_model_from.setRecursiveFilteringEnabled(True)
+        # self.proxy_model_from.setSortCaseSensitivity(Qt::CaseSensitivity cs)
+        # self.proxy_model_from.setSortLocaleAware(bool on)
+        # self.proxy_model_from.setSortRole(int role)
+        # Set the current index to the first item in the filtered list
+        # self.comboBox_from.setCurrentIndex(0)
+
+        # self.proxy_model_from.sort(0, Qt.SortOrder.AscendingOrder)
+        self.comboBox_from.setModel(self.proxy_model_from)
+
+    def filter_combobox_to(self, text):
+        self.proxy_model_from.setFilterFixedString(text)
+        self.proxy_model_from.setFilterCaseSensitivity(
+            Qt.CaseSensitivity.CaseInsensitive
+        )
+        # self.proxy_model_from.setFilterWildcard(f"*{text}*")
+        # Set the current index to the first item in the filtered list
+        # self.comboBox_to.setCurrentIndex(0)
+
+        self.comboBox_to.setModel(self.proxy_model_to)
 
     def get_data(self):
         # selected_date = self.calendarWidget.selectedDate().toPyDate()
@@ -123,6 +175,13 @@ class FlightDialog(QDialog):
         self.airport_b = self.model_lotnisko.record(
             self.comboBox_to.currentIndex()
         ).value("lotnisko_id")
+
+        print(
+            f"{self.plane} - {self.airport_a} - {self.airport_b} - {self.qt_datetime} - {self.row_id}"
+        )
+        print(
+            f"{type(self.plane)} - {type(self.airport_a)} - {type(self.airport_b)} - {type(self.qt_datetime)} - {type(self.row_id)}"
+        )
 
     def insert_into_database(self):
         self.get_data()
@@ -163,7 +222,7 @@ class FlightDialog(QDialog):
         self.get_data()
         self.query = QSqlQuery(None, self.db_handler.con)
         self.query.prepare(
-            "UPDATE osoba SET samolot_id = ?, lotnisko_a_id = ?, lotnisko_b_id = ?, datetime = ? WHERE lot_id = ?"
+            "UPDATE lot SET samolot_id = ?, lotnisko_a_id = ?, lotnisko_b_id = ?, datetime = ? WHERE lot_id = ?"
         )
         self.query.addBindValue(self.plane)
         self.query.addBindValue(self.airport_a)
@@ -174,10 +233,4 @@ class FlightDialog(QDialog):
 
 
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    db_handler = DatabaseHandler()
-    db_handler.create_connection()
-    window = FlightDialog(db_handler, 9)
-    window.show()
-
-    sys.exit(app.exec())
+    test_window = RunTestDialog(FlightDialog, row_id=0)

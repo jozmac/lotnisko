@@ -1,10 +1,3 @@
-from classes.database_handler import DatabaseHandler
-
-# from database_handler import DatabaseHandler
-
-
-# from database_handler import DatabaseHandler
-
 from PyQt6.QtWidgets import QDialog, QApplication, QComboBox, QStyledItemDelegate
 from PyQt6.uic import loadUi
 from PyQt6.QtSql import (
@@ -29,6 +22,7 @@ from PyQt6.QtCore import (
 from PyQt6.QtGui import QIcon
 
 import sys, os
+from run_test_dialog import RunTestDialog
 
 
 class ComboBoxDelegate(QStyledItemDelegate):
@@ -45,16 +39,15 @@ class ComboBoxDelegate(QStyledItemDelegate):
 
 
 class BookingDialog(QDialog):
-    def __init__(
-        self, db_handler: DatabaseHandler, row_id: int = None, *args, **kwargs
-    ):
+    def __init__(self, db_handler, row_id=0, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.db_handler = db_handler
-        self.init_gui()
         self.row_id = row_id
-        if self.row_id:
+        self.init_gui()
+        if row_id:
             self.set_edit_values()
         self.set_combo_boxes_model_column()
+        self.comboBox_flight.currentIndexChanged.connect(self.select_miejsce)
 
     def init_gui(self):
         directory = os.path.dirname(os.path.abspath(__file__))
@@ -65,8 +58,6 @@ class BookingDialog(QDialog):
         self.setWindowTitle("Airport Management System")
         self.setWindowIcon(QIcon("GUI/airport.png"))
         self.load_combo_boxes()
-        self.comboBox_flight.currentIndexChanged.connect(self.select_miejsce)
-
         # self.buttonBox.accepted.connect(self.insert_to_database)
         # self.buttonBox.rejected.connect(Dialog.reject)
 
@@ -113,19 +104,30 @@ class BookingDialog(QDialog):
             "lot_id"
         )
         print(f"self.flight - {self.flight}")
+        print(f"self.row_id - {self.row_id}")
         self.model_miejsce = QSqlQueryModel(None)
+        # query = (
+        #     f"SELECT m.miejsce_samolot_id "
+        #     f"FROM miejsce m "
+        #     f"LEFT JOIN bilet b ON m.miejsce_id = b.miejsce_id "
+        #     f"WHERE m.samolot_id = (SELECT l.samolot_id FROM lot l WHERE lot_id = {self.flight}) "
+        #     f"AND b.miejsce_id IS NULL"
+        # )
         query = (
             f"SELECT m.miejsce_samolot_id "
-            f"FROM miejsce m "
-            f"LEFT JOIN bilet b ON m.miejsce_id = b.miejsce_id "
-            f"WHERE m.samolot_id = (SELECT l.samolot_id FROM lot l WHERE lot_id = {self.flight}) "
-            f"AND b.miejsce_id IS NULL"
+            f"FROM ( "
+            f"    SELECT * "
+            f"    FROM miejsce m "
+            f"    WHERE m.samolot_id = (SELECT l.samolot_id FROM lot l WHERE l.lot_id = {self.flight}) "
+            f") AS m "
+            f"LEFT JOIN (SELECT * FROM bilet b WHERE b.lot_id = {self.flight}) AS b ON m.miejsce_samolot_id = b.miejsce_id "
+            f"WHERE b.miejsce_id IS NULL "
+            f"OR b.bilet_id = {self.row_id}"
         )
         self.model_miejsce.setQuery(query, self.db_handler.con)
         self.comboBox_seat.setModel(self.model_miejsce)
         return self.model_miejsce
 
-    # TODO
     def get_data(self):
         self.flightclass = self.comboBox_class.itemData(
             self.comboBox_class.currentIndex(),
@@ -143,7 +145,7 @@ class BookingDialog(QDialog):
             "lot_id"
         )
         self.seat = self.model_miejsce.record(self.comboBox_seat.currentIndex()).value(
-            "miejsce_id"
+            "miejsce_samolot_id"
         )
 
         # print("=====")
@@ -199,6 +201,11 @@ class BookingDialog(QDialog):
         #     self.comboBox_seat.currentIndex(), Qt.ItemDataRole.EditRole
         # )
 
+        print(f"seat_id - {self.query.value(3)}, type - {type(self.query.value(3))}")
+        print(
+            f"{type(self.query.value(1))}, {type(self.query.value(2))}, {type(self.query.value(3))}, {type(self.query.value(4))}"
+        )
+
         assistant_yes_no = "Yes" if self.query.value(4) else "No"
         self.comboBox_assistant.setCurrentIndex(
             self.comboBox_assistant.findData(assistant_yes_no, 0)
@@ -220,13 +227,4 @@ class BookingDialog(QDialog):
 
 
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    db_handler = DatabaseHandler()
-    db_handler.create_connection()
-    # window = BookingDialog(db_handler)
-    window = BookingDialog(
-        db_handler, 12
-    )  # Nikole Kidman lot-5 miejsce-1 asystent-true klasa-economic
-    window.show()
-    window.get_data()
-    sys.exit(app.exec())
+    test_window = RunTestDialog(BookingDialog, row_id=0)

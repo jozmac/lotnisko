@@ -9,32 +9,16 @@ from PyQt6.QtWidgets import (
     QAbstractItemView,
 )
 
-# from PyQt6.QtSql import (
-#     QSqlDatabase,
-#     QSqlQueryModel,
-#     QSqlTableModel,
-#     QSqlRelationalTableModel,
-#     QSqlRelation,
-#     QSqlRelationalDelegate,
-#     QSqlQuery,
-# )
 from PyQt6.uic import loadUi, loadUiType
 from PyQt6.QtCore import Qt, QSortFilterProxyModel, QDateTime, QModelIndex
 
-# from PyQt6.QtPrintSupport import QPrinter, QPrintDialog, QPrintPreviewDialog
 from PyQt6.QtGui import QPainter, QColor, QTextDocument, QIcon, QFont, QImage
 import sys, os
-
-# from dialogs.booking_dialog import BookingDialog
-# from dialogs.flight_dialog import FlightDialog
-# from dialogs.person_dialog import PersonDialog
 
 from classes.osoba_tab import OsobaTab
 from classes.bilet_tab import BiletTab
 from classes.lot_tab import LotTab
-
 from classes.database_handler import DatabaseHandler
-
 
 # # Temat projektu
 # System zarządzania lotami
@@ -110,11 +94,21 @@ from classes.database_handler import DatabaseHandler
 # ładuj jedynie dostępne miejsca z danego samolotu do comboboxa
 # wydzenenie funkcji execute_query - DatabaseHandler
 # Klasa Tab i klasy OsobaTab, BiletTab i LotTab (Klasa Tab dziedziczy po QWidget żeby QMessageBox działały poprawnie)
-
 # 1 plik 1 klasa
 # fast return
 # QSqlQuery bindvalue
 # combobox nie zwraca indexu modelu zaznaczonej opcji - jedynie int
+
+# Poprawne pobieranie dostępnych miejsc
+# RunDialog
+# Filtrowanie lotnisk QSortFilterProxyModel
+
+
+# error w przypadku błędnej nazwy tabeli:
+# ERROR:  syntax error at end of input
+# LINE 1: EXECUTE
+#                 ^
+# (42601) QPSQL: Unable to create query
 
 
 # TODO:
@@ -123,21 +117,35 @@ from classes.database_handler import DatabaseHandler
 # mockowanie dialogu
 # pytest - QSqlQuery nie buduje zapytania w przypadku zmockowanego db_handlera
 # organizacja folderu projektu
+# __init__.py files and relative imports
 # pytest - sprawdzenie wartości w oknie edycji
 # FORM_CLASS dla każdego okna
 #
 # materiały:
 # pytest - co testować? - przypadki brzegowe, sprawdzanie errorów przy wpisywaniu "drop table" lub niepoprawnego formatu danych
 # docker compose - baza danych postgres w kontenerze + dane w wolumenie
-# API - client-server -
-# hashowanie
+# API - client-server - sockety/flask/django
+# hashowanie - dane osób - dodać kolumnę
 # rozdzielenie backend-frontend
+# przeszukiwanie tabelek w dialogach
 
+# fast API albo sockety - client wysyła za pytanie do bazy lotnisko - serwer odczytuje bazę
+# edycja bilet - zmiana miejsca na to samo - czy jest to możliwe
+# uruchamianie dialogów przez run_dialog.py
+#
 
 # Pytania:
-# - program do śledzenia połączeń w kodzie
-# -
 
+
+# run docker desktop
+# run a PostgreSQL image as a container:
+# docker run -d --name lotnisko postgres
+# docker volume ls
+# docker inspect lotnisko
+# remove container:
+# docker rm -f mydb
+# remove volume:
+# docker volume rm 39089f261ce67fdf11caf9ae3357a7d789de80cc9038530275452cc9baf1617d
 
 # QItemDelegate - tabele, comboboxy - select id
 # py

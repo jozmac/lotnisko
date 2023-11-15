@@ -1,29 +1,24 @@
-from classes.database_handler import DatabaseHandler
-
 from PyQt6.QtWidgets import QDialog, QApplication
 from PyQt6.uic import loadUi
 from PyQt6.QtSql import QSqlQuery
 from PyQt6.QtGui import QIcon
 import sys, os
+from run_test_dialog import RunTestDialog
 
 
 class PersonDialog(QDialog):
-    def __init__(
-        self, db_handler: DatabaseHandler, row_id: int = None, *args, **kwargs
-    ):
+    def __init__(self, db_handler, row_id=0, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.db_handler = db_handler
-        self.init_gui()
         self.row_id = row_id
+        self.init_gui()
         if self.row_id:
             self.set_edit_values()
 
     def init_gui(self):
         # TODO - path management
         directory = os.path.dirname(os.path.abspath(__file__))
-        # print(directory)
         directory = os.path.join(directory, "..")
-        # print(directory)
         ui_file = os.path.join(directory, "GUI", "person_dialog.ui")
         loadUi(ui_file, self)
 
@@ -81,10 +76,4 @@ class PersonDialog(QDialog):
 
 
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    db_handler = DatabaseHandler()
-    db_handler.create_connection()
-    window = PersonDialog(db_handler)
-    window.show()
-
-    sys.exit(app.exec())
+    test_window = RunTestDialog(PersonDialog, row_id=6)

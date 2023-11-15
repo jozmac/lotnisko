@@ -46,6 +46,16 @@
         </widget>
        </item>
        <item>
+        <widget class="QLineEdit" name="lineEdit_from">
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QComboBox" name="comboBox_from">
          <property name="enabled">
           <bool>true</bool>
@@ -75,6 +85,9 @@
           <string>To:</string>
          </property>
         </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="lineEdit_to"/>
        </item>
        <item>
         <widget class="QComboBox" name="comboBox_to">
