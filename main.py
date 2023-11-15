@@ -98,7 +98,9 @@ from classes.database_handler import DatabaseHandler
 # fast return
 # QSqlQuery bindvalue
 # combobox nie zwraca indexu modelu zaznaczonej opcji - jedynie int
+# ładowanie danych do dialogu edycji, zmiana miejsca w samolocie
 
+# organizacja folderu
 # Poprawne pobieranie dostępnych miejsc
 # RunDialog
 # Filtrowanie lotnisk QSortFilterProxyModel
@@ -112,27 +114,21 @@ from classes.database_handler import DatabaseHandler
 
 
 # TODO:
-# ładowanie danych do dialogu edycji, zmiana miejsca w samolocie
 # lepsze wyświetlanie miejsc w samolocie (np. 14A) - QItemDelegate
+# ładowanie comboboxów do edycji FlightDialog
 # mockowanie dialogu
 # pytest - QSqlQuery nie buduje zapytania w przypadku zmockowanego db_handlera
-# organizacja folderu projektu
-# __init__.py files and relative imports
 # pytest - sprawdzenie wartości w oknie edycji
 # FORM_CLASS dla każdego okna
+# hashowanie - dane osób - dodać kolumnę
 #
 # materiały:
 # pytest - co testować? - przypadki brzegowe, sprawdzanie errorów przy wpisywaniu "drop table" lub niepoprawnego formatu danych
 # docker compose - baza danych postgres w kontenerze + dane w wolumenie
 # API - client-server - sockety/flask/django
-# hashowanie - dane osób - dodać kolumnę
 # rozdzielenie backend-frontend
-# przeszukiwanie tabelek w dialogach
 
-# fast API albo sockety - client wysyła za pytanie do bazy lotnisko - serwer odczytuje bazę
-# edycja bilet - zmiana miejsca na to samo - czy jest to możliwe
-# uruchamianie dialogów przez run_dialog.py
-#
+# fast API albo sockety - baza lotnisko - napisać prosty backend - client wysyła za pytanie do bazy lotnisko - serwer odczytuje bazę
 
 # Pytania:
 
@@ -211,18 +207,22 @@ class MainWindow(QWidget, FORM_CLASS):
 
     def connect_signals(self):
         self.tabWidget.currentChanged.connect(self.tabChanged)
-        self.pushButton_dodaj_osoba.clicked.connect(self.osoba_tab.add_row)
-        self.pushButton_dodaj_bilet.clicked.connect(self.bilet_tab.add_row)
-        self.pushButton_dodaj_lot.clicked.connect(self.lot_tab.add_row)
-        self.pushButton_usun_osoba.clicked.connect(self.osoba_tab.delete_row)
-        self.pushButton_usun_bilet.clicked.connect(self.bilet_tab.delete_row)
-        self.pushButton_usun_lot.clicked.connect(self.lot_tab.delete_row)
-        self.pushButton_edytuj_osoba.clicked.connect(self.osoba_tab.edit_row)
-        self.pushButton_edytuj_bilet.clicked.connect(self.bilet_tab.edit_row)
-        self.pushButton_edytuj_lot.clicked.connect(self.lot_tab.edit_row)
-        self.pushButton_info_osoba.clicked.connect(self.osoba_tab.info_row)
-        self.pushButton_info_bilet.clicked.connect(self.bilet_tab.info_row)
-        self.pushButton_info_lot.clicked.connect(self.lot_tab.info_row)
+        button_dict = {
+            self.pushButton_dodaj_osoba: self.osoba_tab.add_row,
+            self.pushButton_dodaj_bilet: self.bilet_tab.add_row,
+            self.pushButton_dodaj_lot: self.lot_tab.add_row,
+            self.pushButton_usun_osoba: self.osoba_tab.delete_row,
+            self.pushButton_usun_bilet: self.bilet_tab.delete_row,
+            self.pushButton_usun_lot: self.lot_tab.delete_row,
+            self.pushButton_edytuj_osoba: self.osoba_tab.edit_row,
+            self.pushButton_edytuj_bilet: self.bilet_tab.edit_row,
+            self.pushButton_edytuj_lot: self.lot_tab.edit_row,
+            self.pushButton_info_osoba: self.osoba_tab.info_row,
+            self.pushButton_info_bilet: self.bilet_tab.info_row,
+            self.pushButton_info_lot: self.lot_tab.info_row,
+        }
+        for button, callback in button_dict.items():
+            button.clicked.connect(callback)
 
     def tabChanged(self, index: int):
         self.index = index

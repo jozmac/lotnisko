@@ -3,7 +3,6 @@ from PyQt6.uic import loadUi
 from PyQt6.QtSql import QSqlQuery
 from PyQt6.QtGui import QIcon
 import sys, os
-from run_test_dialog import RunTestDialog
 
 
 class PersonDialog(QDialog):
@@ -76,4 +75,6 @@ class PersonDialog(QDialog):
 
 
 if __name__ == "__main__":
+    from run_test_dialog import RunTestDialog
+
     test_window = RunTestDialog(PersonDialog, row_id=6)

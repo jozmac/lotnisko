@@ -33,7 +33,6 @@ from PyQt6.QtGui import QIcon
 import sys, os
 
 from datetime import datetime
-from run_test_dialog import RunTestDialog
 
 
 class FlightDialog(QDialog):
@@ -233,4 +232,6 @@ class FlightDialog(QDialog):
 
 
 if __name__ == "__main__":
+    from run_test_dialog import RunTestDialog
+
     test_window = RunTestDialog(FlightDialog, row_id=0)

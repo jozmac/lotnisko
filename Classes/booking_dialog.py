@@ -22,7 +22,6 @@ from PyQt6.QtCore import (
 from PyQt6.QtGui import QIcon
 
 import sys, os
-from run_test_dialog import RunTestDialog
 
 
 class ComboBoxDelegate(QStyledItemDelegate):
@@ -227,4 +226,6 @@ class BookingDialog(QDialog):
 
 
 if __name__ == "__main__":
+    from run_test_dialog import RunTestDialog
+
     test_window = RunTestDialog(BookingDialog, row_id=0)
