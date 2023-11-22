@@ -81,7 +81,7 @@ from classes.database_handler import DatabaseHandler
 # .addBindValue -> f-string
 # ładuj jedynie dostępne miejsca z danego samolotu do comboboxa
 # wydzenenie funkcji execute_query - DatabaseHandler
-# Klasa Tab i klasy OsobaTab, BiletTab i LotTab (Klasa Tab dziedziczy po QWidget żeby QMessageBox działały poprawnie)
+# Klasa Tab i klasy OsobaTab, BiletTab i LotTab
 # 1 plik 1 klasa
 # fast return
 # QSqlQuery bindvalue
@@ -100,16 +100,20 @@ from classes.database_handler import DatabaseHandler
 # QCompleter
 # poprawne ładowanie comboboxów do edycji FlightDialog (opcje nie są wybierane poprawnie po użyciu QSortFilterProxyModel) - zmienione na QLineEdit
 # Comboboxy w FlightDialog nie wyświetlają listy opcji - jedynie aktualnie wybraną. Można zmieniać scrollem (w przypadku QSortFilterProxyModel) - zmienione na QLineEdit
+# self as parent
+# poprawne ładowanie lineeditów do edycji FlightDialog
 
 
 # TODO:
 # sockety/fastAPI/flask/django - client/server - napisać prosty backend - client PyQt wysyła zapytanie serwera Flask
+
 # mockowanie dialogu
 # pytest - QSqlQuery nie buduje zapytania w przypadku zmockowanego db_handlera
 # pytest - sprawdzenie wartości w oknie edycji
 # pytest - co testować? - przypadki brzegowe, sprawdzanie errorów przy wpisywaniu "drop table" lub niepoprawnego formatu danych, połączenie lineeditów z get_data,
 # hashowanie - dane osób - dodać kolumnę
-# clean dialogs code - prints
+# remove flightDialog comboboxes
+# delete comments
 
 
 # Pytania:

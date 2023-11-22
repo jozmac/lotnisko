@@ -31,8 +31,8 @@ class FlightDialog(QDialog, FORM_CLASS):
 
     def set_combo_boxes_model_column(self):
         self.comboBox_plane.setModelColumn(1)
-        self.comboBox_from.setModelColumn(1)
-        self.comboBox_to.setModelColumn(1)
+        # self.comboBox_from.setModelColumn(1)
+        # self.comboBox_to.setModelColumn(1)
 
     def load_combo_boxes(self):
         self.model_samolot = QSqlQueryModel()
@@ -49,7 +49,9 @@ class FlightDialog(QDialog, FORM_CLASS):
         #     "SELECT lotnisko_id AS lotnisko_id, "
         #     "lotnisko_id || ' - ' || icao_code || ' - ' || name || ' - ' || city || ' - ' || country AS lotnisko_data FROM lotnisko"
         # )
-        query = "SELECT lotnisko_id || ' - ' || icao_code || ' - ' || name || ' - ' || city || ' - ' || country AS lotnisko_data FROM lotnisko"
+        # query = "SELECT lotnisko_id || ' - ' || icao_code || ' - ' || name || ' - ' || city || ' - ' || country AS lotnisko_data FROM lotnisko"
+        query = "SELECT lotnisko_id || ' - ' || icao_code || ' - ' || name || ' - ' || city || ' - ' || country AS lotnisko_data, lotnisko_id FROM lotnisko"
+
         self.model_lotnisko.setQuery(query, self.db_handler.con)
 
         # self.model_lotnisko_from = QSqlQueryModel()
@@ -222,13 +224,42 @@ class FlightDialog(QDialog, FORM_CLASS):
         #     self.completer_to.findData(self.query.value(2), 0)
         # )
 
-        # lotnisko_data_from = self.model_lotnisko.record(
-        #     self.completer_from.currentIndex()
-        # ).value("lotnisko_id")
-        self.lineEdit_from.setText(str(self.query.value(1)))
-        self.lineEdit_to.setText(str(self.query.value(2)))
-        # self.completer_from.complete()
-        # self.completer_to.complete()
+        lotnisko_data_from = self.model_lotnisko.record(
+            self.model_lotnisko.match(
+                self.model_lotnisko.index(0, 1),
+                Qt.ItemDataRole.DisplayRole,
+                self.query.value(1),
+                1,
+                Qt.MatchFlag.MatchContains,
+            )[0].row()
+        ).value("lotnisko_data")
+
+        lotnisko_data_to = self.model_lotnisko.record(
+            self.model_lotnisko.match(
+                self.model_lotnisko.index(0, 1),
+                Qt.ItemDataRole.DisplayRole,
+                self.query.value(2),
+                1,
+                Qt.MatchFlag.MatchContains,
+            )[0].row()
+        ).value("lotnisko_data")
+
+        # variant = self.model_lotnisko.match(
+        #     self.model_lotnisko.index(0, 1),
+        #     Qt.ItemDataRole.DisplayRole,
+        #     self.query.value(1),
+        #     1,
+        #     Qt.MatchFlag.MatchContains,
+        # )
+        # print(variant[0])
+        # print(variant[0].row())
+        # print(variant[0].column())
+
+        self.lineEdit_from.setText(str(lotnisko_data_from))
+        self.lineEdit_to.setText(str(lotnisko_data_to))
+
+        # self.lineEdit_from.setText(str(self.query.value(1)))
+        # self.lineEdit_to.setText(str(self.query.value(2)))
 
         datetime = self.query.value(3)
         date = datetime.date()

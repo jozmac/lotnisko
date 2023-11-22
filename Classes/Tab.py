@@ -74,7 +74,7 @@ class Tab(QWidget):
         )
         if reply == QMessageBox.StandardButton.No:
             return
-        query = QSqlQuery(None, self.db_handler.con)
+        query = QSqlQuery(self, self.db_handler.con)
         query.prepare(f"DELETE FROM {self.tab_name} WHERE {self.id_column} = ?")
         query.addBindValue(row_id)
         if query.exec():
