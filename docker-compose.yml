@@ -1,7 +1,6 @@
 version: '3.8'
 services:
-  db:
-    # container_name: lotnisko_container
+  lotnisko_db: 
     image: postgres:14.1-alpine
     restart: always
     environment:
@@ -9,11 +8,34 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: lotnisko
     ports:
-      - '5432:5432'
+      - 5435:5432
     volumes:
-      - db:/var/lib/postgresql/data
-      # - ./db/init.sql:docker-entrypoint-initdb.d/init.sql
-    
+      - lotnisko_dane:/var/lib/postgresql/data
+volumes:
+  lotnisko_dane:
+    driver: local
+
+# run docker desktop
+# run a PostgreSQL image as a container:
+# docker run -d --name lotnisko postgres
+# docker volume ls
+# docker inspect lotnisko
+# remove container:
+# docker rm -f mydb
+# remove volume:
+# docker volume rm 39089f261ce67fdf11caf9ae3357a7d789de80cc9038530275452cc9baf1617d
+
+# docker volume create moj-volume
+# docker volume ls
+# docker volume rm moj-volume
+# docker build -f Dockerfile -t vol_test .
+# . - aktualny katalog jest build contextem
+# docker run vol_test
+
+# docker run --name baza --detach -e POSTGRESS_PASSWORD=haslo --volume dane_bazy: postgres
+# komenda do wyświetlania wszystkich danych o kontenerze / volumenie / sieci:
+# docker inspect
+
   # pgadmin:
   #   container_name: pgadmin4_container
   #   image: dpage/pgadmin4
@@ -26,3 +48,8 @@ services:
 
 
   # docker-compose up 
+  # docker-compose up -d
+
+  # psql -h localhost -p 5435 -U postgres -d lotnisko
+  # cat lotnisko-backup-plain.sql | docker exec -i lotnisko-lotnisko_db-1 psql -U postgres
+  

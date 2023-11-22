@@ -31,6 +31,7 @@ class DatabaseHandler:
             )
             self.display_error(error_text)
             raise ConnectionError(error_text)
+        print("Database opened successfully.")
         return self.con
 
     def close_connection(self):
@@ -38,7 +39,7 @@ class DatabaseHandler:
         if self.con.isOpen():
             print("Database is still open.")
         else:
-            print("Database closed.")
+            print("Database closed successfully.")
 
     def execute_query(self, query):
         if query.exec():

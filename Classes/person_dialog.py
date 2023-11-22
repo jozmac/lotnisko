@@ -1,13 +1,17 @@
-from PyQt6.QtWidgets import QDialog, QApplication
-from PyQt6.uic import loadUi
+from PyQt6.QtWidgets import QDialog
 from PyQt6.QtSql import QSqlQuery
 from PyQt6.QtGui import QIcon
-import sys, os
+from PyQt6.uic import loadUiType
+import os
+
+UI_PATH = os.path.join(os.path.dirname(__file__), "..", "GUI", "person_dialog.ui")
+FORM_CLASS, BASE_CLASS = loadUiType(UI_PATH)
 
 
-class PersonDialog(QDialog):
+class PersonDialog(QDialog, FORM_CLASS):
     def __init__(self, db_handler, row_id=0, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.setupUi(self)
         self.db_handler = db_handler
         self.row_id = row_id
         self.init_gui()
@@ -15,12 +19,6 @@ class PersonDialog(QDialog):
             self.set_edit_values()
 
     def init_gui(self):
-        # TODO - path management
-        directory = os.path.dirname(os.path.abspath(__file__))
-        directory = os.path.join(directory, "..")
-        ui_file = os.path.join(directory, "GUI", "person_dialog.ui")
-        loadUi(ui_file, self)
-
         self.setWindowTitle("Airport Management System")
         self.setWindowIcon(QIcon("GUI/airport.png"))
         # self.buttonBox.accepted.connect(self.insert_to_database)

@@ -1,45 +1,109 @@
-from PyQt6.QtWidgets import QDialog, QApplication, QComboBox, QStyledItemDelegate
-from PyQt6.uic import loadUi
-from PyQt6.QtSql import (
-    QSqlQuery,
-    QSqlDatabase,
-    QSqlQueryModel,
-    QSqlTableModel,
-    QSqlRelationalTableModel,
-    QSqlRelation,
-    QSqlRelationalDelegate,
-)
-from PyQt6.QtCore import (
-    Qt,
-    QModelIndex,
-    QStringListModel,
-    QAbstractTableModel,
-    QAbstractItemModel,
-    QSize,
-    QDateTime,
-)
+from PyQt6.QtCore import Qt, QModelIndex
+from PyQt6.QtWidgets import QDialog, QStyledItemDelegate, QItemDelegate, QApplication
+from PyQt6.QtGui import QIcon, QPainter
+from PyQt6.QtSql import QSqlQuery, QSqlQueryModel
+from PyQt6.uic import loadUiType
+import os
 
-from PyQt6.QtGui import QIcon
+from PyQt6.QtWidgets import QStyle, QStyleOptionViewItem
 
-import sys, os
+# class SeatItemDelegate(QStyledItemDelegate):
+#     def __init__(self, parent):
+#         super().__init__()
+#         self.parent = parent
+#
+#     def displayText(self, value, locale):
+#         # index = value.index(self.currentIndex)
+#         # return index.siblingAtColumn(1).data()
+#         index: QModelIndex = self.parent.currentIndex()
+#         id: int = self.model_osoba.data(index.siblingAtColumn(0), 0)
+#         return id
 
 
-class ComboBoxDelegate(QStyledItemDelegate):
-    def __init__(self, parent):
-        super().__init__()
-        self.parent = parent
+# class SeatItemDelegate(QStyledItemDelegate):
+#     def displayText(self, value, locale):
+#         return f"seat_id - {value}"
 
-    def displayText(self, value, locale):
-        # index = value.index(self.currentIndex)
-        # return index.siblingAtColumn(1).data()
-        index: QModelIndex = self.parent.currentIndex()
-        id: int = self.model_osoba.data(index.siblingAtColumn(0), 0)
-        return id
+#     # def setEditorData(self, editor, index: QModelIndex):
+#     #     value = index.model().data(index, Qt.ItemDataRole.DisplayRole)
+#     #     editor.setCurrentText(f"seat_id - {value}")
+
+#     # def setModelData(self, editor, model, index: QModelIndex):
+#     #     model.setData(
+#     #         index, f"seat_id - {editor.currentText()}", Qt.ItemDataRole.DisplayRole
+#     #     )
 
 
-class BookingDialog(QDialog):
+# class SeatItemDelegate(QItemDelegate):
+#     def paint(self, painter: QPainter, option, index: QModelIndex):
+#         styleOption = QStyleOptionViewItem(option)
+#         try:
+#             value = index.data(Qt.ItemDataRole.DisplayRole)
+#         except AttributeError:
+#             value = ""
+#         if value not in [None, "NULL", ""]:
+#             wartosc = str(value)
+#             styleOption.text = wartosc.replace(".", ",")
+#             styleOption.displayAlignment = Qt.AlignRight | Qt.AlignVCenter
+#             if styleOption.state & QStyle.State_Selected:
+#                 styleOption.state |= QStyle.State_Active
+#             self.parent().style().drawControl(
+#                 QStyle.CE_ItemViewItem, styleOption, painter
+#             )
+
+
+# def setEditorData(self, editor, index):
+#     super().setEditorData(editor, index)
+#     # Update the display text of the selected item in the combo box
+#     editor.setCurrentText(
+#         self.displayText(index.data(Qt.ItemDataRole.DisplayRole), None)
+#     )
+
+# def setEditorData(self, editor, index: QModelIndex):
+#     value = index.model().data(index, Qt.ItemDataRole.DisplayRole)
+#     editor.setCurrentText(f"value - {value}")
+
+
+# class SeatItemDelegate(QStyledItemDelegate):
+#     # def createEditor(self, parent, options, index):
+#     #     return QtGui.QTextEdit(parent)
+
+#     def setEditorData(self, editor, index):
+#         editor.setText(f"value - {index.data()}")
+
+#     def setModelData(self, editor, model, index):
+#         model.setData(index, f"value - {editor.toPlainText()}")
+
+
+class SeatModel(QSqlQueryModel):
+    def __init__(self, parent=None, seat_columns_count=6):
+        self.seat_columns_count = seat_columns_count
+        super().__init__(parent)
+
+    def columnCount(self, parent=None):
+        return 2
+
+    def data(self, index, role=Qt.ItemDataRole.DisplayRole):
+        if index.isValid() and role == Qt.ItemDataRole.DisplayRole:
+            if index.column() == 1:
+                seat_id = self.data(self.index(index.row(), 0), role)
+                row_number = int(seat_id / self.seat_columns_count) + 1
+                seat_letter = chr((seat_id - 1) % self.seat_columns_count + 65)
+                seat_name = f"{seat_id} - {row_number}{seat_letter}"
+                return seat_name
+            else:
+                return super().data(index, role)
+        return None
+
+
+UI_PATH = os.path.join(os.path.dirname(__file__), "..", "GUI", "booking_dialog.ui")
+FORM_CLASS, BASE_CLASS = loadUiType(UI_PATH)
+
+
+class BookingDialog(QDialog, FORM_CLASS):
     def __init__(self, db_handler, row_id=0, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.setupUi(self)
         self.db_handler = db_handler
         self.row_id = row_id
         self.init_gui()
@@ -47,13 +111,15 @@ class BookingDialog(QDialog):
             self.set_edit_values()
         self.set_combo_boxes_model_column()
         self.comboBox_flight.currentIndexChanged.connect(self.select_miejsce)
+        self.comboBox_seat.currentIndexChanged.connect(self.set_seat_name)
+
+    def set_seat_name(self):
+        current_text = self.comboBox_seat.currentText()
+        print(current_text)
+        self.comboBox_seat.setCurrentText(f"value - {current_text}")
+        # self.comboBox_seat.setCurrentData(f"value - {current_text}")
 
     def init_gui(self):
-        directory = os.path.dirname(os.path.abspath(__file__))
-        directory = os.path.join(directory, "..")
-        ui_file = os.path.join(directory, "GUI", "booking_dialog.ui")
-        loadUi(ui_file, self)
-
         self.setWindowTitle("Airport Management System")
         self.setWindowIcon(QIcon("GUI/airport.png"))
         self.load_combo_boxes()
@@ -61,15 +127,15 @@ class BookingDialog(QDialog):
         # self.buttonBox.rejected.connect(Dialog.reject)
 
     def load_combo_boxes(self):
-        # delegate = ComboBoxDelegate()
-        # self.comboBox_person.setItemDelegate(delegate)
         self.comboBox_person.setModel(self.select_osoba())
         self.comboBox_flight.setModel(self.select_lot())
         self.comboBox_seat.setModel(self.select_miejsce())
+        # self.comboBox_seat.setItemDelegate(SeatItemDelegate())
 
     def set_combo_boxes_model_column(self):
         self.comboBox_person.setModelColumn(1)
         self.comboBox_flight.setModelColumn(1)
+        self.comboBox_seat.setModelColumn(1)
 
     def select_osoba(self):
         self.model_osoba = QSqlQueryModel()
@@ -98,13 +164,15 @@ class BookingDialog(QDialog):
         return self.model_lot
 
     def select_miejsce(self):
-        # self.get_data()
         self.flight = self.model_lot.record(self.comboBox_flight.currentIndex()).value(
             "lot_id"
         )
-        print(f"self.flight - {self.flight}")
-        print(f"self.row_id - {self.row_id}")
-        self.model_miejsce = QSqlQueryModel(None)
+        # print(f"self.flight - {self.flight}")
+        # print(f"self.row_id - {self.row_id}")
+
+        # self.model_miejsce = QSqlQueryModel(None)
+        self.model_miejsce = SeatModel(None)
+
         # query = (
         #     f"SELECT m.miejsce_samolot_id "
         #     f"FROM miejsce m "
@@ -112,17 +180,39 @@ class BookingDialog(QDialog):
         #     f"WHERE m.samolot_id = (SELECT l.samolot_id FROM lot l WHERE lot_id = {self.flight}) "
         #     f"AND b.miejsce_id IS NULL"
         # )
+        # query = (
+        #     f"SELECT m.miejsce_samolot_id "
+        #     f"FROM ( "
+        #     f"    SELECT * "
+        #     f"    FROM miejsce m "
+        #     f"    WHERE m.samolot_id = (SELECT l.samolot_id FROM lot l WHERE l.lot_id = {self.flight}) "
+        #     f") AS m "
+        #     f"LEFT JOIN (SELECT * FROM bilet b WHERE b.lot_id = {self.flight}) AS b ON m.miejsce_samolot_id = b.miejsce_id "
+        #     f"WHERE b.miejsce_id IS NULL "
+        #     f"OR b.bilet_id = {self.row_id}"
+        # )
         query = (
-            f"SELECT m.miejsce_samolot_id "
-            f"FROM ( "
-            f"    SELECT * "
-            f"    FROM miejsce m "
-            f"    WHERE m.samolot_id = (SELECT l.samolot_id FROM lot l WHERE l.lot_id = {self.flight}) "
-            f") AS m "
-            f"LEFT JOIN (SELECT * FROM bilet b WHERE b.lot_id = {self.flight}) AS b ON m.miejsce_samolot_id = b.miejsce_id "
-            f"WHERE b.miejsce_id IS NULL "
+            "WITH lot_samolot_id AS ("
+            "    SELECT l.samolot_id "
+            "    FROM lot l "
+            f"    WHERE l.lot_id = {self.flight}"
+            "), "
+            "lot_samolot_miejsce AS ("
+            "    SELECT * "
+            "    FROM miejsce m "
+            "    WHERE m.samolot_id = (SELECT samolot_id FROM lot_samolot_id)"
+            ") "
+            "SELECT m.miejsce_samolot_id "
+            "FROM lot_samolot_miejsce m "
+            "LEFT JOIN ("
+            "    SELECT * "
+            "    FROM bilet b "
+            f"    WHERE b.lot_id = {self.flight}"
+            ") AS b ON m.miejsce_samolot_id = b.miejsce_id "
+            "WHERE b.miejsce_id IS NULL "
             f"OR b.bilet_id = {self.row_id}"
         )
+
         self.model_miejsce.setQuery(query, self.db_handler.con)
         self.comboBox_seat.setModel(self.model_miejsce)
         return self.model_miejsce
@@ -200,10 +290,10 @@ class BookingDialog(QDialog):
         #     self.comboBox_seat.currentIndex(), Qt.ItemDataRole.EditRole
         # )
 
-        print(f"seat_id - {self.query.value(3)}, type - {type(self.query.value(3))}")
-        print(
-            f"{type(self.query.value(1))}, {type(self.query.value(2))}, {type(self.query.value(3))}, {type(self.query.value(4))}"
-        )
+        # print(f"seat_id - {self.query.value(3)}, type - {type(self.query.value(3))}")
+        # print(
+        #     f"{type(self.query.value(1))}, {type(self.query.value(2))}, {type(self.query.value(3))}, {type(self.query.value(4))}"
+        # )
 
         assistant_yes_no = "Yes" if self.query.value(4) else "No"
         self.comboBox_assistant.setCurrentIndex(

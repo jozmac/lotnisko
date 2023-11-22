@@ -1,5 +1,4 @@
-import sys, os
-
+import sys
 from PyQt6.QtWidgets import QApplication
 from database_handler import DatabaseHandler
 

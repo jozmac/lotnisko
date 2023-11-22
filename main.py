@@ -1,18 +1,6 @@
-from PyQt6.QtWidgets import (
-    QWidget,
-    QMainWindow,
-    QApplication,
-    QTableWidgetItem,
-    QTableView,
-    QMessageBox,
-    QDialog,
-    QAbstractItemView,
-)
-
-from PyQt6.uic import loadUi, loadUiType
-from PyQt6.QtCore import Qt, QSortFilterProxyModel, QDateTime, QModelIndex
-
-from PyQt6.QtGui import QPainter, QColor, QTextDocument, QIcon, QFont, QImage
+from PyQt6.QtWidgets import QWidget, QApplication
+from PyQt6.QtGui import QIcon
+from PyQt6.uic import loadUiType
 import sys, os
 
 from classes.osoba_tab import OsobaTab
@@ -99,51 +87,34 @@ from classes.database_handler import DatabaseHandler
 # QSqlQuery bindvalue
 # combobox nie zwraca indexu modelu zaznaczonej opcji - jedynie int
 # ładowanie danych do dialogu edycji, zmiana miejsca w samolocie
-
-# organizacja folderu
+# organizacja folderu, RunDialog
+# error - błędna nazwa tabeli w zapytaniu: (42601) QPSQL: Unable to create query
 # Poprawne pobieranie dostępnych miejsc
-# RunDialog
 # Filtrowanie lotnisk QSortFilterProxyModel
+# - jak zaimportować dane do wolumenu
+# docker-compose.yml - baza danych postgres w kontenerze + dane w wolumenie
 
-
-# error w przypadku błędnej nazwy tabeli:
-# ERROR:  syntax error at end of input
-# LINE 1: EXECUTE
-#                 ^
-# (42601) QPSQL: Unable to create query
+# loadUiType zamiast loadUi
+# booking_dialog miejsce query - podzapytania - zamienić na WITH - https://www.postgresql.org/docs/current/queries-with.html
+# lepsze wyświetlanie miejsc w samolocie (np. 14A) - QItemDelegate pozwala na jedynie zmianę tekstu wyświetlanego w wyskakującej liście
+# QCompleter
+# poprawne ładowanie comboboxów do edycji FlightDialog (opcje nie są wybierane poprawnie po użyciu QSortFilterProxyModel) - zmienione na QLineEdit
+# Comboboxy w FlightDialog nie wyświetlają listy opcji - jedynie aktualnie wybraną. Można zmieniać scrollem (w przypadku QSortFilterProxyModel) - zmienione na QLineEdit
 
 
 # TODO:
-# lepsze wyświetlanie miejsc w samolocie (np. 14A) - QItemDelegate
-# ładowanie comboboxów do edycji FlightDialog
+# sockety/fastAPI/flask/django - client/server - napisać prosty backend - client PyQt wysyła zapytanie serwera Flask
 # mockowanie dialogu
 # pytest - QSqlQuery nie buduje zapytania w przypadku zmockowanego db_handlera
 # pytest - sprawdzenie wartości w oknie edycji
-# FORM_CLASS dla każdego okna
+# pytest - co testować? - przypadki brzegowe, sprawdzanie errorów przy wpisywaniu "drop table" lub niepoprawnego formatu danych, połączenie lineeditów z get_data,
 # hashowanie - dane osób - dodać kolumnę
-#
-# materiały:
-# pytest - co testować? - przypadki brzegowe, sprawdzanie errorów przy wpisywaniu "drop table" lub niepoprawnego formatu danych
-# docker compose - baza danych postgres w kontenerze + dane w wolumenie
-# API - client-server - sockety/flask/django
-# rozdzielenie backend-frontend
+# clean dialogs code - prints
 
-# fast API albo sockety - baza lotnisko - napisać prosty backend - client wysyła za pytanie do bazy lotnisko - serwer odczytuje bazę
 
 # Pytania:
 
 
-# run docker desktop
-# run a PostgreSQL image as a container:
-# docker run -d --name lotnisko postgres
-# docker volume ls
-# docker inspect lotnisko
-# remove container:
-# docker rm -f mydb
-# remove volume:
-# docker volume rm 39089f261ce67fdf11caf9ae3357a7d789de80cc9038530275452cc9baf1617d
-
-# QItemDelegate - tabele, comboboxy - select id
 # py
 # class AreaItemDelegate(QItemDelegate):
 #     def paint(self, painter, option, index):
@@ -167,8 +138,8 @@ BILET_TAB_INDEX = 1
 LOT_TAB_INDEX = 2
 TAB_LABELS = ["Osoba", "Bilet", "Lot"]
 
-UI_PATH = os.path.join(os.path.dirname(__file__), "GUI")
-FORM_CLASS, BASE_CLASS = loadUiType(os.path.join(UI_PATH, "main.ui"))
+UI_PATH = os.path.join(os.path.dirname(__file__), "GUI", "main.ui")
+FORM_CLASS, BASE_CLASS = loadUiType(UI_PATH)
 
 
 class MainWindow(QWidget, FORM_CLASS):
@@ -241,7 +212,7 @@ def run_app():
     # app.setStyle("macOS")
     # app.setStyle("Windows")
 
-    db_handler = DatabaseHandler()
+    db_handler = DatabaseHandler(port=5435)
     db_handler.create_connection()
     window = MainWindow(db_handler)
     window.show()
@@ -249,4 +220,7 @@ def run_app():
 
 
 if __name__ == "__main__":
+    # from config import BASE_DIR, UI_FILE
+    # print(UI_FILE)
+    # print(BASE_DIR)
     run_app()
