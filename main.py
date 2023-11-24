@@ -136,10 +136,10 @@ from classes.database_handler import DatabaseHandler
 #             self.parent().style().drawControl(QStyle.CE_ItemViewItem,
 #                                               styleOption, painter)
 
-
-OSOBA_TAB_INDEX = 0
-BILET_TAB_INDEX = 1
-LOT_TAB_INDEX = 2
+# OSOBA_TAB_INDEX = 0
+# BILET_TAB_INDEX = 1
+# LOT_TAB_INDEX = 2
+OSOBA_TAB_INDEX, BILET_TAB_INDEX, LOT_TAB_INDEX = range(3)
 TAB_LABELS = ["Osoba", "Bilet", "Lot"]
 
 UI_PATH = os.path.join(os.path.dirname(__file__), "GUI", "main.ui")
@@ -147,7 +147,7 @@ FORM_CLASS, BASE_CLASS = loadUiType(UI_PATH)
 
 
 class MainWindow(QWidget, FORM_CLASS):
-    def __init__(self, db_handler: DatabaseHandler) -> QWidget:
+    def __init__(self, db_handler: DatabaseHandler):
         super().__init__()
         self.setupUi(self)
         self.db_handler = db_handler
@@ -216,7 +216,8 @@ def run_app():
     # app.setStyle("macOS")
     # app.setStyle("Windows")
 
-    db_handler = DatabaseHandler(port=5435)
+    # db_handler = DatabaseHandler()
+    db_handler = DatabaseHandler(port=5435)  # Docker database
     db_handler.create_connection()
     window = MainWindow(db_handler)
     window.show()

@@ -1,4 +1,4 @@
-from PyQt6.QtSql import QSqlDatabase, QSqlQuery
+from PyQt6.QtSql import QSqlDatabase, QSqlQuery, QSqlQueryModel
 from PyQt6.QtWidgets import QMessageBox
 
 
@@ -52,6 +52,11 @@ class DatabaseHandler:
             print(f"Last query -> {query.lastQuery()}")
             print(f"Bound values -> {query.boundValues()}")
             self.display_error(f"Query execution error: {query.lastError().text()}")
+
+    def return_model(self, query):
+        self.model = QSqlQueryModel()
+        self.model.setQuery(query, self.con)
+        return self.model
 
     def display_error(self, message):
         QMessageBox.critical(None, "Error", message)

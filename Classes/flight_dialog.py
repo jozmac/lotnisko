@@ -26,8 +26,8 @@ class FlightDialog(QDialog, FORM_CLASS):
 
         self.load_combo_boxes()
 
-        self.comboBox_from.setCurrentIndex(1538)
-        self.comboBox_to.setCurrentIndex(1538)
+        # self.comboBox_from.setCurrentIndex(1538)
+        # self.comboBox_to.setCurrentIndex(1538)
 
     def set_combo_boxes_model_column(self):
         self.comboBox_plane.setModelColumn(1)
@@ -214,14 +214,6 @@ class FlightDialog(QDialog, FORM_CLASS):
         # )
         # self.comboBox_to.setCurrentIndex(
         #     self.comboBox_to.findData(self.query.value(2), 0)
-        # )
-
-        # # TODO
-        # self.completer_from.setCurrentIndex(
-        #     self.completer_from.findData(self.query.value(1), 0)
-        # )
-        # self.completer_to.setCurrentIndex(
-        #     self.completer_to.findData(self.query.value(2), 0)
         # )
 
         lotnisko_data_from = self.model_lotnisko.record(
