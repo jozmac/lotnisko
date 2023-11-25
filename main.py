@@ -104,12 +104,11 @@ from classes.database_handler import DatabaseHandler
 # poprawne ładowanie lineeditów do edycji FlightDialog
 # sockety/fastAPI/flask/django - client/server - napisać prosty backend - client PyQt wysyła zapytanie serwera Flask
 # remove flightDialog comboboxes
+# pytest - QSqlQuery nie buduje zapytania w przypadku zmockowanego db_handlera
+# pytest - sprawdzenie wartości w oknie edycji
 
 
 # TODO:
-# mockowanie dialogu
-# pytest - QSqlQuery nie buduje zapytania w przypadku zmockowanego db_handlera
-# pytest - sprawdzenie wartości w oknie edycji
 # pytest - co testować? - przypadki brzegowe, sprawdzanie errorów (niepoprawny format danych, ...), połączenie lineeditów z get_data,
 # hashowanie - dane osób - dodać kolumnę
 # delete comments
@@ -215,8 +214,8 @@ def run_app():
     # app.setStyle("macOS")
     # app.setStyle("Windows")
 
-    # db_handler = DatabaseHandler()
-    db_handler = DatabaseHandler(port=5435)  # Docker database
+    db_handler = DatabaseHandler()
+    # db_handler = DatabaseHandler(port=5435)  # Docker database
     db_handler.create_connection()
     window = MainWindow(db_handler)
     window.show()
