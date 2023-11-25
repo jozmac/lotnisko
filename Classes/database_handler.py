@@ -6,9 +6,9 @@ class DatabaseHandler:
     def __init__(
         self,
         database_name="lotnisko",
-        host="localhost",
         username="postgres",
         password="password",
+        host="localhost",
         port=5432,
     ):
         self.database_name = database_name

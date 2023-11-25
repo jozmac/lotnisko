@@ -102,17 +102,16 @@ from classes.database_handler import DatabaseHandler
 # Comboboxy w FlightDialog nie wyświetlają listy opcji - jedynie aktualnie wybraną. Można zmieniać scrollem (w przypadku QSortFilterProxyModel) - zmienione na QLineEdit
 # self as parent
 # poprawne ładowanie lineeditów do edycji FlightDialog
+# sockety/fastAPI/flask/django - client/server - napisać prosty backend - client PyQt wysyła zapytanie serwera Flask
+# remove flightDialog comboboxes
 
 
 # TODO:
-# sockety/fastAPI/flask/django - client/server - napisać prosty backend - client PyQt wysyła zapytanie serwera Flask
-
 # mockowanie dialogu
 # pytest - QSqlQuery nie buduje zapytania w przypadku zmockowanego db_handlera
 # pytest - sprawdzenie wartości w oknie edycji
-# pytest - co testować? - przypadki brzegowe, sprawdzanie errorów przy wpisywaniu "drop table" lub niepoprawnego formatu danych, połączenie lineeditów z get_data,
+# pytest - co testować? - przypadki brzegowe, sprawdzanie errorów (niepoprawny format danych, ...), połączenie lineeditów z get_data,
 # hashowanie - dane osób - dodać kolumnę
-# remove flightDialog comboboxes
 # delete comments
 
 

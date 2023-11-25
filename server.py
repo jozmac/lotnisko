@@ -6,26 +6,26 @@ import psycopg2
 
 app = Flask(__name__)
 
-DB_HOST = "localhost"
-DB_PORT = 5432
-# DB_PORT = 5435  # Docker
-DB_NAME = "lotnisko"
-DB_USER = "postgres"
-DB_PASSWORD = "password"
+DB_CONFIG = {
+    "dbname": "lotnisko",
+    "user": "postgres",
+    "password": "password",
+    "host": "localhost",
+    "port": 5432,
+    # "port": 5435, # Docker
+}
 
 
 def connect_to_database():
-    connection = psycopg2.connect(
-        host=DB_HOST, port=DB_PORT, database=DB_NAME, user=DB_USER, password=DB_PASSWORD
-    )
+    connection = psycopg2.connect(**DB_CONFIG)
     return connection
 
 
-def get_from_database(query):
+def get_from_database(query, params=None):
     try:
         connection = connect_to_database()
         cursor = connection.cursor()
-        cursor.execute(query)
+        cursor.execute(query, params)
         data = cursor.fetchall()
         cursor.close()
         connection.close()
@@ -37,6 +37,9 @@ def get_from_database(query):
 
 @app.route("/api/data/<table_name>")
 def get_data(table_name):
+    query = "SELECT * FROM %(table_name)s"
+    params = {"table_name": table_name}
+    data = get_from_database(query, params)
     data = get_from_database(f"SELECT * FROM {table_name}")
     print(type(data))
     return data
