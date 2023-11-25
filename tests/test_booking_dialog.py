@@ -5,22 +5,25 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication
 from unittest.mock import Mock, patch
 
-from booking_dialog import BookingDialog
-from classes.DatabaseHandler import DatabaseHandler
+sys.path.insert(0, "C:\\PycharmProjects\\lotnisko")
+
+from classes.booking_dialog import BookingDialog
+from classes.database_handler import DatabaseHandler
 
 # TODO - wszystko do poprawy
 
 
-class MockBookingDialog(BookingDialog):
-    def __init__(self, db_handler: DatabaseHandler, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.db_handler = db_handler
+# class MockBookingDialog(BookingDialog):
+#     def __init__(self, db_handler: DatabaseHandler, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         self.db_handler = db_handler
 
 
 def test_insert_into_database():
     db_handler = Mock()
     application = QApplication(sys.argv)
-    window = MockBookingDialog(db_handler)
+    window = BookingDialog(db_handler)
+    # window = MockBookingDialog(db_handler)
 
     window.load_combo_boxes = Mock()
     window.get_data = Mock()

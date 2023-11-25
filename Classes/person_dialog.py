@@ -31,7 +31,8 @@ class PersonDialog(QDialog, FORM_CLASS):
 
     def insert_into_database(self):
         self.get_data()
-        self.query = QSqlQuery(None, self.db_handler.con)
+        # self.query = QSqlQuery(None, self.db_handler.con)
+        self.query = QSqlQuery(None)
         self.query.prepare(
             "INSERT INTO osoba (imie, nazwisko, stanowisko) VALUES (?, ?, ?)"
         )

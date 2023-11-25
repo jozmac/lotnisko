@@ -14,8 +14,8 @@ from PyQt6.QtCore import Qt, QVariant, QAbstractTableModel
 
 # from PyQt6.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
 # from PyQt6.QtCore import Qt, QUrl
-from PyQt6.QtGui import QStandardItemModel, QStandardItem
-import requests
+# from PyQt6.QtGui import QStandardItemModel, QStandardItem
+import requests  # HTTP library
 
 
 class CustomTableModel(QAbstractTableModel):
@@ -33,14 +33,6 @@ class CustomTableModel(QAbstractTableModel):
         if role == Qt.ItemDataRole.DisplayRole:
             return str(self._data[index.row()][index.column()])
         return QVariant()
-
-    # def headerData(self, section, orientation, role=Qt.ItemDataRole.DisplayRole):
-    #     if role == Qt.ItemDataRole.DisplayRole:
-    #         if orientation == Qt.Orientation.Horizontal:
-    #             return str(self._data.columns[section])
-    #         elif orientation == Qt.Orientation.Vertical:
-    #             return str(self._data.index[section])
-    #     return QVariant()
 
 
 class MainWindow(QMainWindow):
@@ -76,26 +68,25 @@ class MainWindow(QMainWindow):
             response.raise_for_status()
             data = response.json()  # list of lists (list of rows)
             self.display_data(data)
-            self.label.setText(
-                f"Status code: {response.status_code} - {self.get_status_info(response.status_code)}"
-            )
+            self.label.setText(f"Status: {self.get_status_info(response.status_code)}")
 
         except requests.RequestException as e:
             self.label.setText(str(e))
 
     def get_status_info(self, status_code):
-        if 100 <= status_code < 200:
-            return "Informational response"
-        elif 200 <= status_code < 300:
-            return "Successful response"
-        elif 300 <= status_code < 400:
-            return "Redirection message"
-        elif 400 <= status_code < 500:
-            return "Client error response"
-        elif 500 <= status_code < 600:
-            return "Server error response"
-        else:
-            return "Unknown status code"
+        status_ranges = {
+            (100, 200): "Informational response",
+            (200, 300): "Successful response",
+            (300, 400): "Redirection message",
+            (400, 500): "Client error response",
+            (500, 600): "Server error response",
+        }
+
+        for code_range, info in status_ranges.items():
+            if code_range[0] <= status_code < code_range[1]:
+                return info
+
+        return "Unknown status code"
 
     def display_data(self, data):
         # model = QStandardItemModel(len(data), len(data[0]), self)

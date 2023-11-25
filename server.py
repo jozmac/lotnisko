@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask  # Web service
 import psycopg2
 
 # from classes.database_handler import DatabaseHandler
@@ -46,13 +46,7 @@ def get_data(table_name):
 
 
 if __name__ == "__main__":
-    # db_handler = DatabaseHandler(
-    #     database_name=DB_NAME,
-    #     host=DB_HOST,
-    #     username=DB_USER,
-    #     password=DB_PASSWORD,
-    #     port=DB_PORT,
-    # )
+    # db_handler = DatabaseHandler()
     # db_handler.create_connection()
     app.run(debug=True)
     # app.run(host="0.0.0.0", port=5000, debug=True)
