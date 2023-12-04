@@ -12,29 +12,27 @@ FORM_CLASS, BASE_CLASS = loadUiType(UI_PATH)
 class FlightDialog(QDialog, FORM_CLASS):
     def __init__(self, db_handler, row_id=0, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.setupUi(self)
         self.db_handler = db_handler
         self.row_id = row_id
-        self.init_gui()
-        if self.row_id:
-            self.set_edit_values()
-        self.set_combo_boxes_model_column()
+        self._init_ui()
 
-    def init_gui(self):
+    def _init_ui(self):
+        self.setupUi(self)
         self.setWindowTitle("Airport Management System")
         self.setWindowIcon(QIcon("GUI/airport.png"))
-
-        self.load_combo_boxes()
-
+        self._load_combo_boxes()
+        if self.row_id:
+            self._set_edit_values()
+        self._set_combo_boxes_model_column()
         # self.comboBox_from.setCurrentIndex(1538)
         # self.comboBox_to.setCurrentIndex(1538)
 
-    def set_combo_boxes_model_column(self):
+    def _set_combo_boxes_model_column(self):
         self.comboBox_plane.setModelColumn(1)
         # self.comboBox_from.setModelColumn(1)
         # self.comboBox_to.setModelColumn(1)
 
-    def load_combo_boxes(self):
+    def _load_combo_boxes(self):
         self.model_samolot = QSqlQueryModel()
         query = (
             "SELECT samolot_id AS samolot_id, "
@@ -139,66 +137,7 @@ class FlightDialog(QDialog, FORM_CLASS):
 
     #     self.comboBox_to.setModel(self.proxy_model_to)
 
-    def get_data(self):
-        # selected_date = self.calendarWidget.selectedDate().toPyDate()
-        # selected_time = self.timeEdit.time().toPyTime()
-        # py_datetime = datetime.combine(selected_date, selected_time)
-        # datetime_str = py_datetime.strftime("%Y-%m-%d %H:%M:%S")
-        # self.qt_datetime = QDateTime.fromString(datetime_str, "yyyy-MM-dd HH:mm:ss")
-
-        selected_date = self.calendarWidget.selectedDate()
-        selected_time = self.timeEdit.time()
-        self.qt_datetime = QDateTime()
-        self.qt_datetime.setDate(selected_date)
-        self.qt_datetime.setTime(selected_time)
-
-        # self.plane = self.comboBox_plane.itemData(
-        #     self.comboBox_plane.currentIndex(), Qt.ItemDataRole.EditRole
-        # )
-        # self.airport_a = self.comboBox_from.itemData(
-        #     self.comboBox_from.currentIndex(), Qt.ItemDataRole.EditRole
-        # )
-        # self.airport_b = self.comboBox_to.itemData(
-        #     self.comboBox_to.currentIndex(), Qt.ItemDataRole.EditRole
-        # )
-
-        self.plane = self.model_samolot.record(
-            self.comboBox_plane.currentIndex()
-        ).value("samolot_id")
-        # self.airport_a = self.model_lotnisko.record(
-        #     self.comboBox_from.currentIndex()
-        # ).value("lotnisko_id")
-        # self.airport_b = self.model_lotnisko.record(
-        #     self.comboBox_to.currentIndex()
-        # ).value("lotnisko_id")
-
-        self.airport_a = self.model_lotnisko.record(
-            self.completer_from.currentIndex()
-        ).value("lotnisko_id")
-        self.airport_b = self.model_lotnisko.record(
-            self.completer_to.currentIndex()
-        ).value("lotnisko_id")
-
-        # print(
-        #     f"{self.plane} - {self.airport_a} - {self.airport_b} - {self.qt_datetime} - {self.row_id}"
-        # )
-        # print(
-        #     f"{type(self.plane)} - {type(self.airport_a)} - {type(self.airport_b)} - {type(self.qt_datetime)} - {type(self.row_id)}"
-        # )
-
-    def insert_into_database(self):
-        self.get_data()
-        self.query = QSqlQuery(None, self.db_handler.con)
-        self.query.prepare(
-            "INSERT INTO lot (samolot_id, lotnisko_a_id, lotnisko_b_id, datetime) VALUES (?, ?, ?, ?)"
-        )
-        self.query.addBindValue(self.plane)
-        self.query.addBindValue(self.airport_a)
-        self.query.addBindValue(self.airport_b)
-        self.query.addBindValue(self.qt_datetime)
-        self.db_handler.execute_query(self.query)
-
-    def set_edit_values(self):
+    def _set_edit_values(self):
         self.query = QSqlQuery(None, self.db_handler.con)
         self.query.prepare(
             "SELECT samolot_id, lotnisko_a_id, lotnisko_b_id, datetime FROM lot WHERE lot_id = ?"
@@ -259,8 +198,105 @@ class FlightDialog(QDialog, FORM_CLASS):
         self.calendarWidget.setSelectedDate(date)
         self.timeEdit.setTime(time)
 
+    def _get_data(self):
+        # selected_date = self.calendarWidget.selectedDate().toPyDate()
+        # selected_time = self.timeEdit.time().toPyTime()
+        # py_datetime = datetime.combine(selected_date, selected_time)
+        # datetime_str = py_datetime.strftime("%Y-%m-%d %H:%M:%S")
+        # self.qt_datetime = QDateTime.fromString(datetime_str, "yyyy-MM-dd HH:mm:ss")
+
+        selected_date = self.calendarWidget.selectedDate()
+        selected_time = self.timeEdit.time()
+        self.qt_datetime = QDateTime()
+        self.qt_datetime.setDate(selected_date)
+        self.qt_datetime.setTime(selected_time)
+
+        # self.plane = self.comboBox_plane.itemData(
+        #     self.comboBox_plane.currentIndex(), Qt.ItemDataRole.EditRole
+        # )
+        # self.airport_a = self.comboBox_from.itemData(
+        #     self.comboBox_from.currentIndex(), Qt.ItemDataRole.EditRole
+        # )
+        # self.airport_b = self.comboBox_to.itemData(
+        #     self.comboBox_to.currentIndex(), Qt.ItemDataRole.EditRole
+        # )
+
+        self.plane = self.model_samolot.record(
+            self.comboBox_plane.currentIndex()
+        ).value("samolot_id")
+        # self.airport_a = self.model_lotnisko.record(
+        #     self.comboBox_from.currentIndex()
+        # ).value("lotnisko_id")
+        # self.airport_b = self.model_lotnisko.record(
+        #     self.comboBox_to.currentIndex()
+        # ).value("lotnisko_id")
+
+        # self.airport_a = self.model_lotnisko.record(
+        #     self.completer_from.currentIndex()
+        # ).value("lotnisko_id")
+        # self.airport_b = self.model_lotnisko.record(
+        #     self.completer_to.currentIndex()
+        # ).value("lotnisko_id")
+
+        # index_from = self.completer_from.currentIndex()
+        # row = index_from.row()
+        # key = self.completer_from.completionModel.index(row, 1).data()
+        # print(key)
+
+        self.airport_a = self.model_lotnisko.record(
+            self.model_lotnisko.match(
+                self.model_lotnisko.index(0, 0),
+                Qt.ItemDataRole.DisplayRole,
+                self.completer_from.currentCompletion(),
+                1,
+                Qt.MatchFlag.MatchContains,
+            )[0].row()
+        ).value("lotnisko_id")
+
+        self.airport_b = self.model_lotnisko.record(
+            self.model_lotnisko.match(
+                self.model_lotnisko.index(0, 0),
+                Qt.ItemDataRole.DisplayRole,
+                self.completer_to.currentCompletion(),
+                1,
+                Qt.MatchFlag.MatchContains,
+            )[0].row()
+        ).value("lotnisko_id")
+
+        # self.airport_a = self.model_lotnisko.data(
+        #     self.completer_from.currentIndex().siblingAtColumn(1)
+        # )
+        # self.airport_b = self.model_lotnisko.data(
+        #     self.completer_to.currentIndex().siblingAtColumn(1)
+        # )
+
+        # print(self.completer_from.currentIndex())
+        # print(self.completer_to.currentIndex())
+
+        # print(self.airport_a)
+        # print(self.airport_b)
+
+        # print(
+        #     f"{self.plane} - {self.airport_a} - {self.airport_b} - {self.qt_datetime} - {self.row_id}"
+        # )
+        # print(
+        #     f"{type(self.plane)} - {type(self.airport_a)} - {type(self.airport_b)} - {type(self.qt_datetime)} - {type(self.row_id)}"
+        # )
+
+    def insert_into_database(self):
+        self._get_data()
+        self.query = QSqlQuery(None, self.db_handler.con)
+        self.query.prepare(
+            "INSERT INTO lot (samolot_id, lotnisko_a_id, lotnisko_b_id, datetime) VALUES (?, ?, ?, ?)"
+        )
+        self.query.addBindValue(self.plane)
+        self.query.addBindValue(self.airport_a)
+        self.query.addBindValue(self.airport_b)
+        self.query.addBindValue(self.qt_datetime)
+        self.db_handler.execute_query(self.query)
+
     def update_database(self):
-        self.get_data()
+        self._get_data()
         self.query = QSqlQuery(None, self.db_handler.con)
         self.query.prepare(
             "UPDATE lot SET samolot_id = ?, lotnisko_a_id = ?, lotnisko_b_id = ?, datetime = ? WHERE lot_id = ?"
@@ -276,4 +312,4 @@ class FlightDialog(QDialog, FORM_CLASS):
 if __name__ == "__main__":
     from run_test_dialog import RunTestDialog
 
-    test_window = RunTestDialog(FlightDialog, row_id=0)
+    test_window = RunTestDialog(FlightDialog, row_id=3)

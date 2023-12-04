@@ -56,25 +56,6 @@
         </widget>
        </item>
        <item>
-        <widget class="QComboBox" name="comboBox_from">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>250</width>
-           <height>0</height>
-          </size>
-         </property>
-        </widget>
-       </item>
-       <item>
         <widget class="QLabel" name="label_to">
          <property name="font">
           <font>
@@ -88,25 +69,6 @@
        </item>
        <item>
         <widget class="QLineEdit" name="lineEdit_to"/>
-       </item>
-       <item>
-        <widget class="QComboBox" name="comboBox_to">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>250</width>
-           <height>0</height>
-          </size>
-         </property>
-        </widget>
        </item>
        <item>
         <widget class="QCalendarWidget" name="calendarWidget"/>

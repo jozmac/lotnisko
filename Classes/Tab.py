@@ -23,7 +23,7 @@ class Tab(QWidget):
         super().__init__()
 
     def init_ui(self):
-        self.model = QSqlQueryModel(None)
+        self.model = QSqlQueryModel()
         self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
         self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
@@ -74,7 +74,7 @@ class Tab(QWidget):
         )
         if reply == QMessageBox.StandardButton.No:
             return
-        query = QSqlQuery(self, self.db_handler.con)
+        query = QSqlQuery(None, self.db_handler.con)
         query.prepare(f"DELETE FROM {self.tab_name} WHERE {self.id_column} = ?")
         query.addBindValue(row_id)
         if query.exec():
@@ -87,3 +87,6 @@ class Tab(QWidget):
         row_id = self.get_selected_row_id(self.table.currentIndex())
         if not row_id:
             return self.select_row_msg()
+        msg = QMessageBox(self, text=f"The id of the selected row is {row_id}.")
+        msg.setWindowTitle("Information")
+        msg.exec()

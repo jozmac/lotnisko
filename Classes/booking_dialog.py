@@ -7,93 +7,25 @@ import os
 
 from PyQt6.QtWidgets import QStyle, QStyleOptionViewItem
 
-# class SeatItemDelegate(QStyledItemDelegate):
-#     def __init__(self, parent):
-#         super().__init__()
-#         self.parent = parent
-#
-#     def displayText(self, value, locale):
-#         # index = value.index(self.currentIndex)
-#         # return index.siblingAtColumn(1).data()
-#         index: QModelIndex = self.parent.currentIndex()
-#         id: int = self.model_osoba.data(index.siblingAtColumn(0), 0)
-#         return id
+# class SeatModel(QSqlQueryModel):
+#     def __init__(self, parent=None, seat_columns_count=6, *args, **kwargs):
+#         self.seat_columns_count = seat_columns_count
+#         super().__init__(parent, *args, **kwargs)
 
+#     def columnCount(self, parent=None):
+#         return 2
 
-# class SeatItemDelegate(QStyledItemDelegate):
-#     def displayText(self, value, locale):
-#         return f"seat_id - {value}"
-
-#     # def setEditorData(self, editor, index: QModelIndex):
-#     #     value = index.model().data(index, Qt.ItemDataRole.DisplayRole)
-#     #     editor.setCurrentText(f"seat_id - {value}")
-
-#     # def setModelData(self, editor, model, index: QModelIndex):
-#     #     model.setData(
-#     #         index, f"seat_id - {editor.currentText()}", Qt.ItemDataRole.DisplayRole
-#     #     )
-
-
-# class SeatItemDelegate(QItemDelegate):
-#     def paint(self, painter: QPainter, option, index: QModelIndex):
-#         styleOption = QStyleOptionViewItem(option)
-#         try:
-#             value = index.data(Qt.ItemDataRole.DisplayRole)
-#         except AttributeError:
-#             value = ""
-#         if value not in [None, "NULL", ""]:
-#             wartosc = str(value)
-#             styleOption.text = wartosc.replace(".", ",")
-#             styleOption.displayAlignment = Qt.AlignRight | Qt.AlignVCenter
-#             if styleOption.state & QStyle.State_Selected:
-#                 styleOption.state |= QStyle.State_Active
-#             self.parent().style().drawControl(
-#                 QStyle.CE_ItemViewItem, styleOption, painter
-#             )
-
-
-# def setEditorData(self, editor, index):
-#     super().setEditorData(editor, index)
-#     # Update the display text of the selected item in the combo box
-#     editor.setCurrentText(
-#         self.displayText(index.data(Qt.ItemDataRole.DisplayRole), None)
-#     )
-
-# def setEditorData(self, editor, index: QModelIndex):
-#     value = index.model().data(index, Qt.ItemDataRole.DisplayRole)
-#     editor.setCurrentText(f"value - {value}")
-
-
-# class SeatItemDelegate(QStyledItemDelegate):
-#     # def createEditor(self, parent, options, index):
-#     #     return QtGui.QTextEdit(parent)
-
-#     def setEditorData(self, editor, index):
-#         editor.setText(f"value - {index.data()}")
-
-#     def setModelData(self, editor, model, index):
-#         model.setData(index, f"value - {editor.toPlainText()}")
-
-
-class SeatModel(QSqlQueryModel):
-    def __init__(self, parent=None, seat_columns_count=6):
-        self.seat_columns_count = seat_columns_count
-        super().__init__(parent)
-
-    def columnCount(self, parent=None):
-        return 2
-
-    def data(self, index, role=Qt.ItemDataRole.DisplayRole):
-        if index.isValid() and role == Qt.ItemDataRole.DisplayRole:
-            if index.column() == 1:
-                seat_id = self.data(self.index(index.row(), 0), role)
-                row_number = int(seat_id / self.seat_columns_count) + 1
-                seat_letter = chr((seat_id - 1) % self.seat_columns_count + 65)
-                seat_name = f"{seat_id} - {row_number}{seat_letter}"
-                return seat_name
-            else:
-                return super().data(index, role)
-        return None
+#     def data(self, index, role=Qt.ItemDataRole.DisplayRole):
+#         if index.isValid() and role == Qt.ItemDataRole.DisplayRole:
+#             if index.column() == 1:
+#                 seat_id = self.data(self.index(index.row(), 0), role)
+#                 row_number = int(seat_id / self.seat_columns_count) + 1
+#                 seat_letter = chr((seat_id - 1) % self.seat_columns_count + 65)
+#                 seat_name = f"{seat_id} - {row_number}{seat_letter}"
+#                 return seat_name
+#             else:
+#                 return super().data(index, role)
+#         return None
 
 
 UI_PATH = os.path.join(os.path.dirname(__file__), "..", "GUI", "booking_dialog.ui")
@@ -103,94 +35,97 @@ FORM_CLASS, BASE_CLASS = loadUiType(UI_PATH)
 class BookingDialog(QDialog, FORM_CLASS):
     def __init__(self, db_handler, row_id=0, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.setupUi(self)
         self.db_handler = db_handler
         self.row_id = row_id
-        self.init_gui()
-        if row_id:
-            self.set_edit_values()
-        self.set_combo_boxes_model_column()
-        self.comboBox_flight.currentIndexChanged.connect(self.select_miejsce)
-        self.comboBox_seat.currentIndexChanged.connect(self.set_seat_name)
+        self._init_ui()
 
-    def set_seat_name(self):
-        current_text = self.comboBox_seat.currentText()
-        print(current_text)
-        self.comboBox_seat.setCurrentText(f"value - {current_text}")
-        # self.comboBox_seat.setCurrentData(f"value - {current_text}")
-
-    def init_gui(self):
+    def _init_ui(self):
+        self.setupUi(self)
         self.setWindowTitle("Airport Management System")
         self.setWindowIcon(QIcon("GUI/airport.png"))
-        self.load_combo_boxes()
+        self._load_combo_boxes()
+        if self.row_id:
+            self._set_edit_values()
+        self._set_combo_boxes_model_column()
+        self.comboBox_flight.currentIndexChanged.connect(self._select_miejsce)
         # self.buttonBox.accepted.connect(self.insert_to_database)
         # self.buttonBox.rejected.connect(Dialog.reject)
 
-    def load_combo_boxes(self):
-        self.comboBox_person.setModel(self.select_osoba())
-        self.comboBox_flight.setModel(self.select_lot())
-        self.comboBox_seat.setModel(self.select_miejsce())
-        # self.comboBox_seat.setItemDelegate(SeatItemDelegate())
+    def _load_combo_boxes(self):
+        self.comboBox_person.setModel(self._select_osoba())
+        self.comboBox_flight.setModel(self._select_lot())
+        # self.comboBox_seat.setModel(self._select_miejsce())
+        self._select_miejsce()
 
-    def set_combo_boxes_model_column(self):
+    def _set_combo_boxes_model_column(self):
         self.comboBox_person.setModelColumn(1)
         self.comboBox_flight.setModelColumn(1)
         self.comboBox_seat.setModelColumn(1)
 
-    def select_osoba(self):
+    def _select_osoba(self):
         self.model_osoba = QSqlQueryModel()
         query = (
-            "SELECT osoba_id AS osoba_id, "
+            "SELECT osoba_id, "
             "osoba_id || ' - ' || imie || ' ' || nazwisko AS osoba_data "
             "FROM osoba"
         )
+        # query = (
+        #     "SELECT osoba_id || ' - ' || imie || ' ' || nazwisko AS osoba_data, "
+        #     "osoba_id "
+        #     "FROM osoba"
+        # )
         self.model_osoba.setQuery(query, self.db_handler.con)
         return self.model_osoba
 
-    def select_lot(self):
+    def _select_lot(self):
         self.model_lot = QSqlQueryModel()
         query = (
-            "SELECT l.lot_id AS lot_id, "
+            "SELECT l.lot_id, "
             "l.lot_id || ' - ' || la.city || ' - ' || lb.city || ' - ' || l.datetime AS lot_data "
-            "FROM bilet b "
-            "INNER JOIN lot l ON l.lot_id = b.lot_id "
+            "FROM lot l "
             "INNER JOIN lotnisko la ON la.lotnisko_id = l.lotnisko_a_id "
             "INNER JOIN lotnisko lb ON lb.lotnisko_id = l.lotnisko_b_id "
         )
+        # query = (
+        #     "SELECT l.lot_id || ' - ' || la.city || ' - ' || lb.city || ' - ' || l.datetime AS lot_data, "
+        #     # "SELECT l.lot_id || ' - ' || l.lotnisko_a_id || ' - ' || l.lotnisko_b_id || ' - ' || l.datetime AS lot_data, "
+        #     "l.lot_id "
+        #     "FROM lot l "
+        #     "INNER JOIN lotnisko la ON la.lotnisko_id = l.lotnisko_a_id "
+        #     "INNER JOIN lotnisko lb ON lb.lotnisko_id = l.lotnisko_b_id "
+        # )
         # query = (
         #     "SELECT lot_id, samolot_id, lotnisko_a_id, lotnisko_b_id, datetime FROM lot"
         # )
         self.model_lot.setQuery(query, self.db_handler.con)
         return self.model_lot
 
-    def select_miejsce(self):
+    def _select_miejsce(self):
+        # TODO - brak miejsc w dialogu. self.flight jest poprawne self.row_id jest poprawne
         self.flight = self.model_lot.record(self.comboBox_flight.currentIndex()).value(
             "lot_id"
         )
+
+        # self.flight = self.model_lot.record(
+        #     self.model_lot.match(
+        #         self.model_lot.index(0, 0),
+        #         Qt.ItemDataRole.DisplayRole,
+        #         self.comboBox_flight.currentText(),
+        #         1,
+        #         Qt.MatchFlag.MatchContains,
+        #     )[0].row()
+        # ).value("lot_id")
+
+        print(
+            f"_select_miejsce: self.comboBox_flight.currentText() == {self.comboBox_flight.currentText()}"
+        )
+        print(f"_select_miejsce: self.flight == {self.flight}")
+
         # print(f"self.flight - {self.flight}")
         # print(f"self.row_id - {self.row_id}")
 
-        # self.model_miejsce = QSqlQueryModel(None)
-        self.model_miejsce = SeatModel(None)
+        self.model_miejsce = QSqlQueryModel()
 
-        # query = (
-        #     f"SELECT m.miejsce_samolot_id "
-        #     f"FROM miejsce m "
-        #     f"LEFT JOIN bilet b ON m.miejsce_id = b.miejsce_id "
-        #     f"WHERE m.samolot_id = (SELECT l.samolot_id FROM lot l WHERE lot_id = {self.flight}) "
-        #     f"AND b.miejsce_id IS NULL"
-        # )
-        # query = (
-        #     f"SELECT m.miejsce_samolot_id "
-        #     f"FROM ( "
-        #     f"    SELECT * "
-        #     f"    FROM miejsce m "
-        #     f"    WHERE m.samolot_id = (SELECT l.samolot_id FROM lot l WHERE l.lot_id = {self.flight}) "
-        #     f") AS m "
-        #     f"LEFT JOIN (SELECT * FROM bilet b WHERE b.lot_id = {self.flight}) AS b ON m.miejsce_samolot_id = b.miejsce_id "
-        #     f"WHERE b.miejsce_id IS NULL "
-        #     f"OR b.bilet_id = {self.row_id}"
-        # )
         query = (
             "WITH lot_samolot_id AS ("
             "    SELECT l.samolot_id "
@@ -200,24 +135,28 @@ class BookingDialog(QDialog, FORM_CLASS):
             "lot_samolot_miejsce AS ("
             "    SELECT * "
             "    FROM miejsce m "
-            "    WHERE m.samolot_id = (SELECT samolot_id FROM lot_samolot_id)"
+            "    WHERE m.samolot_id = (SELECT samolot_id FROM lot_samolot_id) "
             ") "
-            "SELECT m.miejsce_samolot_id "
+            "SELECT m.miejsce_samolot_id, m.miejsce_samolot_name "
             "FROM lot_samolot_miejsce m "
             "LEFT JOIN ("
             "    SELECT * "
             "    FROM bilet b "
-            f"    WHERE b.lot_id = {self.flight}"
+            f"    WHERE b.lot_id = {self.flight} "
             ") AS b ON m.miejsce_samolot_id = b.miejsce_id "
             "WHERE b.miejsce_id IS NULL "
             f"OR b.bilet_id = {self.row_id}"
+        )
+
+        print(
+            f"_select_miejsce: miejsce_samolot_id query values: row_id: {self.row_id}, flight_id: {self.flight}"
         )
 
         self.model_miejsce.setQuery(query, self.db_handler.con)
         self.comboBox_seat.setModel(self.model_miejsce)
         return self.model_miejsce
 
-    def get_data(self):
+    def _get_data(self):
         self.flightclass = self.comboBox_class.itemData(
             self.comboBox_class.currentIndex(),
             Qt.ItemDataRole.EditRole,
@@ -237,6 +176,22 @@ class BookingDialog(QDialog, FORM_CLASS):
             "miejsce_samolot_id"
         )
 
+        data = {
+            "osoba_id": self.person,
+            "lot_id": self.flight,
+            "miejsce_samolot_id": self.seat,
+            "flightclass": self.flightclass,
+            "assistant": self.assistant,
+        }
+        print(f"_get_data: {data}")
+
+        # model_miejsce_current_index = self.comboBox_seat.currentIndex()
+        # model_miejsce_record = self.model_miejsce.record(
+        #     self.comboBox_seat.currentIndex()
+        # )
+        # print(model_miejsce_record)
+        # print(model_miejsce_current_index)
+
         # print("=====")
         # print(
         #     f"{self.person} - {self.flight} - {self.flightclass} - {self.seat} - {self.assistant}"
@@ -249,20 +204,7 @@ class BookingDialog(QDialog, FORM_CLASS):
         # 65 - 4 - Economic - 1741 - No
         # <class 'int'> - <class 'int'> - <class 'str'> - <class 'int'> - <class 'str'>
 
-    def insert_into_database(self):
-        self.get_data()
-        self.query = QSqlQuery(None, self.db_handler.con)
-        self.query.prepare(
-            "INSERT INTO bilet (osoba_id, lot_id, klasa, miejsce_id, asystent) VALUES (?, ?, ?, ?, ?)"
-        )
-        self.query.addBindValue(self.person)
-        self.query.addBindValue(self.flight)
-        self.query.addBindValue(self.flightclass)
-        self.query.addBindValue(self.seat)
-        self.query.addBindValue(self.assistant)
-        self.db_handler.execute_query(self.query)
-
-    def set_edit_values(self):
+    def _set_edit_values(self):
         self.query = QSqlQuery(None, self.db_handler.con)
         self.query.prepare(
             "SELECT osoba_id, lot_id, klasa, miejsce_id, asystent FROM bilet WHERE bilet_id = ?"
@@ -270,12 +212,26 @@ class BookingDialog(QDialog, FORM_CLASS):
         self.query.addBindValue(self.row_id)
         self.query.exec()
         self.query.next()
+
+        data = {
+            "osoba_id": self.query.value(0),
+            "lot_id": self.query.value(1),
+            "klasa": self.query.value(2),
+            "miejsce_id": self.query.value(3),
+            "asystent": self.query.value(4),
+        }
+        print(f"_set_edit_values: {data}")
+
         # index = self.comboBox_person.findData(
         #     self.query.value(0), Qt.ItemDataRole.DisplayRole
         # )
 
         self.comboBox_person.setCurrentIndex(
-            self.comboBox_person.findData(self.query.value(0), 0)
+            self.comboBox_person.findData(
+                self.query.value(0),
+                Qt.ItemDataRole.DisplayRole,
+                Qt.MatchFlag.MatchExactly,
+            )
         )
         self.comboBox_flight.setCurrentIndex(
             self.comboBox_flight.findData(self.query.value(1), 0)
@@ -286,6 +242,45 @@ class BookingDialog(QDialog, FORM_CLASS):
         self.comboBox_seat.setCurrentIndex(
             self.comboBox_seat.findData(self.query.value(3), 0)
         )
+
+        print(f"________________ {self.comboBox_seat.findData(self.query.value(3), 0)}")
+
+        # osoba_data = self.model_osoba.record(
+        #     self.model_osoba.match(
+        #         self.model_osoba.index(0, 1),
+        #         Qt.ItemDataRole.DisplayRole,
+        #         self.query.value(0),
+        #         1,
+        #         Qt.MatchFlag.MatchContains,
+        #     )[0].row()
+        # ).value("osoba_data")
+
+        # lot_data = self.model_lot.record(
+        #     self.model_lot.match(
+        #         self.model_lot.index(0, 1),
+        #         Qt.ItemDataRole.DisplayRole,
+        #         self.query.value(1),
+        #         1,
+        #         Qt.MatchFlag.MatchContains,
+        #     )[0].row()
+        # ).value("lot_data")
+
+        # miejsce_data = self.model_miejsce.record(
+        #     self.model_miejsce.match(
+        #         self.model_miejsce.index(0, 1),
+        #         Qt.ItemDataRole.DisplayRole,
+        #         self.query.value(3),
+        #         1,
+        #         Qt.MatchFlag.MatchContains,
+        #     )[0].row()
+        # ).value("miejsce_data")
+
+        # self.comboBox_person.setCurrentIndex(
+        #     self.comboBox_person.findData(osoba_data, 0)
+        # )
+        # self.comboBox_flight.setCurrentIndex(self.comboBox_flight.findData(lot_data, 0))
+        # self.comboBox_seat.setCurrentIndex(self.comboBox_seat.findData(miejsce_data, 0))
+
         # self.seat = self.comboBox_seat.itemData(
         #     self.comboBox_seat.currentIndex(), Qt.ItemDataRole.EditRole
         # )
@@ -300,8 +295,32 @@ class BookingDialog(QDialog, FORM_CLASS):
             self.comboBox_assistant.findData(assistant_yes_no, 0)
         )
 
+    # def match_data_in_model(self, model, match_column: int, data, return_value_column: str):
+    #     return model.record(
+    #         model.match(
+    #             model.index(0, match_column),
+    #             Qt.ItemDataRole.DisplayRole,
+    #             data,
+    #             1,
+    #             Qt.MatchFlag.MatchContains,
+    #         )[0].row()
+    #     ).value(f"{return_value_column}")
+
+    def insert_into_database(self):
+        self._get_data()
+        self.query = QSqlQuery(None, self.db_handler.con)
+        self.query.prepare(
+            "INSERT INTO bilet (osoba_id, lot_id, klasa, miejsce_id, asystent) VALUES (?, ?, ?, ?, ?)"
+        )
+        self.query.addBindValue(self.person)
+        self.query.addBindValue(self.flight)
+        self.query.addBindValue(self.flightclass)
+        self.query.addBindValue(self.seat)
+        self.query.addBindValue(self.assistant)
+        self.db_handler.execute_query(self.query)
+
     def update_database(self):
-        self.get_data()
+        self._get_data()
         self.query = QSqlQuery(None, self.db_handler.con)
         self.query.prepare(
             "UPDATE bilet SET osoba_id = ?, lot_id = ?, miejsce_id = ?, asystent = ?, klasa = ? WHERE bilet_id = ?"
@@ -314,8 +333,17 @@ class BookingDialog(QDialog, FORM_CLASS):
         self.query.addBindValue(self.row_id)
         self.db_handler.execute_query(self.query)
 
+    # def display_model(self, model):
+    #     from PyQt6.QtWidgets import QTableView
+
+    #     table_view = QTableView()
+    #     table_view.show()
+    #     table_view.setModel(model)
+
 
 if __name__ == "__main__":
     from run_test_dialog import RunTestDialog
 
-    test_window = RunTestDialog(BookingDialog, row_id=0)
+    test_window = RunTestDialog(BookingDialog, row_id=15)
+    # test_window.display_model(test_window.model_miejsce)
+    # test_window.display_model(test_window.model_lot)

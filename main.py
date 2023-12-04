@@ -91,9 +91,8 @@ from classes.database_handler import DatabaseHandler
 # error - błędna nazwa tabeli w zapytaniu: (42601) QPSQL: Unable to create query
 # Poprawne pobieranie dostępnych miejsc
 # Filtrowanie lotnisk QSortFilterProxyModel
-# - jak zaimportować dane do wolumenu
+# - jak zaimportować dane do wolumenu -
 # docker-compose.yml - baza danych postgres w kontenerze + dane w wolumenie
-
 # loadUiType zamiast loadUi
 # booking_dialog miejsce query - podzapytania - zamienić na WITH - https://www.postgresql.org/docs/current/queries-with.html
 # lepsze wyświetlanie miejsc w samolocie (np. 14A) - QItemDelegate pozwala na jedynie zmianę tekstu wyświetlanego w wyskakującej liście
@@ -106,16 +105,22 @@ from classes.database_handler import DatabaseHandler
 # remove flightDialog comboboxes
 # pytest - QSqlQuery nie buduje zapytania w przypadku zmockowanego db_handlera
 # pytest - sprawdzenie wartości w oknie edycji
+# pytest - co testować? - przypadki brzegowe, sprawdzanie errorów (niepoprawny format danych, ...), połączenie lineeditów z get_data,
+
+# pytest - module paths
+# kolumna z nazwami miejsc
+# nazwy kolumn
+# get_data bug
+#
 
 
 # TODO:
-# pytest - co testować? - przypadki brzegowe, sprawdzanie errorów (niepoprawny format danych, ...), połączenie lineeditów z get_data,
-# hashowanie - dane osób - dodać kolumnę
+# hashowanie - dane osoba haslo - dodać kolumnę
+# testowanie zapytań sql - Datagrip, DBeaver, pycharm
 # delete comments
-
+# fake_database sqlite - with open
 
 # Pytania:
-
 
 # py
 # class AreaItemDelegate(QItemDelegate):
@@ -147,26 +152,30 @@ FORM_CLASS, BASE_CLASS = loadUiType(UI_PATH)
 class MainWindow(QWidget, FORM_CLASS):
     def __init__(self, db_handler: DatabaseHandler):
         super().__init__()
-        self.setupUi(self)
         self.db_handler = db_handler
         if not self.db_handler.con:
             return
-        self.init_ui()
-        self.init_tabs()
-        self.connect_signals()
+        self._init_ui()
+
+    def _init_ui(self):
+        self.setupUi(self)
+        self._set_tab_labels()
+        self.setGeometry(500, 300, 900, 700)
+        self.setWindowIcon(QIcon(os.path.join(UI_PATH, "airport.png")))
+        self.setWindowTitle("Airport Management System")
+        self._init_tabs()
+        self._connect_signals()
         self.tab = {
             OSOBA_TAB_INDEX: self.osoba_tab,
             BILET_TAB_INDEX: self.bilet_tab,
             LOT_TAB_INDEX: self.lot_tab,
         }
 
-    def init_ui(self):
-        self.set_tab_labels()
-        self.setGeometry(500, 300, 900, 700)
-        self.setWindowIcon(QIcon(os.path.join(UI_PATH, "airport.png")))
-        self.setWindowTitle("Airport Management System")
+    def _set_tab_labels(self):
+        for index, label in enumerate(TAB_LABELS):
+            self.tabWidget.setTabText(index, label)
 
-    def init_tabs(self):
+    def _init_tabs(self):
         self.osoba_tab = OsobaTab(self.db_handler, self.tableView_osoba)
         self.bilet_tab = BiletTab(self.db_handler, self.tableView_bilet)
         self.lot_tab = LotTab(self.db_handler, self.tableView_lot)
@@ -174,11 +183,7 @@ class MainWindow(QWidget, FORM_CLASS):
         self.bilet_tab.load_data()
         self.tabWidget.setMovable(True)
 
-    def set_tab_labels(self):
-        for index, label in enumerate(TAB_LABELS):
-            self.tabWidget.setTabText(index, label)
-
-    def connect_signals(self):
+    def _connect_signals(self):
         self.tabWidget.currentChanged.connect(self.tabChanged)
         button_dict = {
             self.pushButton_dodaj_osoba: self.osoba_tab.add_row,
@@ -210,13 +215,14 @@ def run_app():
     # app.setStyle("Basic")
     # app.setStyle("Material") # Android
     # app.setStyle("iOS")
-    # app.setStyle("Fusion")  # Linux
+    app.setStyle("Fusion")  # Linux
     # app.setStyle("macOS")
     # app.setStyle("Windows")
 
     db_handler = DatabaseHandler()
     # db_handler = DatabaseHandler(port=5435)  # Docker database
     db_handler.create_connection()
+    # db_handler.create_connection_sqlite()
     window = MainWindow(db_handler)
     window.show()
     sys.exit(app.exec())

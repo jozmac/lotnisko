@@ -12,18 +12,31 @@ class DatabaseHandler:
         port=5432,
     ):
         self.database_name = database_name
-        self.host = host
         self.username = username
         self.password = password
+        self.host = host
         self.port = port
 
     def create_connection(self):
         self.con = QSqlDatabase.addDatabase("QPSQL")
-        self.con.setHostName(self.host)
         self.con.setDatabaseName(self.database_name)
         self.con.setUserName(self.username)
         self.con.setPassword(self.password)
+        self.con.setHostName(self.host)
         self.con.setPort(self.port)
+
+        if not self.con.open():
+            error_text = (
+                f"Could not open database. Error: {self.con.lastError().text()}"
+            )
+            self.display_error(error_text)
+            raise ConnectionError(error_text)
+        print("Database opened successfully.")
+        return self.con
+
+    def create_connection_sqlite(self):
+        self.con = QSqlDatabase.addDatabase("QSQLITE")
+        self.con.setDatabaseName("data\lotnisko.sqlite3")
 
         if not self.con.open():
             error_text = (
@@ -61,6 +74,56 @@ class DatabaseHandler:
     def display_error(self, message):
         QMessageBox.critical(None, "Error", message)
 
+
+if __name__ == "__main__":
+    from PyQt6.QtWidgets import QApplication, QTableView
+    import sys
+
+    db = DatabaseHandler()
+    # db.create_connection_sqlite()
+    db.create_connection()
+    # table_model = db.return_model("SELECT * FROM bilet")
+    table_model = db.return_model("SELECT * FROM samolot")
+
+    app = QApplication(sys.argv)
+
+    tableView = QTableView()
+    tableView.show()
+    tableView.setModel(table_model)
+
+    ######
+
+    from PyQt6.QtCore import Qt
+
+    def match_data_in_model(model, match_column: int, data, output_column: str):
+        return model.record(
+            model.match(
+                model.index(0, match_column),
+                Qt.ItemDataRole.DisplayRole,
+                data,
+                1,
+                Qt.MatchFlag.MatchContains,
+            )[0].row()
+        ).value(f"{output_column}")
+
+    plane_model = match_data_in_model(table_model, 0, 10, "model")
+    print(plane_model)
+    plane_model = match_data_in_model(table_model, 1, "Boeing 777", "samolot_id")
+    print(plane_model)
+
+    from PyQt6.QtWidgets import QComboBox
+
+    combo_box = QComboBox()
+    combo_box.show()
+    combo_box.setModel(table_model)
+    combo_box.setModelColumn(1)
+    plane = table_model.record(combo_box.currentIndex())
+    model = table_model.record(combo_box.currentIndex()).value("model")
+    plane_id = table_model.record(combo_box.currentIndex()).value("samolot_id")
+
+    ######
+
+    sys.exit(app.exec())
 
 # import psycopg2 as pg2
 
