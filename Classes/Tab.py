@@ -19,10 +19,10 @@ class Tab(QWidget):
         self.query = query
         self.id_column = id_column
         self.dialog_class = dialog_class
-        self.init_ui()
+        self._init_ui()
         super().__init__()
 
-    def init_ui(self):
+    def _init_ui(self):
         self.model = QSqlQueryModel()
         self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)

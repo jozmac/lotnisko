@@ -2,6 +2,7 @@ import psycopg2 as pg2
 import sqlite3
 import pandas as pd
 import os
+import bcrypt
 
 # https://manuelvanrijn.nl/blog/2012/01/18/convert-postgresql-to-sqlite/
 
@@ -82,7 +83,8 @@ class InitializeDatabase:
             imie VARCHAR(255),
             nazwisko VARCHAR(255),
             stanowisko VARCHAR(255),
-            password VARCHAR(255)
+            password_hash VARCHAR(255),
+            salt VARCHAR(255)
             );
             """
         )
@@ -139,8 +141,8 @@ class InitializeDatabase:
                 samolot_id INTEGER NOT NULL REFERENCES samolot(samolot_id),
                 lotnisko_a_id INTEGER NOT NULL REFERENCES lotnisko(lotnisko_id),
                 lotnisko_b_id INTEGER NOT NULL REFERENCES lotnisko(lotnisko_id),
-                bramka INTEGER NOT NULL,
-                -- data DATETIME,
+                datetime DATETIME,
+                bramka INTEGER,
                 cena FLOAT
             );
             """
@@ -172,7 +174,8 @@ class InitializeDatabase:
                 osoba_id INTEGER NOT NULL REFERENCES osoba(osoba_id),
                 lot_id INTEGER NOT NULL REFERENCES lot(lot_id),
                 miejsce_id INTEGER NOT NULL REFERENCES miejsce(miejsce_id),
-                asystent BOOLEAN
+                asystent BOOLEAN,
+                klasa VARCHAR(255)
             );
             """
         )
@@ -185,7 +188,10 @@ class InitializeDatabase:
             imie VARCHAR(255),
             nazwisko VARCHAR(255),
             stanowisko VARCHAR(255),
-            password VARCHAR(255)
+            password_hash VARCHAR(255),
+            salt VARCHAR(255)
+            -- password_hash VARBINARY(255)
+            -- password_hash TEXT
             );
             """
         )
@@ -238,12 +244,12 @@ class InitializeDatabase:
         self.cursor.execute(
             """
             CREATE TABLE IF NOT EXISTS lot (
-                lot_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                lot_id SERIAL PRIMARY KEY,
                 samolot_id INTEGER NOT NULL REFERENCES samolot(samolot_id),
                 lotnisko_a_id INTEGER NOT NULL REFERENCES lotnisko(lotnisko_id),
                 lotnisko_b_id INTEGER NOT NULL REFERENCES lotnisko(lotnisko_id),
-                bramka INTEGER NOT NULL,
-                -- data DATETIME,
+                datetime DATETIME,
+                bramka INTEGER,
                 cena FLOAT
             );
             """
@@ -275,7 +281,8 @@ class InitializeDatabase:
                 osoba_id INTEGER NOT NULL REFERENCES osoba(osoba_id),
                 lot_id INTEGER NOT NULL REFERENCES lot(lot_id),
                 miejsce_id INTEGER NOT NULL REFERENCES miejsce(miejsce_id),
-                asystent BOOLEAN
+                asystent BOOLEAN,
+                klasa VARCHAR(255)
             );
             """
         )
@@ -335,6 +342,20 @@ class InitializeDatabase:
             ('Mullah', 'Omar', NULL);
             """
         )
+
+        self.connection.commit()
+        self.cursor.execute("SELECT osoba_id, imie FROM osoba")
+        person = self.cursor.fetchall()
+        for id, name in person:
+            salt = bcrypt.gensalt()
+            hashed = bcrypt.hashpw(name.encode("utf-8"), salt)
+            hashed = hashed.decode("utf-8")
+            salt = salt.decode("utf-8")
+            # print(f"id: {id}, name: {name}, hash: {hashed}, salt: {salt}")
+            self.cursor.execute(
+                f"UPDATE osoba SET password_hash = '{hashed}', salt = '{salt}' WHERE osoba_id = {id};"
+            )
+
         self.cursor.execute(
             """
             INSERT INTO samolot (samolot_id, model, ilosc_miejsc)
@@ -399,6 +420,39 @@ class InitializeDatabase:
             """
         )
 
+        self.cursor.execute(
+            """
+            INSERT INTO lot (lot_id, samolot_id, lotnisko_a_id, lotnisko_b_id, datetime)
+            VALUES
+            (6, 1, 1537, 1543, '2023-08-09 00:00:00'),
+            (3, 7, 1544, 1550, '2023-08-17 00:00:00'),
+            (5, 3, 1543, 1541, '2023-08-09 00:00:00'),
+            (4, 1, 1540, 1537, '2023-08-09 00:00:00'),
+            (17, 1, 1539, 1539, '2023-10-01 01:00:00'),
+            (7, 2, 1541, 1544, '2023-08-24 07:00:00'),
+            (2, 10, 1541, 1540, '2023-08-09 00:00:00'),
+            (15, 5, 1539, 1540, '2023-10-01 01:00:00'),
+            (18, 5, 1279, 1539, '2023-11-04 17:00:00'),
+            (22, 1, 1539, 1539, '2023-11-14 00:00:00');
+            """
+        )
+
+        self.cursor.execute(
+            """
+            INSERT INTO bilet (bilet_id, osoba_id, lot_id, miejsce_id, asystent, klasa)
+            VALUES 
+            (33, 65, 6, 3, false, 'Economic'),
+            (35, 9, 2, 10, true, 'Buisness'),
+            (15, 15, 2, 60, false, 'Buisness'),
+            (12, 12, 5, 1, true, 'Economic'),
+            (14, 27, 7, 30, true, 'Buisness'),
+            (16, 28, 4, 14, false, 'Buisness'),
+            (19, 37, 17, 50, false, 'Economic'),
+            (17, 13, 2, 4, false, 'Buisness'),
+            (26, 30, 4, 2, true, 'Buisness');
+            """
+        )
+
     def create_indexes(self):
         # self.cursor.execute("CREATE INDEX idx_lotnisko ON lotnisko(lotnisko_id, city);")
         self.cursor.execute("CREATE INDEX idx_samolot ON samolot(samolot_id);")
@@ -432,6 +486,7 @@ class InitializeDatabase:
         self.create_sequences()
         self.insert_data()
         self.create_indexes()
+        self.insert_seat_names()
         self.connection.commit()
         self.connection.close()
 

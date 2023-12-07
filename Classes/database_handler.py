@@ -10,15 +10,17 @@ class DatabaseHandler:
         password="password",
         host="localhost",
         port=5432,
+        database_type="QPSQL",
     ):
         self.database_name = database_name
         self.username = username
         self.password = password
         self.host = host
         self.port = port
+        self.database_type = database_type
 
     def create_connection(self):
-        self.con = QSqlDatabase.addDatabase("QPSQL")
+        self.con = QSqlDatabase.addDatabase(self.database_type)
         self.con.setDatabaseName(self.database_name)
         self.con.setUserName(self.username)
         self.con.setPassword(self.password)
@@ -36,7 +38,7 @@ class DatabaseHandler:
 
     def create_connection_sqlite(self):
         self.con = QSqlDatabase.addDatabase("QSQLITE")
-        self.con.setDatabaseName("data\lotnisko.sqlite3")
+        self.con.setDatabaseName(self.database_name)
 
         if not self.con.open():
             error_text = (
@@ -57,14 +59,12 @@ class DatabaseHandler:
     def execute_query(self, query):
         if query.exec():
             print(f"Data inserted successfully.")
-            print(f"Last query -> {query.lastQuery()}")
-            print(f"Bound values -> {query.boundValues()}")
         else:
             print("Error inserting data.")
             print(query.lastError().text())
-            print(f"Last query -> {query.lastQuery()}")
-            print(f"Bound values -> {query.boundValues()}")
             self.display_error(f"Query execution error: {query.lastError().text()}")
+        print(f"Last query -> {query.lastQuery()}")
+        print(f"Bound values -> {query.boundValues()}")
 
     def return_model(self, query):
         self.model = QSqlQueryModel()

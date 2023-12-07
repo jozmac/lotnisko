@@ -7,6 +7,8 @@ from PyQt6.QtPrintSupport import QPrinter, QPrintDialog, QPrintPreviewDialog
 from PyQt6.QtGui import QPainter, QColor, QTextDocument, QFont
 from PyQt6.QtCore import Qt
 
+from classes.password_dialog import PasswordDialog
+
 
 class BiletTab(Tab):
     def __init__(self, db_handler, table):
@@ -37,6 +39,28 @@ class BiletTab(Tab):
     #     super().load_data()
 
     def info_row(self):
+        id = self.get_selected_row_id(self.table.currentIndex())
+        query = QSqlQuery(None, self.db_handler.con)
+        query.prepare(
+            """
+            SELECT o.osoba_id
+            FROM bilet b
+            INNER JOIN osoba o ON o.osoba_id = b.osoba_id
+            WHERE b.bilet_id = ?;
+            """
+        )
+        query.addBindValue(id)
+        query.exec()
+        query.next()
+        self.osoba_id = query.value(0)
+
+        # window = PasswordDialog(self.db_handler, self.osoba_id).exec()
+        window = PasswordDialog(self.db_handler, self.osoba_id)
+        if not window.exec():
+            return
+        if window.match == False:
+            return self.select_row_msg("Wrong Password.")
+
         if not self.table.selectedIndexes():
             return self.select_row_msg("Select row to print boarding pass.")
         self.print_preview()

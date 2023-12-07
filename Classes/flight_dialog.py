@@ -138,7 +138,8 @@ class FlightDialog(QDialog, FORM_CLASS):
     #     self.comboBox_to.setModel(self.proxy_model_to)
 
     def _set_edit_values(self):
-        self.query = QSqlQuery(None, self.db_handler.con)
+        # self.query = QSqlQuery(None, self.db_handler.con)
+        self.query = QSqlQuery()
         self.query.prepare(
             "SELECT samolot_id, lotnisko_a_id, lotnisko_b_id, datetime FROM lot WHERE lot_id = ?"
         )
@@ -193,6 +194,8 @@ class FlightDialog(QDialog, FORM_CLASS):
         # self.lineEdit_to.setText(str(self.query.value(2)))
 
         datetime = self.query.value(3)
+        print("++++++++++++")
+        print(type(datetime))
         date = datetime.date()
         time = datetime.time()
         self.calendarWidget.setSelectedDate(date)

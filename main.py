@@ -105,22 +105,35 @@ from classes.database_handler import DatabaseHandler
 # remove flightDialog comboboxes
 # pytest - QSqlQuery nie buduje zapytania w przypadku zmockowanego db_handlera
 # pytest - sprawdzenie wartości w oknie edycji
-# pytest - co testować? - przypadki brzegowe, sprawdzanie errorów (niepoprawny format danych, ...), połączenie lineeditów z get_data,
 
-# pytest - module paths
-# kolumna z nazwami miejsc
-# nazwy kolumn
-# get_data bug
-#
+# pytest - module paths - użycie zakładki do testowania w VSCode
+# pytest - testy okna głównego i dialogu osoby
+# kolumna z nazwami miejsc w bazie danych zamiast metody dodającej kolumnę w modelu
+# nazwy kolumn - AS zamiast funkcji z Qt
+# get_data bug - QSqlQueryModel(None)
+# testowanie zapytań sql - Datagrip, DBeaver, pycharm
+# hashowanie - dane osoba haslo - dodać kolumnę
+# weryfikacja hasła przy przed drukowaniem biletu - password_dialog
+# widget.setFocus()
+# fake_database sqlite
 
 
 # TODO:
-# hashowanie - dane osoba haslo - dodać kolumnę
-# testowanie zapytań sql - Datagrip, DBeaver, pycharm
 # delete comments
-# fake_database sqlite - with open
+# split get_data_from_column_ functions for testing
+# model test display TableView
 
 # Pytania:
+# prawidłowe podświetlanie funkcji w przypadku używania dictów lub plików ui (patrz self.tab[index].load_data() lub self.comboBox_person.setModel(self._select_osoba()))
+# _ przed nazwą metody (patrz _init_ui())
+# jak konwertować PG na Sqlite
+# database_handler - osobny dla pg i sqlite?
+# czy with _ as _: jest przydatne w przypadku używania sqlite
+# czy powinno się przechowywać salt w bazie danych, a jeśli tak to dlaczego ALTER TABLE osoba DROP COLUMN salt;
+
+# Pomysły:
+# klasa do debugowanie kodu - wyświetlanie pojedyńczych obiektów / tabeli z modelami w czasie wykonywania kodu
+
 
 # py
 # class AreaItemDelegate(QItemDelegate):
@@ -161,7 +174,8 @@ class MainWindow(QWidget, FORM_CLASS):
         self.setupUi(self)
         self._set_tab_labels()
         self.setGeometry(500, 300, 900, 700)
-        self.setWindowIcon(QIcon(os.path.join(UI_PATH, "airport.png")))
+        # self.setWindowIcon(QIcon(os.path.join(UI_PATH, "airport.png")))
+        self.setWindowIcon(QIcon("GUI/airport.png"))
         self.setWindowTitle("Airport Management System")
         self._init_tabs()
         self._connect_signals()
@@ -215,12 +229,13 @@ def run_app():
     # app.setStyle("Basic")
     # app.setStyle("Material") # Android
     # app.setStyle("iOS")
-    app.setStyle("Fusion")  # Linux
+    # app.setStyle("Fusion")  # Linux
     # app.setStyle("macOS")
     # app.setStyle("Windows")
 
     db_handler = DatabaseHandler()
     # db_handler = DatabaseHandler(port=5435)  # Docker database
+    # db_handler = DatabaseHandler("data/lotnisko.sqlite3")
     db_handler.create_connection()
     # db_handler.create_connection_sqlite()
     window = MainWindow(db_handler)

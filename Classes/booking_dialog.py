@@ -101,7 +101,6 @@ class BookingDialog(QDialog, FORM_CLASS):
         return self.model_lot
 
     def _select_miejsce(self):
-        # TODO - brak miejsc w dialogu. self.flight jest poprawne self.row_id jest poprawne
         self.flight = self.model_lot.record(self.comboBox_flight.currentIndex()).value(
             "lot_id"
         )
@@ -156,56 +155,8 @@ class BookingDialog(QDialog, FORM_CLASS):
         self.comboBox_seat.setModel(self.model_miejsce)
         return self.model_miejsce
 
-    def _get_data(self):
-        self.flightclass = self.comboBox_class.itemData(
-            self.comboBox_class.currentIndex(),
-            Qt.ItemDataRole.EditRole,
-        )
-        self.assistant = self.comboBox_assistant.itemData(
-            self.comboBox_assistant.currentIndex(),
-            Qt.ItemDataRole.EditRole,
-        )
-
-        self.person = self.model_osoba.record(
-            self.comboBox_person.currentIndex()
-        ).value("osoba_id")
-        self.flight = self.model_lot.record(self.comboBox_flight.currentIndex()).value(
-            "lot_id"
-        )
-        self.seat = self.model_miejsce.record(self.comboBox_seat.currentIndex()).value(
-            "miejsce_samolot_id"
-        )
-
-        data = {
-            "osoba_id": self.person,
-            "lot_id": self.flight,
-            "miejsce_samolot_id": self.seat,
-            "flightclass": self.flightclass,
-            "assistant": self.assistant,
-        }
-        print(f"_get_data: {data}")
-
-        # model_miejsce_current_index = self.comboBox_seat.currentIndex()
-        # model_miejsce_record = self.model_miejsce.record(
-        #     self.comboBox_seat.currentIndex()
-        # )
-        # print(model_miejsce_record)
-        # print(model_miejsce_current_index)
-
-        # print("=====")
-        # print(
-        #     f"{self.person} - {self.flight} - {self.flightclass} - {self.seat} - {self.assistant}"
-        # )
-        # print(
-        #     f"{type(self.person)} - {type(self.flight)} - {type(self.flightclass)} - {type(self.seat)} - {type(self.assistant)}"
-        # )
-        # print("=====")
-
-        # 65 - 4 - Economic - 1741 - No
-        # <class 'int'> - <class 'int'> - <class 'str'> - <class 'int'> - <class 'str'>
-
     def _set_edit_values(self):
-        self.query = QSqlQuery(None, self.db_handler.con)
+        self.query = QSqlQuery()
         self.query.prepare(
             "SELECT osoba_id, lot_id, klasa, miejsce_id, asystent FROM bilet WHERE bilet_id = ?"
         )
@@ -213,14 +164,14 @@ class BookingDialog(QDialog, FORM_CLASS):
         self.query.exec()
         self.query.next()
 
-        data = {
-            "osoba_id": self.query.value(0),
-            "lot_id": self.query.value(1),
-            "klasa": self.query.value(2),
-            "miejsce_id": self.query.value(3),
-            "asystent": self.query.value(4),
-        }
-        print(f"_set_edit_values: {data}")
+        # data = {
+        #     "osoba_id": self.query.value(0),
+        #     "lot_id": self.query.value(1),
+        #     "klasa": self.query.value(2),
+        #     "miejsce_id": self.query.value(3),
+        #     "asystent": self.query.value(4),
+        # }
+        # print(f"_set_edit_values: {data}")
 
         # index = self.comboBox_person.findData(
         #     self.query.value(0), Qt.ItemDataRole.DisplayRole
@@ -243,7 +194,7 @@ class BookingDialog(QDialog, FORM_CLASS):
             self.comboBox_seat.findData(self.query.value(3), 0)
         )
 
-        print(f"________________ {self.comboBox_seat.findData(self.query.value(3), 0)}")
+        # print(f"________________ {self.comboBox_seat.findData(self.query.value(3), 0)}")
 
         # osoba_data = self.model_osoba.record(
         #     self.model_osoba.match(
@@ -306,9 +257,58 @@ class BookingDialog(QDialog, FORM_CLASS):
     #         )[0].row()
     #     ).value(f"{return_value_column}")
 
+    def _get_data(self):
+        self.flightclass = self.comboBox_class.itemData(
+            self.comboBox_class.currentIndex(),
+            Qt.ItemDataRole.EditRole,
+        )
+        self.assistant = self.comboBox_assistant.itemData(
+            self.comboBox_assistant.currentIndex(),
+            Qt.ItemDataRole.EditRole,
+        )
+
+        self.person = self.model_osoba.record(
+            self.comboBox_person.currentIndex()
+        ).value("osoba_id")
+        self.flight = self.model_lot.record(self.comboBox_flight.currentIndex()).value(
+            "lot_id"
+        )
+        self.seat = self.model_miejsce.record(self.comboBox_seat.currentIndex()).value(
+            "miejsce_samolot_id"
+        )
+
+        # data = {
+        #     "osoba_id": self.person,
+        #     "lot_id": self.flight,
+        #     "miejsce_samolot_id": self.seat,
+        #     "flightclass": self.flightclass,
+        #     "assistant": self.assistant,
+        # }
+        # print(f"_get_data: {data}")
+
+        # model_miejsce_current_index = self.comboBox_seat.currentIndex()
+        # model_miejsce_record = self.model_miejsce.record(
+        #     self.comboBox_seat.currentIndex()
+        # )
+        # print(model_miejsce_record)
+        # print(model_miejsce_current_index)
+
+        # print("=====")
+        # print(
+        #     f"{self.person} - {self.flight} - {self.flightclass} - {self.seat} - {self.assistant}"
+        # )
+        # print(
+        #     f"{type(self.person)} - {type(self.flight)} - {type(self.flightclass)} - {type(self.seat)} - {type(self.assistant)}"
+        # )
+        # print("=====")
+
+        # 65 - 4 - Economic - 1741 - No
+        # <class 'int'> - <class 'int'> - <class 'str'> - <class 'int'> - <class 'str'>
+
     def insert_into_database(self):
         self._get_data()
-        self.query = QSqlQuery(None, self.db_handler.con)
+        # self.query = QSqlQuery(None, self.db_handler.con)
+        self.query = QSqlQuery()
         self.query.prepare(
             "INSERT INTO bilet (osoba_id, lot_id, klasa, miejsce_id, asystent) VALUES (?, ?, ?, ?, ?)"
         )
@@ -321,7 +321,8 @@ class BookingDialog(QDialog, FORM_CLASS):
 
     def update_database(self):
         self._get_data()
-        self.query = QSqlQuery(None, self.db_handler.con)
+        # self.query = QSqlQuery(None, self.db_handler.con)
+        self.query = QSqlQuery()
         self.query.prepare(
             "UPDATE bilet SET osoba_id = ?, lot_id = ?, miejsce_id = ?, asystent = ?, klasa = ? WHERE bilet_id = ?"
         )

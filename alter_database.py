@@ -1,4 +1,5 @@
 from classes.initialize_database import InitializeDatabase
+import bcrypt
 
 database_name = "lotnisko"
 username = "postgres"
@@ -26,10 +27,25 @@ class InitDb(InitializeDatabase):
                 f"UPDATE miejsce SET miejsce_samolot_name = '{seat_name}' WHERE miejsce_id = {seat_id};"
             )
 
+    def insert_passwords(self):
+        self.connection.commit()
+        self.cursor.execute("SELECT osoba_id, imie FROM osoba")
+        person = self.cursor.fetchall()
+        for id, name in person:
+            salt = bcrypt.gensalt()
+            hashed = bcrypt.hashpw(name.encode("utf-8"), salt)
+            hashed = hashed.decode("utf-8")
+            salt = salt.decode("utf-8")
+            print(f"id: {id}, name: {name}, hash: {hashed}, salt: {salt}")
+            self.cursor.execute(
+                f"UPDATE osoba SET password_hash = '{hashed}', salt = '{salt}' WHERE osoba_id = {id};"
+            )
+
 
 if __name__ == "__main__":
     init_db = InitDb(database_name, username, password, host, port)
     init_db.create_connection()
-    init_db.insert_seat_names()
+    # init_db.insert_seat_names()
+    init_db.insert_passwords()
     init_db.connection.commit()
     init_db.connection.close()

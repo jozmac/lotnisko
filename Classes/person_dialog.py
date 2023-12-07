@@ -21,9 +21,22 @@ class PersonDialog(QDialog, FORM_CLASS):
         self.setWindowTitle("Airport Management System")
         self.setWindowIcon(QIcon("GUI/airport.png"))
         if self.row_id:
-            self.set_edit_values()
+            self._set_edit_values()
         # self.buttonBox.accepted.connect(self.insert_to_database)
         # self.buttonBox.rejected.connect(Dialog.reject)
+
+    def _set_edit_values(self):
+        # self.query = QSqlQuery(None, self.db_handler.con)
+        self.query = QSqlQuery()
+        self.query.prepare(
+            "SELECT imie, nazwisko, stanowisko FROM osoba WHERE osoba_id = ?"
+        )
+        self.query.addBindValue(self.row_id)
+        self.query.exec()
+        self.query.next()
+        self.lineEdit_imie.setText(self.query.value(0))
+        self.lineEdit_nazwisko.setText(self.query.value(1))
+        self.lineEdit_stanowisko.setText(self.query.value(2))
 
     def _get_data(self):
         self.imie = self.lineEdit_imie.text()
@@ -32,8 +45,7 @@ class PersonDialog(QDialog, FORM_CLASS):
 
     def insert_into_database(self):
         self._get_data()
-        # self.query = QSqlQuery(None, self.db_handler.con)
-        self.query = QSqlQuery(None)
+        self.query = QSqlQuery()
         self.query.prepare(
             "INSERT INTO osoba (imie, nazwisko, stanowisko) VALUES (?, ?, ?)"
         )
@@ -49,21 +61,10 @@ class PersonDialog(QDialog, FORM_CLASS):
         # print(self.bound_values)
         # print(self.query)
 
-    def set_edit_values(self):
-        self.query = QSqlQuery(None, self.db_handler.con)
-        self.query.prepare(
-            "SELECT imie, nazwisko, stanowisko FROM osoba WHERE osoba_id = ?"
-        )
-        self.query.addBindValue(self.row_id)
-        self.query.exec()
-        self.query.next()
-        self.lineEdit_imie.setText(self.query.value(0))
-        self.lineEdit_nazwisko.setText(self.query.value(1))
-        self.lineEdit_stanowisko.setText(self.query.value(2))
-
     def update_database(self):
         self._get_data()
-        self.query = QSqlQuery(None, self.db_handler.con)
+        # self.query = QSqlQuery(None, self.db_handler.con)
+        self.query = QSqlQuery()
         self.query.prepare(
             "UPDATE osoba SET imie = ?, nazwisko = ?, stanowisko = ? WHERE osoba_id = ?"
         )
