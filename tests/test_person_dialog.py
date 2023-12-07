@@ -1,65 +1,163 @@
 import sys, os
 import pytest
 
-# import pytest-mock
 from PyQt6.QtTest import QTest
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication
+from PyQt6.QtSql import QSqlQuery
 
 from unittest.mock import Mock, patch
 
-# sys.path.insert(1, "../")
-# sys.path.append("../")
-# sys.path.insert(1, os.path.join(os.path.dirname(__file__), ".."))
-# os.chdir(os.path.join(os.path.dirname(__file__), ".."))
-# print(os.path.join(os.path.dirname(__file__), ".."))
-# print(os.getcwd())
-
-# sys.path.insert(0, "C:\\PycharmProjects\\lotnisko\\classes")
-# from person_dialog import PersonDialog
-# from database_handler import DatabaseHandler
-
-sys.path.insert(0, "C:\\PycharmProjects\\lotnisko")
 from classes.person_dialog import PersonDialog
 from classes.database_handler import DatabaseHandler
+from classes.initialize_database import InitializeDatabase
 
-# from person_dialog import PersonDialog
-# from database_handler import DatabaseHandler
-
-
-# QSqlQuery(None, self.db_handler.con) nie działa poprawnie przez db_handler mock
+# import sqlite3
 
 
-# class FakeDatabaseHandler(DatabaseHandler):
-#     def execute_query(self, query):
-#         pass
+class FakeDatabaseHandler(DatabaseHandler):
+    def execute_query(self, query):
+        print("pass query execution")
+        pass
+
+
+# python -m tests.test_person_dialog
+
+
+# class HelloContextManager:
+#     def __enter__(self):
+#         print("Entering the context...")
+#         return "Hello, World!"
+
+#     def __exit__(self, exc_type, exc_value, exc_tb):
+#         print("Leaving the context...")
+#         print(exc_type, exc_value, exc_tb, sep="\n")
+
+
+# with HelloContextManager() as hello:
+#     print(hello)
+
+
+# class DbConn:
+#     def __enter__(self):
+#         # print("Creating database connection...")
+#         self.db_handler = FakeDatabaseHandler()
+#         self.db_handler.create_connection_sqlite()
+#         return self.db_handler
+
+#     def __exit__(self, exc_type, exc_value, exc_tb):
+#         # print("Closing database connection...")
+#         print(exc_type, exc_value, exc_tb, sep="\n")
+#         self.db_handler.close_connection()
 
 
 @pytest.fixture
 def window():
-    db_handler = Mock()
-    # db_handler = DatabaseHandler()
+    # db_handler = Mock()
+    # dbinit = InitializeDatabase()
+    # dbinit.initialize_sqlite()
+    db_handler = DatabaseHandler("data/lotnisko.sqlite3")
     # db_handler = FakeDatabaseHandler()
-    db_handler.create_connection()
-    app = QApplication(sys.argv)
-    person_dialog = PersonDialog(db_handler)
+    # db_handler.create_connection()
+    db_handler.create_connection_sqlite()
+    application = QApplication(sys.argv)
+    person_dialog = PersonDialog(db_handler, row_id=11)
+    # person_dialog.show()
     yield person_dialog
-    # sys.exit(app.exec())
+    person_dialog.close()
+    # sys.exit(application.exec())
+
+
+def test_row_id(window):
+    assert window.row_id == 11
 
 
 # @patch("classes.database_handler.DatabaseHandler.execute_query")
-def test_insert_into_database_query(window):
-    window.lineEdit_imie.setText("Jan")
-    window.lineEdit_nazwisko.setText("Kowalski")
-    window.lineEdit_stanowisko.setText("Pilot")
-    # window.insert_into_database()
-    # assert window.query.boundValues() == ["Jan", "Kowalski", "Pilot"]
-    window.get_data()
-    assert [window.imie, window.nazwisko, window.stanowisko] == [
-        "Jan",
-        "Kowalski",
-        "Pilot",
-    ]
+# def test_get_data(window):
+#     window.lineEdit_imie.setText("Jan")
+#     window.lineEdit_nazwisko.setText("Kowalski")
+#     window.lineEdit_stanowisko.setText("Pilot")
+#     window.insert_into_database()
+#     assert window.query.boundValues() == ["Jan", "Kowalski", "Pilot"]
+#     # window._get_data()
+#     # assert [window.imie, window.nazwisko, window.stanowisko] == [
+#     #     "Jan",
+#     #     "Kowalski",
+#     #     "Pilot",
+#     # ]
+
+
+def test_set_edit_values(window):
+    window.query = QSqlQuery()
+    window.query.prepare(
+        "SELECT imie, nazwisko, stanowisko FROM osoba WHERE osoba_id = ?"
+    )
+    window.query.addBindValue(window.row_id)
+    window.query.exec()
+    window.query.next()
+    # window.lineEdit_imie.setText(window.query.value(0))
+    # window.lineEdit_nazwisko.setText(window.query.value(1))
+    # window.lineEdit_stanowisko.setText(window.query.value(2))
+    person_sql = [window.query.value(0), window.query.value(1), window.query.value(2)]
+
+    window._set_edit_values()
+    window._get_data()
+    person_window = [window.imie, window.nazwisko, window.stanowisko]
+
+    assert person_window == person_sql
+
+
+def test_insert_into_database(window):
+    person = ["test_imie", "test_nazwisko", "test_stanowisko"]
+    window.lineEdit_imie.setText(person[0])
+    window.lineEdit_nazwisko.setText(person[1])
+    window.lineEdit_stanowisko.setText(person[2])
+
+    window.insert_into_database()
+
+    window.query = QSqlQuery()
+    window.query.prepare(
+        "SELECT imie, nazwisko, stanowisko FROM osoba WHERE imie = ? AND nazwisko = ? AND stanowisko = ?"
+    )
+    window.query.addBindValue(person[0])
+    window.query.addBindValue(person[1])
+    window.query.addBindValue(person[2])
+    window.query.exec()
+    window.query.next()
+    person_sql = [window.query.value(0), window.query.value(1), window.query.value(2)]
+    # assert window.query.boundValues() == person
+    assert person == person_sql
+
+
+def test_update_database(window):
+    person = ["test_imie", "test_nazwisko", "test_stanowisko"]
+    window.lineEdit_imie.setText(person[0])
+    window.lineEdit_nazwisko.setText(person[1])
+    window.lineEdit_stanowisko.setText(person[2])
+    # window._get_data()
+    # person_dialog = [window.imie, window.nazwisko, window.stanowisko]
+    window.update_database()
+
+    window.query = QSqlQuery()
+    window.query.prepare(
+        "SELECT imie, nazwisko, stanowisko FROM osoba WHERE osoba_id = ?"
+    )
+    window.query.addBindValue(window.row_id)
+    window.query.exec()
+    window.query.next()
+    person_sql = [window.query.value(0), window.query.value(1), window.query.value(2)]
+    # print(person)
+    # print(person_sql)
+    assert person == person_sql
+
+
+# class TestMyFunc:
+#     """Group of tests for my_func."""
+
+#     @pytest.mark.skip(reason="test shell")
+#     def test_my_func(self):
+#         """Test for my_func."""
+#         pass
 
 
 # def test_update_database(window):
@@ -219,8 +317,15 @@ def test_insert_into_database_query(window):
 #     assert True
 
 
-# You can similarly create a test case for `update_database`.
+# sys.path.insert(1, "../")
+# sys.path.append("../")
+# sys.path.insert(1, os.path.join(os.path.dirname(__file__), ".."))
+# os.chdir(os.path.join(os.path.dirname(__file__), ".."))
+# print(os.path.join(os.path.dirname(__file__), ".."))
+# print(os.getcwd())
 
-if __name__ == "__main__":
-    # sys.argv.append("--qt=qt6")
-    sys.exit(pytest.main(["-vv", __file__]))
+# sys.path.insert(0, "C:\\PycharmProjects\\lotnisko\\classes")
+# from person_dialog import PersonDialog
+# from database_handler import DatabaseHandler
+
+# sys.path.insert(0, "C:\\PycharmProjects\\lotnisko")

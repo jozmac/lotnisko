@@ -6,7 +6,7 @@ from PyQt6.QtTest import QTest
 from PyQt6.QtCore import Qt
 import sys, os
 
-sys.path.insert(0, "C:\\PycharmProjects\\lotnisko")
+import main
 from main import MainWindow
 from classes.booking_dialog import BookingDialog
 from classes.flight_dialog import FlightDialog
@@ -14,28 +14,107 @@ from classes.person_dialog import PersonDialog
 from classes.initialize_database import InitializeDatabase
 from classes.database_handler import DatabaseHandler
 
+# pytest
+# - Positive testing - make sure the expected values are right
+# - Edge cases - input 0, NaN, etc. Split edge cases into it's own tests
+# - Coverage - % score - lines of code executed by test - all combinations of boolean switch must be tested
+# - Negative testing - What mistakes might they make when using a function? error messages
+
 
 # pytest -v C:\PycharmProjects\lotnisko\test_main.py
+# class AppContextmManager:
+#     def __enter__(self):
+#         print("Creating the widget...")
+#         # self.db_handler = FakeDatabaseHandler()
+#         # self.db_handler.create_connection_sqlite()
+#         # return self.db_handler
+#         self.application = QApplication(sys.argv)
+#         # dbinit = InitializeDatabase(database_name="test_lotnisko")
+#         # dbinit = InitializeDatabase()
+#         # dbinit.initialize_sqlite()
+#         # db_handler = DatabaseHandler(database_name="test_lotnisko")
+#         self.db_handler = DatabaseHandler(database_name="lotnisko")
+#         self.db_handler.create_connection_sqlite()
+#         # db_handler = DatabaseHandler()
+#         # db_handler.create_connection_sqlite()
+#         # db_handler.initialize_database()
+#         # db_handler = DatabaseHandler()
+#         self.widget = MainWindow(self.db_handler)
+#         self.widget.show()
+#         sys.exit(self.application.exec())
+
+#     def __exit__(self, exc_type, exc_value, exc_tb):
+#         print("Closing the widget...")
+#         self.application.closeAllWindows()
+
+
+# with AppContextmManager() as app:
+#     print(app)
 
 
 @pytest.fixture
 def app():
     application = QApplication(sys.argv)
-    # dbinit = InitializeDatabase(database_name="test_lotnisko")
-    # dbinit.initialize()
-    db_handler = DatabaseHandler(database_name="test_lotnisko")
-    db_handler.create_connection()
-    # db_handler.initialize_database()
-    # db_handler = DatabaseHandler()
+    # dbinit = InitializeDatabase()
+    # dbinit.initialize_sqlite()
+    # db_handler = DatabaseHandler(database_name="test_lotnisko")
+    db_handler = DatabaseHandler("data/lotnisko.sqlite3")
+    db_handler.create_connection_sqlite()
+    # db_handler = DatabaseHandler("data\lotnisko.sqlite3", database_type="QSQLITE")
+    # db_handler.create_connection()
     widget = MainWindow(db_handler)
-    return widget
-    # yield widget
-    # widget.close()
+    # widget.show()
+    # return widget
+    yield widget
+    widget.close()
     # sys.exit(application.exec())
 
 
 def test_database_connection(app):
     assert app.db_handler.con.isOpen()
+
+
+def test_tab_labels(app):
+    assert app.tabWidget.tabText(0) == "Osoba"
+    assert app.tabWidget.tabText(1) == "Bilet"
+    assert app.tabWidget.tabText(2) == "Lot"
+
+
+def test_widget_title(app):
+    assert app.windowTitle() == "Airport Management System"
+
+
+def test_signal_connections(app):
+    assert app.pushButton_dodaj_osoba.clicked.disconnect(app.osoba_tab.add_row) == None
+    assert app.pushButton_dodaj_bilet.clicked.disconnect(app.bilet_tab.add_row) == None
+    assert app.pushButton_dodaj_lot.clicked.disconnect(app.lot_tab.add_row) == None
+    assert (
+        app.pushButton_usun_osoba.clicked.disconnect(app.osoba_tab.delete_row) == None
+    )
+    assert (
+        app.pushButton_usun_bilet.clicked.disconnect(app.bilet_tab.delete_row) == None
+    )
+    assert app.pushButton_usun_lot.clicked.disconnect(app.lot_tab.delete_row) == None
+    assert (
+        app.pushButton_edytuj_osoba.clicked.disconnect(app.osoba_tab.edit_row) == None
+    )
+    assert (
+        app.pushButton_edytuj_bilet.clicked.disconnect(app.bilet_tab.edit_row) == None
+    )
+    assert app.pushButton_edytuj_lot.clicked.disconnect(app.lot_tab.edit_row) == None
+    assert app.pushButton_info_osoba.clicked.disconnect(app.osoba_tab.info_row) == None
+    assert app.pushButton_info_bilet.clicked.disconnect(app.bilet_tab.info_row) == None
+    assert app.pushButton_info_lot.clicked.disconnect(app.lot_tab.info_row) == None
+
+
+def test_data_loading(app):
+    app.tabWidget.setCurrentIndex(2)
+    assert app.index == 2
+
+
+def test_database_closing(app):
+    app.close()
+    assert not app.db_handler.con.isOpen()
 
 
 # def test_pay_order(monkeypatch: MonkeyPatch):
