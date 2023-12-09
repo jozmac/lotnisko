@@ -11,8 +11,6 @@ from classes.person_dialog import PersonDialog
 from classes.database_handler import DatabaseHandler
 from classes.initialize_database import InitializeDatabase
 
-# TODO - wszystko do poprawy
-
 
 # class MockBookingDialog(BookingDialog):
 #     def __init__(self, db_handler: DatabaseHandler, *args, **kwargs):
@@ -23,7 +21,7 @@ from classes.initialize_database import InitializeDatabase
 class FakeDatabaseHandler(DatabaseHandler):
     def execute_query(self, query):
         print("pass query execution")
-        pass
+        self.con.rollback()
 
 
 @pytest.fixture
@@ -79,7 +77,7 @@ def test_set_edit_values(window):
     ]
     # window._set_edit_values()
     window._get_data()
-    # bilet_window = [
+    # bilet_window_1 = [
     #     window.person,
     #     window.flight,
     #     window.flightclass,

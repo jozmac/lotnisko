@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QWidget, QApplication
+from PyQt6.QtWidgets import QWidget, QApplication, QTabWidget
 from PyQt6.QtGui import QIcon
 from PyQt6.uic import loadUiType
 import sys, os
@@ -105,8 +105,7 @@ from classes.database_handler import DatabaseHandler
 # remove flightDialog comboboxes
 # pytest - QSqlQuery nie buduje zapytania w przypadku zmockowanego db_handlera
 # pytest - sprawdzenie wartości w oknie edycji
-
-# pytest - module paths - użycie zakładki do testowania w VSCode
+# pytest - ścieżki modułów - użycie zakładki do testowania
 # pytest - testy okna głównego i dialogu osoby
 # kolumna z nazwami miejsc w bazie danych zamiast metody dodającej kolumnę w modelu
 # nazwy kolumn - AS zamiast funkcji z Qt
@@ -116,45 +115,29 @@ from classes.database_handler import DatabaseHandler
 # weryfikacja hasła przy przed drukowaniem biletu - password_dialog
 # widget.setFocus()
 # fake_database sqlite
+# model test display TableView
+
+# print_qtmodel - konwersja do dataframeu i wyświetlanie w terminalu
+# _ przed nazwą metody (patrz _init_ui()) - vars - example_vars.py
+# force all succeeding arguments to be named def func(a, *, b, c) - func(1,b=2,c=3) https://treyhunner.com/2018/04/keyword-arguments-in-python/, https://www.vegardstikbakke.com/python-keyword-only/#:~:text=By%20adding%20a%20*%20in%20the,all%20arguments%20to%20be%20named.&text=This%20makes%20writing%20defensive%20Python%20easier!
 
 
 # TODO:
-# delete comments
+# prawidłowe podświetlanie funkcji w przypadku używania dictów lub plików ui (patrz self.tab[index].load_data() lub self.comboBox_person.setModel(self._select_osoba()))
 # split get_data_from_column_ functions for testing
-# model test display TableView
+# test tab.py
+# test flight_dialog bug
+# klasy / funkcje do debugowanie kodu - wyświetlanie pojedyńczych obiektów / tabeli z modelami w czasie wykonywania kodu --- logger -- przerobienie na dicta
+# delete comments
+# PyQt unit testing - https://stackoverflow.com/questions/15044447/how-do-i-unit-testing-my-gui-program-with-python-and-pyqt
+# database_handler - usunąć obsługę sqlite i używać sqlite jedynie jako baza otwierana przez contextmanager - context_manager.py
 
 # Pytania:
-# prawidłowe podświetlanie funkcji w przypadku używania dictów lub plików ui (patrz self.tab[index].load_data() lub self.comboBox_person.setModel(self._select_osoba()))
-# _ przed nazwą metody (patrz _init_ui())
-# jak konwertować PG na Sqlite
-# database_handler - osobny dla pg i sqlite?
-# czy with _ as _: jest przydatne w przypadku używania sqlite
 # czy powinno się przechowywać salt w bazie danych, a jeśli tak to dlaczego ALTER TABLE osoba DROP COLUMN salt;
 
 # Pomysły:
-# klasa do debugowanie kodu - wyświetlanie pojedyńczych obiektów / tabeli z modelami w czasie wykonywania kodu
 
 
-# py
-# class AreaItemDelegate(QItemDelegate):
-#     def paint(self, painter, option, index):
-#         styleOption = QStyleOptionViewItem(option)
-#         try:
-#             value = index.data(Qt.DisplayRole)
-#         except AttributeError:
-#             value = ''
-#         if value not in [None, NULL, 'NULL', '']:
-#             wartosc = str(value)
-#             styleOption.text = wartosc.replace('.', ',')
-#             styleOption.displayAlignment = Qt.AlignRight | Qt.AlignVCenter
-#             if styleOption.state & QStyle.State_Selected:
-#                 styleOption.state |= QStyle.State_Active
-#             self.parent().style().drawControl(QStyle.CE_ItemViewItem,
-#                                               styleOption, painter)
-
-# OSOBA_TAB_INDEX = 0
-# BILET_TAB_INDEX = 1
-# LOT_TAB_INDEX = 2
 OSOBA_TAB_INDEX, BILET_TAB_INDEX, LOT_TAB_INDEX = range(3)
 TAB_LABELS = ["Osoba", "Bilet", "Lot"]
 
@@ -196,6 +179,8 @@ class MainWindow(QWidget, FORM_CLASS):
         self.tabWidget.setCurrentIndex(BILET_TAB_INDEX)
         self.bilet_tab.load_data()
         self.tabWidget.setMovable(True)
+        # self.tabWidget.setTabShape(QTabWidget.TabShape.Triangular)
+        # self.tabWidget.setTabPosition(QTabWidget.TabPosition.West)
 
     def _connect_signals(self):
         self.tabWidget.currentChanged.connect(self.tabChanged)
@@ -221,6 +206,7 @@ class MainWindow(QWidget, FORM_CLASS):
         self.tab[index].load_data()
 
     def closeEvent(self, event):
+        super().closeEvent(event)
         self.db_handler.close_connection()
 
 

@@ -12,13 +12,11 @@ from classes.person_dialog import PersonDialog
 from classes.database_handler import DatabaseHandler
 from classes.initialize_database import InitializeDatabase
 
-# import sqlite3
-
 
 class FakeDatabaseHandler(DatabaseHandler):
     def execute_query(self, query):
         print("pass query execution")
-        pass
+        self.con.rollback()
 
 
 # python -m tests.test_person_dialog

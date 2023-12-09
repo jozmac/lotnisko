@@ -28,6 +28,7 @@ class BiletTab(Tab):
         )
         super().__init__(db_handler, tab_name, table, query, id_column, dialog_class)
 
+    # enum lista nazw i for
     # def load_data(self):
     #     self.model.setHeaderData(0, Qt.Orientation.Horizontal, "id")
     #     self.model.setHeaderData(1, Qt.Orientation.Horizontal, "name")

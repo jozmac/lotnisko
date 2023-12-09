@@ -16,7 +16,7 @@ from classes.initialize_database import InitializeDatabase
 class FakeDatabaseHandler(DatabaseHandler):
     def execute_query(self, query):
         print("pass query execution")
-        pass
+        self.con.rollback()
 
 
 @pytest.fixture

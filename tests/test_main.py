@@ -6,7 +6,6 @@ from PyQt6.QtTest import QTest
 from PyQt6.QtCore import Qt
 import sys, os
 
-import main
 from main import MainWindow
 from classes.booking_dialog import BookingDialog
 from classes.flight_dialog import FlightDialog
@@ -14,42 +13,27 @@ from classes.person_dialog import PersonDialog
 from classes.initialize_database import InitializeDatabase
 from classes.database_handler import DatabaseHandler
 
-# pytest
 # - Positive testing - make sure the expected values are right
 # - Edge cases - input 0, NaN, etc. Split edge cases into it's own tests
 # - Coverage - % score - lines of code executed by test - all combinations of boolean switch must be tested
 # - Negative testing - What mistakes might they make when using a function? error messages
 
+# TODO
+# with TestDb as db:
+#   def __enter__():
+#       self.db =
+#       create table
+#       insert
+#   def __exit__():
+#       usunięcie bazy danych
 
-# pytest -v C:\PycharmProjects\lotnisko\test_main.py
-# class AppContextmManager:
-#     def __enter__(self):
-#         print("Creating the widget...")
-#         # self.db_handler = FakeDatabaseHandler()
-#         # self.db_handler.create_connection_sqlite()
-#         # return self.db_handler
-#         self.application = QApplication(sys.argv)
-#         # dbinit = InitializeDatabase(database_name="test_lotnisko")
-#         # dbinit = InitializeDatabase()
-#         # dbinit.initialize_sqlite()
-#         # db_handler = DatabaseHandler(database_name="test_lotnisko")
-#         self.db_handler = DatabaseHandler(database_name="lotnisko")
-#         self.db_handler.create_connection_sqlite()
-#         # db_handler = DatabaseHandler()
-#         # db_handler.create_connection_sqlite()
-#         # db_handler.initialize_database()
-#         # db_handler = DatabaseHandler()
-#         self.widget = MainWindow(self.db_handler)
-#         self.widget.show()
-#         sys.exit(self.application.exec())
-
-#     def __exit__(self, exc_type, exc_value, exc_tb):
-#         print("Closing the widget...")
-#         self.application.closeAllWindows()
-
-
-# with AppContextmManager() as app:
-#     print(app)
+# @contextmanager
+# def test_db():
+#   db =
+#   create tables
+#   insert data
+#   yield db
+#   db.close()
 
 
 @pytest.fixture
@@ -70,6 +54,7 @@ def app():
     # sys.exit(application.exec())
 
 
+# class TestMain:
 def test_database_connection(app):
     assert app.db_handler.con.isOpen()
 

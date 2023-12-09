@@ -5,7 +5,106 @@ from PyQt6.QtSql import QSqlQuery, QSqlQueryModel
 from PyQt6.uic import loadUiType
 import os
 
-from PyQt6.QtWidgets import QStyle, QStyleOptionViewItem
+import pandas as pd
+
+# def display_model(model):
+#     from PyQt6.QtWidgets import QTableView
+#     import sys
+
+#     # app = QApplication(sys.argv)
+#     table_view = QTableView()
+#     table_view.setModel(model)
+#     table_view.show()
+#     # table_view.exec()
+#     # sys.exit(app.exec())
+
+
+class DisplayModel(QDialog):
+    def __init__(self, model):
+        super().__init__()
+
+        from PyQt6.QtWidgets import QTableView, QVBoxLayout
+
+        self.setWindowTitle("Display Model")
+        table_view = QTableView()
+        table_view.setModel(model)
+        layout = QVBoxLayout(self)
+        layout.addWidget(table_view)
+        self.exec()
+
+
+class DisplayWidgets(QDialog):
+    def __init__(self, *widgets):
+        super().__init__()
+
+        from PyQt6.QtWidgets import QVBoxLayout
+
+        layout = QVBoxLayout(self)
+
+        for widget in widgets:
+            layout.addWidget(widget)
+
+        self.exec()
+
+
+def qtmodel_to_dataframe(qt_model):
+    """
+    Convert a PyQt model to a Pandas DataFrame.
+
+    Parameters:
+    - qt_model: The PyQt model to be converted.
+
+    Returns:
+    - pd.DataFrame: The Pandas DataFrame containing the data from the PyQt model.
+    """
+    import pandas as pd
+
+    rows = qt_model.rowCount()
+    columns = qt_model.columnCount()
+
+    headers = [
+        qt_model.headerData(col, Qt.Orientation.Horizontal, Qt.ItemDataRole.DisplayRole)
+        for col in range(columns)
+    ]
+
+    df = pd.DataFrame(columns=headers)
+
+    for row in range(rows):
+        data = [qt_model.data(qt_model.index(row, col)) for col in range(columns)]
+        df.loc[row] = data
+
+    return df
+
+
+def dataframe_to_qtmodel(dataframe):
+    """
+    Convert a Pandas DataFrame to a PyQt model.
+
+    Parameters:
+    - dataframe: The Pandas DataFrame to be converted.
+
+    Returns:
+    - QStandardItemModel: The PyQt QStandardItemModel containing the data from the DataFrame.
+    """
+    from PyQt6.QtGui import QStandardItem, QStandardItemModel
+
+    model = QStandardItemModel()
+
+    model.setHorizontalHeaderLabels(dataframe.columns)
+
+    for row in range(dataframe.shape[0]):
+        items = [
+            QStandardItem(str(dataframe.iloc[row, col]))
+            for col in range(dataframe.shape[1])
+        ]
+        model.appendRow(items)
+
+    return model
+
+
+def print_qtmodel(qtmodel):
+    print(qtmodel_to_dataframe(qtmodel))
+
 
 # class SeatModel(QSqlQueryModel):
 #     def __init__(self, parent=None, seat_columns_count=6, *args, **kwargs):
@@ -56,6 +155,24 @@ class BookingDialog(QDialog, FORM_CLASS):
         self.comboBox_flight.setModel(self._select_lot())
         # self.comboBox_seat.setModel(self._select_miejsce())
         self._select_miejsce()
+        # DisplayModel(self.model_osoba)
+        # DisplayModel(self.model_lot)
+        # DisplayModel(self.model_miejsce)
+        df = qtmodel_to_dataframe(self.model_osoba)
+        # data = {"Column1": [1, 2, 3], "Column2": ["A", "B", "C"]}
+        data = df
+        df = pd.DataFrame(data)
+        qt_model = dataframe_to_qtmodel(df)
+        DisplayModel(qt_model)
+
+        # from PyQt6.QtWidgets import QTableView
+
+        # table_view1 = QTableView()
+        # table_view1.setModel(self.model_osoba)
+        # table_view2 = QTableView()
+        # table_view2.setModel(qt_model)
+        # DisplayWidgets(table_view1, table_view2)
+        print_qtmodel(qt_model)
 
     def _set_combo_boxes_model_column(self):
         self.comboBox_person.setModelColumn(1)
@@ -347,4 +464,5 @@ if __name__ == "__main__":
 
     test_window = RunTestDialog(BookingDialog, row_id=15)
     # test_window.display_model(test_window.model_miejsce)
+    # test_window.display_model(test_window.model_lot)
     # test_window.display_model(test_window.model_lot)
